@@ -1,0 +1,37 @@
+{
+  "name": "vendorhub-ai-server",
+  "version": "1.0.0",
+  "description": "VendorHub AI Backend",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cloudinary": "^1.41.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-validator": "^7.0.1",
+    "groq-sdk": "^0.3.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.0.0",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
+    "multer-storage-cloudinary": "^4.0.0",
+    "nodemailer": "^6.9.7",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
+    "passport-linkedin-oauth2": "^2.0.0",
+    "passport-microsoft": "^1.1.0",
+    "puppeteer": "^21.6.0",
+    "qrcode": "^1.5.3",
+    "socket.io": "^4.7.2",
+    "speakeasy": "^2.0.0",
+    "stripe": "^14.11.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}
