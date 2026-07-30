@@ -16,6 +16,10 @@ app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
 
+// API Routes
+app.use('/api/vendors', vendorRoutes);
+app.use('/api/products', productRoutes);
+
 io.on('connection', (socket) => {
   console.log('Client connected:', socket.id);
   socket.on('disconnect', () => console.log('Client disconnected:', socket.id));
