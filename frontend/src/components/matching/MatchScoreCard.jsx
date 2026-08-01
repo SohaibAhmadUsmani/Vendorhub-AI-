@@ -11,59 +11,33 @@ export default function MatchScoreCard({ vendor }) {
   ]
 
   return (
-    <div
-      className="glass-panel"
-      style={{
-        borderRadius: 'var(--radius-lg)',
-        padding: '1.25rem',
-        boxShadow: 'var(--shadow-card)',
-        border: '1px solid var(--border-card)',
-      }}
-    >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-        <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '1.1rem', margin: 0 }}>
+    <div className="bg-white dark:bg-[#151D30] border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 sm:p-6 shadow-card hover:shadow-hover hover:-translate-y-1 transition-all duration-200">
+      <div className="flex justify-between items-center mb-3">
+        <h3 className="font-sans text-base sm:text-lg font-bold text-slate-900 dark:text-white">
           {vendor.name}
         </h3>
-        <span
-          style={{
-            backgroundColor: 'var(--match-badge-bg)',
-            color: 'var(--match-badge-text)',
-            padding: '0.25rem 0.75rem',
-            borderRadius: 'var(--radius-full)',
-            fontWeight: 700,
-            fontFamily: 'var(--font-mono)',
-            fontSize: '0.85rem',
-          }}
-        >
+        <span className="bg-[#F0EBFE] text-[#6C5CE7] font-mono font-bold text-xs sm:text-sm px-3 py-1 rounded-full whitespace-nowrap">
           {vendor.matchScore}% Match
         </span>
       </div>
 
       {vendor.explanation && (
-        <p style={{
-          fontSize: '0.8rem',
-          color: 'var(--text-secondary)',
-          marginBottom: '1rem',
-          fontStyle: 'italic',
-        }}>
+        <p className="text-sm text-slate-600 dark:text-slate-300 italic mb-4">
           {vendor.explanation}
         </p>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem 1rem' }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
         {factors.map((f) => (
           <div key={f.label}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+            <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400 mb-1">
               <span>{f.label}</span>
-              <span>{f.value}/10</span>
+              <span className="font-mono">{f.value}/10</span>
             </div>
-            <div style={{ height: '4px', backgroundColor: 'var(--border-color)', borderRadius: 'var(--radius-full)', overflow: 'hidden' }}>
+            <div className="h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
               <div
-                style={{
-                  width: `${f.value * 10}%`,
-                  height: '100%',
-                  backgroundColor: 'var(--primary-purple)',
-                }}
+                className="h-full bg-[#6C5CE7] rounded-full transition-all duration-300"
+                style={{ width: `${f.value * 10}%` }}
               />
             </div>
           </div>

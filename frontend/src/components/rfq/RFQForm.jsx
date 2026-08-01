@@ -11,7 +11,6 @@ export default function RFQForm() {
     shippingMethod: '',
     attachments: null,
   })
-
   const [errors, setErrors] = useState({})
 
   const handleChange = (e) => {
@@ -39,127 +38,120 @@ export default function RFQForm() {
     alert('RFQ ready to send!')
   }
 
-  const inputStyle = {
-    width: '100%',
-    minHeight: '44px',
-    border: '1px solid var(--border-color)',
-    borderRadius: 'var(--radius-md)',
-    padding: '0.6rem 0.85rem',
-    fontFamily: 'var(--font-body)',
-    fontSize: '0.9rem',
-    color: 'var(--text-primary)',
-    backgroundColor: 'var(--bg-card)',
-    marginBottom: '1rem',
-  }
+  const inputBase =
+    'w-full min-h-[44px] bg-white dark:bg-[#0B1021]/80 border text-slate-900 dark:text-slate-100 placeholder-slate-400 rounded-xl px-4 py-2.5 outline-none transition-all duration-200 focus:ring-2 focus:ring-[#6C5CE7]/20'
 
-  const errorInputStyle = {
-    ...inputStyle,
-    border: '1px solid #E74C3C',
-    marginBottom: '0.35rem',
-  }
-
-  const labelStyle = {
-    display: 'block',
-    fontWeight: 600,
-    fontSize: '0.85rem',
-    color: 'var(--text-secondary)',
-    marginBottom: '0.35rem',
-  }
-
-  const errorTextStyle = {
-    color: '#E74C3C',
-    fontSize: '0.75rem',
-    marginTop: '-0.75rem',
-    marginBottom: '0.75rem',
-  }
+  const inputNormal = `${inputBase} border-slate-200 dark:border-slate-800 focus:border-[#6C5CE7] dark:focus:border-[#6C5CE7]`
+  const inputError = `${inputBase} border-red-500 focus:ring-red-500/20 focus:border-red-500`
 
   return (
     <form
       onSubmit={handleSubmit}
-      className="glass-panel"
-      style={{
-        maxWidth: '600px',
-        margin: '2rem auto',
-        padding: '2rem',
-        borderRadius: 'var(--radius-lg)',
-        boxShadow: 'var(--shadow-card)',
-      }}
+      className="max-w-xl mx-auto bg-white dark:bg-[#151D30] border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-card"
     >
-      <h2 style={{ fontFamily: 'var(--font-heading)', marginBottom: '1.5rem' }}>
+      <h2 className="font-sans text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-6">
         Create RFQ
       </h2>
 
-      <label style={labelStyle}>Product</label>
-      <input
-        style={errors.product ? errorInputStyle : inputStyle}
-        type="text"
-        name="product"
-        value={form.product}
-        onChange={handleChange}
-      />
-      {errors.product && <p style={errorTextStyle}>{errors.product}</p>}
+      <div className="mb-4">
+        <label className="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1.5">
+          Product
+        </label>
+        <input
+          className={errors.product ? inputError : inputNormal}
+          type="text"
+          name="product"
+          value={form.product}
+          onChange={handleChange}
+          placeholder="e.g. Cotton T-shirts"
+        />
+        {errors.product && <p className="text-red-500 text-xs mt-1">{errors.product}</p>}
+      </div>
 
-      <label style={labelStyle}>Quantity</label>
-      <input
-        style={errors.quantity ? errorInputStyle : inputStyle}
-        type="number"
-        name="quantity"
-        value={form.quantity}
-        onChange={handleChange}
-      />
-      {errors.quantity && <p style={errorTextStyle}>{errors.quantity}</p>}
+      <div className="mb-4">
+        <label className="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1.5">
+          Quantity
+        </label>
+        <input
+          className={errors.quantity ? inputError : inputNormal}
+          type="number"
+          name="quantity"
+          value={form.quantity}
+          onChange={handleChange}
+          placeholder="e.g. 10000"
+        />
+        {errors.quantity && <p className="text-red-500 text-xs mt-1">{errors.quantity}</p>}
+      </div>
 
-      <label style={labelStyle}>Material</label>
-      <input style={inputStyle} type="text" name="material" value={form.material} onChange={handleChange} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+        <div>
+          <label className="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1.5">
+            Material
+          </label>
+          <input className={inputNormal} type="text" name="material" value={form.material} onChange={handleChange} />
+        </div>
+        <div>
+          <label className="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1.5">
+            Budget
+          </label>
+          <input className={inputNormal} type="number" name="budget" value={form.budget} onChange={handleChange} placeholder="$" />
+        </div>
+      </div>
 
-      <label style={labelStyle}>Budget</label>
-      <input style={inputStyle} type="number" name="budget" value={form.budget} onChange={handleChange} />
+      <div className="mb-4">
+        <label className="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1.5">
+          Delivery Date
+        </label>
+        <input
+          className={errors.deliveryDate ? inputError : inputNormal}
+          type="date"
+          name="deliveryDate"
+          value={form.deliveryDate}
+          onChange={handleChange}
+        />
+        {errors.deliveryDate && <p className="text-red-500 text-xs mt-1">{errors.deliveryDate}</p>}
+      </div>
 
-      <label style={labelStyle}>Delivery Date</label>
-      <input
-        style={errors.deliveryDate ? errorInputStyle : inputStyle}
-        type="date"
-        name="deliveryDate"
-        value={form.deliveryDate}
-        onChange={handleChange}
-      />
-      {errors.deliveryDate && <p style={errorTextStyle}>{errors.deliveryDate}</p>}
+      <div className="mb-4">
+        <label className="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1.5">
+          Payment Terms
+        </label>
+        <input
+          className={inputNormal}
+          type="text"
+          name="paymentTerms"
+          value={form.paymentTerms}
+          onChange={handleChange}
+          placeholder="e.g. 50% advance, 50% on delivery"
+        />
+      </div>
 
-      <label style={labelStyle}>Payment Terms</label>
-      <input
-        style={inputStyle}
-        type="text"
-        name="paymentTerms"
-        value={form.paymentTerms}
-        onChange={handleChange}
-        placeholder="e.g. 50% advance, 50% on delivery"
-      />
+      <div className="mb-4">
+        <label className="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1.5">
+          Shipping Method
+        </label>
+        <select className={inputNormal} name="shippingMethod" value={form.shippingMethod} onChange={handleChange}>
+          <option value="">Select shipping method</option>
+          <option value="sea">Sea Freight</option>
+          <option value="air">Air Freight</option>
+          <option value="land">Land</option>
+        </select>
+      </div>
 
-      <label style={labelStyle}>Shipping Method</label>
-      <select style={inputStyle} name="shippingMethod" value={form.shippingMethod} onChange={handleChange}>
-        <option value="">Select shipping method</option>
-        <option value="sea">Sea Freight</option>
-        <option value="air">Air Freight</option>
-        <option value="land">Land</option>
-      </select>
-
-      <label style={labelStyle}>Attachments</label>
-      <input style={inputStyle} type="file" onChange={handleFileChange} />
+      <div className="mb-6">
+        <label className="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1.5">
+          Attachments
+        </label>
+        <input
+          className="w-full text-sm text-slate-600 dark:text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-[#F0EBFE] file:text-[#6C5CE7] file:font-semibold hover:file:bg-[#E4DAFC] file:cursor-pointer"
+          type="file"
+          onChange={handleFileChange}
+        />
+      </div>
 
       <button
         type="submit"
-        className="btn-purple-primary"
-        style={{
-          width: '100%',
-          minHeight: '44px',
-          backgroundColor: 'var(--primary-purple)',
-          color: '#fff',
-          border: 'none',
-          borderRadius: 'var(--radius-md)',
-          fontWeight: 700,
-          marginTop: '0.5rem',
-          cursor: 'pointer',
-        }}
+        className="w-full min-h-[44px] bg-[#6C5CE7] hover:bg-[#5A4AD1] text-white font-semibold px-5 py-2.5 rounded-xl shadow-card hover:shadow-hover transition-all duration-200 active:scale-95"
       >
         Submit RFQ
       </button>

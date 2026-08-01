@@ -1,6 +1,8 @@
 import { Navigate, Routes, Route, BrowserRouter } from "react-router-dom";
 import DashboardLayout from "./components/layout/DashboardLayout";
 import Dashboard from "./pages/dashboard";
+import VendorMatchingPage from "./pages/VendorMatchingPage";
+import RFQGeneratorPage from "./pages/RFQGeneratorPage";
 
 function ModulePlaceholder({ name }) {
   return <h1>{name} coming soon...</h1>;
@@ -13,8 +15,8 @@ function App() {
         <Route path="/" element={<Navigate to="/buyer/dashboard" replace />} />
         <Route path="/buyer" element={<DashboardLayout />}>
           <Route path="dashboard" element={<Dashboard />} />
-          <Route path="ai-search" element={<ModulePlaceholder name="AI Search" />} />
-          <Route path="rfqs" element={<ModulePlaceholder name="RFQs" />} />
+          <Route path="ai-search" element={<VendorMatchingPage />} />
+          <Route path="rfqs" element={<RFQGeneratorPage />} />
           <Route path="quotes" element={<ModulePlaceholder name="Quotes" />} />
           <Route path="orders" element={<ModulePlaceholder name="Orders" />} />
           <Route path="vendors" element={<ModulePlaceholder name="Vendors" />} />

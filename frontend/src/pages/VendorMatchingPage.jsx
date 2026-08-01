@@ -29,7 +29,6 @@ export default function VendorMatchingPage() {
   const handleSearch = (e) => {
     e.preventDefault()
     setLoading(true)
-    // Day 3: simulated API delay — real filtering/AI reasoning comes once backend + GROQ are ready
     setTimeout(() => {
       setResults(scoreVendors(mockVendors))
       setLoading(false)
@@ -37,46 +36,32 @@ export default function VendorMatchingPage() {
   }
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
-      <h1 style={{ fontFamily: 'var(--font-heading)', marginBottom: '1rem' }}>AI Vendor Matching</h1>
+    <div className="min-h-screen bg-[#F6F8FD] dark:bg-[#0B1021] p-6 sm:p-10">
+      <h1 className="font-sans text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-6">
+        AI Vendor Matching
+      </h1>
 
-      <form onSubmit={handleSearch} style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
+      <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3 mb-8 max-w-2xl">
         <input
           type="text"
           value={requirement}
           onChange={(e) => setRequirement(e.target.value)}
           placeholder="e.g. Need 10,000 cotton T-shirts manufactured in Pakistan"
-          style={{
-            flex: 1,
-            minHeight: '44px',
-            border: '1px solid var(--border-color)',
-            borderRadius: 'var(--radius-md)',
-            padding: '0 0.85rem',
-          }}
+          className="flex-1 min-h-[44px] bg-white dark:bg-[#0B1021]/80 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 rounded-xl px-4 outline-none focus:border-[#6C5CE7] focus:ring-2 focus:ring-[#6C5CE7]/20 transition-all"
         />
         <button
           type="submit"
           disabled={loading}
-          style={{
-            minHeight: '44px',
-            padding: '0 1.5rem',
-            backgroundColor: 'var(--primary-purple)',
-            color: '#fff',
-            border: 'none',
-            borderRadius: 'var(--radius-md)',
-            fontWeight: 700,
-            cursor: loading ? 'not-allowed' : 'pointer',
-            opacity: loading ? 0.6 : 1,
-          }}
+          className="min-h-[44px] px-6 bg-[#6C5CE7] hover:bg-[#5A4AD1] text-white font-semibold rounded-xl shadow-card hover:shadow-hover transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? 'Searching...' : 'Find Vendors'}
         </button>
       </form>
 
       {loading ? (
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Finding the best vendor matches...</p>
+        <p className="text-slate-500 dark:text-slate-400 text-sm">Finding the best vendor matches...</p>
       ) : (
-        <div style={{ display: 'grid', gap: '1rem' }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl">
           {results.map((vendor) => (
             <MatchScoreCard key={vendor.id} vendor={vendor} />
           ))}
