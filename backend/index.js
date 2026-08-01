@@ -5,6 +5,10 @@ const { Server } = require('socket.io');
 const cors = require('cors');
 const morgan = require('morgan');
 const connectDB = require('./config/db');
+const vendorRoutes = require('./routes/vendorRoutes');
+const productRoutes = require('./routes/productRoutes');
+const matchRoutes = require('./routes/matchRoutes');
+const rfqRoutes = require('./routes/rfqRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -19,6 +23,8 @@ app.use(morgan('dev'));
 // API Routes
 app.use('/api/vendors', vendorRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/match', matchRoutes);
+app.use('/api/rfq', rfqRoutes);
 
 io.on('connection', (socket) => {
   console.log('Client connected:', socket.id);
