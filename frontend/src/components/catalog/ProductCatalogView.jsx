@@ -1,92 +1,78 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import ProductSpecModal from './ProductSpecModal';
+import ProductForm from './ProductForm';
+import { fetchProducts, addProduct } from '../../services/productService';
 
 /**
- * ProductCatalogView — Module 6 (Product Catalog)
+ * ProductCatalogView — Module 6 (Product Catalog) 35% Completion View
  * 100% Faithful Replica of Visily UI PDF Page 3 & design_system.md
  */
-export default function ProductCatalogView() {
-  const [moqValue, setMoqValue] = useState(25);
+export default function ProductCatalogView({ vendorIdFilter = null }) {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activeCategory, setActiveCategory] = useState('All');
+  const [moqMax, setMoqMax] = useState(50);
+  const [minPriceInput, setMinPriceInput] = useState('');
+  const [maxPriceInput, setMaxPriceInput] = useState('');
+  const [verifiedOnly, setVerifiedOnly] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
   const [activePage, setActivePage] = useState(1);
 
-  const catalogProducts = [
-    {
-      id: 1,
-      title: "Precision Logic Controller V4",
-      category: "ELECTRONIC COMPONENTS",
-      rating: 4.8,
-      price: "$450.00",
-      minOrder: "10 Units",
-      isVerified: true,
-      tags: ["IP67 Rated", "ARM Cortex-M4", "RS485 Support"],
-      imageUrl: "https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=400&auto=format&fit=crop&q=80"
-    },
-    {
-      id: 2,
-      title: "Industrial Torque Actuator",
-      category: "MECHANICAL PARTS",
-      rating: 4.9,
-      price: "$1,250.00",
-      minOrder: "5 Units",
-      isVerified: true,
-      tags: ["120Nm Peak", "Brushless DC", "Steel Alloy"],
-      imageUrl: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=400&auto=format&fit=crop&q=80"
-    },
-    {
-      id: 3,
-      title: "High-Tensile Aluminum Grade 7",
-      category: "RAW MATERIALS",
-      rating: 4.5,
-      price: "$85.50",
-      minOrder: "500 Units",
-      isVerified: true,
-      tags: ["Aerospace Grade", "99.8% Pure", "Sheet Form"],
-      imageUrl: "https://images.unsplash.com/photo-1541888946425-d0fbb186a5b3?w=400&auto=format&fit=crop&q=80"
-    },
-    {
-      id: 4,
-      title: "Modular Sensor Array (MSA-2)",
-      category: "ELECTRONIC COMPONENTS",
-      rating: 4.7,
-      price: "$320.00",
-      minOrder: "25 Units",
-      isVerified: true,
-      tags: ["Humidity/Temp", "I2C Interface", "Ultra-low Power"],
-      imageUrl: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=400&auto=format&fit=crop&q=80"
-    },
-    {
-      id: 5,
-      title: "Heavy Duty Gear Assembly",
-      category: "MECHANICAL PARTS",
-      rating: 5.0,
-      price: "$2,100.00",
-      minOrder: "2 Units",
-      isVerified: true,
-      tags: ["Custom Ratio", "Hardened Steel", "Vibration Damping"],
-      imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&auto=format&fit=crop&q=80"
-    },
-    {
-      id: 6,
-      title: "Conductive Copper Ingot",
-      category: "RAW MATERIALS",
-      rating: 4.6,
-      price: "$42.00",
-      minOrder: "1,000 Units",
-      isVerified: true,
-      tags: ["High Conductivity", "ASTM B115", "Bulk Supply"],
-      imageUrl: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=400&auto=format&fit=crop&q=80"
+  // Modals
+  const [selectedProductForSpec, setSelectedProductForSpec] = useState(null);
+  const [showAddProductModal, setShowAddProductModal] = useState(false);
+
+  useEffect(() => {
+    async function loadCatalog() {
+      setLoading(true);
+      const data = await fetchProducts({
+        category: activeCategory,
+        maxMoq: Number(moqMax),
+        minPrice: minPriceInput,
+        maxPrice: maxPriceInput,
+        verifiedOnly: verifiedOnly,
+        searchQuery: searchQuery,
+        vendorId: vendorIdFilter
+      });
+      setProducts(data);
+      setLoading(false);
     }
-  ];
+    loadCatalog();
+  }, [activeCategory, moqMax, minPriceInput, maxPriceInput, verifiedOnly, searchQuery, vendorIdFilter]);
+
+  const handleResetFilters = () => {
+    setActiveCategory('All');
+    setMoqMax(50);
+    setMinPriceInput('');
+    setMaxPriceInput('');
+    setVerifiedOnly(true);
+    setSearchQuery('');
+  };
+
+  const handleSaveNewProduct = async (formData) => {
+    await addProduct(formData);
+    // Reload catalog
+    const refreshed = await fetchProducts({
+      category: activeCategory,
+      verifiedOnly: verifiedOnly,
+      vendorId: vendorIdFilter
+    });
+    setProducts(refreshed);
+  };
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr', gap: '1.5rem', padding: '1rem', maxWidth: '1440px', margin: '0 auto' }}>
       
-      {/* LEFT FILTER SIDEBAR (Page 3 PDF) */}
+      {/* LEFT FILTER SIDEBAR (PDF Page 3) */}
       <aside className="card-surface" style={{ padding: '1.25rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
           <h3 className="font-heading" style={{ fontSize: '1rem', fontWeight: 700 }}>
             🎛 Filters
           </h3>
-          <button style={{ background: 'none', border: 'none', color: 'var(--primary-purple)', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}>
+          <button 
+            onClick={handleResetFilters}
+            style={{ background: 'none', border: 'none', color: 'var(--primary-purple)', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}
+          >
             Reset All
           </button>
         </div>
@@ -94,9 +80,15 @@ export default function ProductCatalogView() {
         {/* Category Checklist */}
         <div style={{ marginBottom: '1.5rem' }}>
           <h4 style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.5rem', color: 'var(--text-primary)' }}>Category</h4>
-          {['Electronic Components', 'Mechanical Parts', 'Raw Materials', 'Industrial Tools', 'Safety Equipment'].map((cat, i) => (
+          {['All', 'ELECTRONIC COMPONENTS', 'MECHANICAL PARTS', 'RAW MATERIALS', 'INDUSTRIAL TOOLS'].map((cat) => (
             <label key={cat} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.825rem', color: 'var(--text-secondary)', marginBottom: '0.4rem', cursor: 'pointer' }}>
-              <input type="checkbox" defaultChecked={i === 0 || i === 1} style={{ accentColor: 'var(--primary-purple)' }} />
+              <input 
+                type="radio" 
+                name="categoryFilter"
+                checked={activeCategory === cat}
+                onChange={() => setActiveCategory(cat)}
+                style={{ accentColor: 'var(--primary-purple)' }} 
+              />
               {cat}
             </label>
           ))}
@@ -105,19 +97,19 @@ export default function ProductCatalogView() {
         {/* Min Quantity Range Slider */}
         <div style={{ marginBottom: '1.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.35rem' }}>
-            <span style={{ fontWeight: 700 }}>Min. Order Quantity (MOQ)</span>
+            <span style={{ fontWeight: 700 }}>Max MOQ Limit</span>
           </div>
           <input 
             type="range" 
-            min="0" 
-            max="50" 
-            value={moqValue}
-            onChange={(e) => setMoqValue(e.target.value)}
+            min="1" 
+            max="1000" 
+            value={moqMax}
+            onChange={(e) => setMoqMax(e.target.value)}
             style={{ width: '100%', accentColor: 'var(--primary-purple)' }}
           />
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-            <span>MIN: 0</span>
-            <span>MAX: {moqValue}</span>
+            <span>1</span>
+            <span>MAX: {moqMax}</span>
           </div>
         </div>
 
@@ -125,33 +117,35 @@ export default function ProductCatalogView() {
         <div style={{ marginBottom: '1.5rem' }}>
           <span style={{ fontSize: '0.85rem', fontWeight: 700, display: 'block', marginBottom: '0.5rem' }}>Price Range (USD)</span>
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <input type="text" placeholder="Min" style={{ width: '50%', padding: '0.35rem 0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.8rem' }} />
+            <input 
+              type="number" 
+              placeholder="Min" 
+              value={minPriceInput}
+              onChange={(e) => setMinPriceInput(e.target.value)}
+              style={{ width: '50%', padding: '0.35rem 0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.8rem' }} 
+            />
             <span style={{ color: 'var(--text-muted)' }}>-</span>
-            <input type="text" placeholder="Max" style={{ width: '50%', padding: '0.35rem 0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.8rem' }} />
+            <input 
+              type="number" 
+              placeholder="Max" 
+              value={maxPriceInput}
+              onChange={(e) => setMaxPriceInput(e.target.value)}
+              style={{ width: '50%', padding: '0.35rem 0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.8rem' }} 
+            />
           </div>
-        </div>
-
-        {/* Lead Time Checkboxes */}
-        <div style={{ marginBottom: '1.5rem' }}>
-          <span style={{ fontSize: '0.85rem', fontWeight: 700, display: 'block', marginBottom: '0.5rem' }}>Lead Time</span>
-          {['Ready to Ship', '< 7 Days', '7-14 Days', '14-30 Days', '30+ Days'].map(lead => (
-            <label key={lead} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.825rem', color: 'var(--text-secondary)', marginBottom: '0.35rem', cursor: 'pointer' }}>
-              <input type="checkbox" style={{ accentColor: 'var(--primary-purple)' }} />
-              {lead}
-            </label>
-          ))}
         </div>
 
         {/* Vendor Status Checkboxes */}
         <div style={{ marginBottom: '1.5rem' }}>
           <span style={{ fontSize: '0.85rem', fontWeight: 700, display: 'block', marginBottom: '0.5rem' }}>Vendor Status</span>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.825rem', color: 'var(--text-secondary)', marginBottom: '0.35rem', cursor: 'pointer' }}>
-            <input type="checkbox" defaultChecked style={{ accentColor: 'var(--primary-purple)' }} />
-            Verified Suppliers
-          </label>
           <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.825rem', color: 'var(--text-secondary)', cursor: 'pointer' }}>
-            <input type="checkbox" style={{ accentColor: 'var(--primary-purple)' }} />
-            High-Rated (4.5+)
+            <input 
+              type="checkbox" 
+              checked={verifiedOnly}
+              onChange={(e) => setVerifiedOnly(e.target.checked)}
+              style={{ accentColor: 'var(--primary-purple)' }} 
+            />
+            Verified Suppliers Only
           </label>
         </div>
 
@@ -164,101 +158,118 @@ export default function ProductCatalogView() {
         </div>
       </aside>
 
-      {/* MAIN CATALOG AREA (Page 3 PDF) */}
+      {/* MAIN CATALOG AREA (PDF Page 3) */}
       <div>
         
-        {/* Top Header Controls Bar */}
+        {/* Top Controls Bar */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
             <h2 className="font-heading" style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0 }}>
-              Product Catalog <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 400 }}>(6 Results)</span>
+              Product Catalog <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 400 }}>({products.length} Results)</span>
             </h2>
             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: '0.35rem', fontSize: '0.8rem' }}>
-              <span className="badge badge-verified" style={{ fontSize: '0.7rem' }}>Electronic Components ✕</span>
-              <span className="badge badge-verified" style={{ fontSize: '0.7rem' }}>Verified Only ✕</span>
-              <span style={{ color: 'var(--primary-purple)', cursor: 'pointer', fontWeight: 600 }}>Clear All</span>
+              {activeCategory !== 'All' && <span className="badge badge-verified" style={{ fontSize: '0.7rem' }}>{activeCategory} ✕</span>}
+              {verifiedOnly && <span className="badge badge-verified" style={{ fontSize: '0.7rem' }}>Verified Only ✕</span>}
+              {(activeCategory !== 'All' || !verifiedOnly) && (
+                <span onClick={handleResetFilters} style={{ color: 'var(--primary-purple)', cursor: 'pointer', fontWeight: 600 }}>Clear All</span>
+              )}
             </div>
           </div>
 
           <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-            <select style={{ padding: '0.45rem 0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', fontSize: '0.85rem' }}>
-              <option>Sort by: Relevant</option>
-              <option>Price: Low to High</option>
-              <option>Rating: High to Low</option>
-            </select>
-            <button className="btn-purple-primary" style={{ minHeight: '40px', padding: '0.4rem 1rem' }}>
-              Bulk Actions
+            <button 
+              className="btn-purple-primary" 
+              style={{ minHeight: '40px', padding: '0.4rem 1rem' }}
+              onClick={() => setShowAddProductModal(true)}
+            >
+              ➕ Add Product
             </button>
           </div>
         </div>
 
-        {/* 6 Product Cards Grid matching Page 3 PDF */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-          gap: '1.25rem',
-          marginBottom: '2rem'
-        }}>
-          {catalogProducts.map(prod => (
-            <div key={prod.id} className="card-surface" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-              <div>
-                {/* Product Thumbnail with Verified Overlay */}
-                <div style={{ position: 'relative', height: '160px', borderRadius: 'var(--radius-md)', overflow: 'hidden', marginBottom: '0.75rem' }}>
-                  <img src={prod.imageUrl} alt={prod.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  <span className="badge badge-verified" style={{ position: 'absolute', top: '8px', left: '8px', fontSize: '0.65rem' }}>
-                    ✓ Verified
-                  </span>
-                </div>
+        {/* Product Cards Grid */}
+        {loading ? (
+          <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+            <div className="font-mono" style={{ fontSize: '1rem', fontWeight: 700 }}>⚡ Fetching Catalog Products...</div>
+          </div>
+        ) : products.length === 0 ? (
+          <div className="card-surface" style={{ padding: '3rem', textAlign: 'center' }}>
+            <h3 className="font-heading">No Products Found</h3>
+            <p style={{ color: 'var(--text-muted)' }}>Try resetting your filter parameters.</p>
+            <button className="btn-outline-secondary" style={{ marginTop: '1rem' }} onClick={handleResetFilters}>Reset Filters</button>
+          </div>
+        ) : (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+            gap: '1.25rem',
+            marginBottom: '2rem'
+          }}>
+            {products.map(prod => (
+              <div key={prod.id} className="card-surface" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div>
+                  <div style={{ position: 'relative', height: '160px', borderRadius: 'var(--radius-md)', overflow: 'hidden', marginBottom: '0.75rem' }}>
+                    <img src={prod.imageUrl} alt={prod.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    {prod.isVerified && (
+                      <span className="badge badge-verified" style={{ position: 'absolute', top: '8px', left: '8px', fontSize: '0.65rem' }}>
+                        ✓ Verified
+                      </span>
+                    )}
+                  </div>
 
-                {/* Category & Rating */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
-                  <span className="font-mono" style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700 }}>
-                    {prod.category}
-                  </span>
-                  <span style={{ fontSize: '0.8rem', color: '#F59E0B', fontWeight: 600 }}>
-                    ★ {prod.rating}
-                  </span>
-                </div>
-
-                {/* Title */}
-                <h3 className="font-heading" style={{ fontSize: '1rem', fontWeight: 700, margin: '0 0 0.5rem 0', lineHeight: 1.3 }}>
-                  {prod.title}
-                </h3>
-
-                {/* Price & MOQ */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.75rem' }}>
-                  <span className="font-mono" style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--primary-purple)' }}>
-                    {prod.price} <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 400 }}>per unit</span>
-                  </span>
-                  <span className="font-mono" style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                    {prod.minOrder} MIN. ORDER
-                  </span>
-                </div>
-
-                {/* Tags */}
-                <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
-                  {prod.tags.map((tag, tIdx) => (
-                    <span key={tIdx} style={{ fontSize: '0.65rem', backgroundColor: 'var(--bg-main)', color: 'var(--text-secondary)', padding: '0.15rem 0.4rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
-                      {tag}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                    <span className="font-mono" style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700 }}>
+                      {prod.category}
                     </span>
-                  ))}
+                    <span style={{ fontSize: '0.8rem', color: '#F59E0B', fontWeight: 600 }}>
+                      ★ {prod.rating}
+                    </span>
+                  </div>
+
+                  <h3 className="font-heading" style={{ fontSize: '1rem', fontWeight: 700, margin: '0 0 0.5rem 0', lineHeight: 1.3 }}>
+                    {prod.title}
+                  </h3>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.75rem' }}>
+                    <span className="font-mono" style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--primary-purple)' }}>
+                      {prod.priceDisplay} <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 400 }}>/{prod.unit}</span>
+                    </span>
+                    <span className="font-mono" style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                      {prod.moq} {prod.unit} MIN. ORDER
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+                    {prod.tags && prod.tags.map((tag, tIdx) => (
+                      <span key={tIdx} style={{ fontSize: '0.65rem', backgroundColor: 'var(--bg-main)', color: 'var(--text-secondary)', padding: '0.15rem 0.4rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem' }}>
+                  <button 
+                    className="btn-purple-primary" 
+                    style={{ minHeight: '36px', fontSize: '0.8rem', justifyContent: 'center' }}
+                    onClick={() => setSelectedProductForSpec(prod)}
+                  >
+                    🛒 Order
+                  </button>
+                  <button 
+                    className="btn-outline-secondary" 
+                    style={{ minHeight: '36px', fontSize: '0.8rem', justifyContent: 'center' }}
+                    onClick={() => setSelectedProductForSpec(prod)}
+                  >
+                    RFQ
+                  </button>
                 </div>
               </div>
+            ))}
+          </div>
+        )}
 
-              {/* Order & RFQ Action Buttons */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem' }}>
-                <button className="btn-purple-primary" style={{ minHeight: '36px', fontSize: '0.8rem', justifyContent: 'center' }}>
-                  🛒 Order
-                </button>
-                <button className="btn-outline-secondary" style={{ minHeight: '36px', fontSize: '0.8rem', justifyContent: 'center' }}>
-                  RFQ
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Footer Pagination Bar matching Page 3 PDF */}
+        {/* Footer Pagination Bar */}
         <div className="card-surface" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
           <div style={{ display: 'flex', gap: '1.5rem', fontSize: '0.85rem' }}>
             <span className="font-mono">📦 <strong>1,245+</strong> TOTAL SKU IN CATALOG</span>
@@ -291,6 +302,22 @@ export default function ProductCatalogView() {
         </div>
 
       </div>
+
+      {/* Product Spec Modal */}
+      {selectedProductForSpec && (
+        <ProductSpecModal 
+          product={selectedProductForSpec}
+          onClose={() => setSelectedProductForSpec(null)}
+        />
+      )}
+
+      {/* Add Product Form Modal */}
+      {showAddProductModal && (
+        <ProductForm 
+          onClose={() => setShowAddProductModal(false)}
+          onSaveProduct={handleSaveNewProduct}
+        />
+      )}
 
     </div>
   );
