@@ -1,5 +1,5 @@
-// RFQ Generator Controller (Module 8)
 const RFQ = require('../models/RFQ');
+const { generateRFQPdf } = require('../services/pdfGenerator');
 
 /**
  * @desc    Test RFQ Route
@@ -28,4 +28,22 @@ const createRFQ = async (req, res) => {
   }
 };
 
-module.exports = { getRfqTest, createRFQ };
+/**
+ * @desc    Export RFQ as PDF (works with dummy data — no DB needed for testing)
+ * @route   POST /api/rfq/export-pdf
+ * @access  Private (buyer)
+ */
+const exportRFQPdf = async (req, res) => {
+  try {
+    const pdfBuffer = await generateRFQPdf(req.body);
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': 'attachment; filename=rfq.pdf',
+    });
+    res.send(pdfBuffer);
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+module.exports = { getRfqTest, createRFQ, exportRFQPdf };

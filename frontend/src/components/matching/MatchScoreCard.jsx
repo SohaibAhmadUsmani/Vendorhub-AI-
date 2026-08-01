@@ -39,6 +39,17 @@ export default function MatchScoreCard({ vendor }) {
         </span>
       </div>
 
+      {vendor.explanation && (
+        <p style={{
+          fontSize: '0.8rem',
+          color: 'var(--text-secondary)',
+          marginBottom: '1rem',
+          fontStyle: 'italic',
+        }}>
+          {vendor.explanation}
+        </p>
+      )}
+
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem 1rem' }}>
         {factors.map((f) => (
           <div key={f.label}>

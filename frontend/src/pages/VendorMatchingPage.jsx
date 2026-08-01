@@ -24,11 +24,16 @@ function scoreVendors(vendors) {
 export default function VendorMatchingPage() {
   const [requirement, setRequirement] = useState('')
   const [results, setResults] = useState(scoreVendors(mockVendors))
+  const [loading, setLoading] = useState(false)
 
   const handleSearch = (e) => {
     e.preventDefault()
-    // Day 2: still mock — real filtering/AI reasoning comes once backend + GROQ are ready
-    setResults(scoreVendors(mockVendors))
+    setLoading(true)
+    // Day 3: simulated API delay — real filtering/AI reasoning comes once backend + GROQ are ready
+    setTimeout(() => {
+      setResults(scoreVendors(mockVendors))
+      setLoading(false)
+    }, 600)
   }
 
   return (
@@ -51,6 +56,7 @@ export default function VendorMatchingPage() {
         />
         <button
           type="submit"
+          disabled={loading}
           style={{
             minHeight: '44px',
             padding: '0 1.5rem',
@@ -59,18 +65,23 @@ export default function VendorMatchingPage() {
             border: 'none',
             borderRadius: 'var(--radius-md)',
             fontWeight: 700,
-            cursor: 'pointer',
+            cursor: loading ? 'not-allowed' : 'pointer',
+            opacity: loading ? 0.6 : 1,
           }}
         >
-          Find Vendors
+          {loading ? 'Searching...' : 'Find Vendors'}
         </button>
       </form>
 
-      <div style={{ display: 'grid', gap: '1rem' }}>
-        {results.map((vendor) => (
-          <MatchScoreCard key={vendor.id} vendor={vendor} />
-        ))}
-      </div>
+      {loading ? (
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Finding the best vendor matches...</p>
+      ) : (
+        <div style={{ display: 'grid', gap: '1rem' }}>
+          {results.map((vendor) => (
+            <MatchScoreCard key={vendor.id} vendor={vendor} />
+          ))}
+        </div>
+      )}
     </div>
   )
 }

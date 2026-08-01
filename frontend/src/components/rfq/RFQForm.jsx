@@ -12,6 +12,8 @@ export default function RFQForm() {
     attachments: null,
   })
 
+  const [errors, setErrors] = useState({})
+
   const handleChange = (e) => {
     const { name, value } = e.target
     setForm((prev) => ({ ...prev, [name]: value }))
@@ -21,10 +23,20 @@ export default function RFQForm() {
     setForm((prev) => ({ ...prev, attachments: e.target.files[0] }))
   }
 
+  const validate = () => {
+    const newErrors = {}
+    if (!form.product.trim()) newErrors.product = 'Product is required'
+    if (!form.quantity || form.quantity <= 0) newErrors.quantity = 'Enter a valid quantity'
+    if (!form.deliveryDate) newErrors.deliveryDate = 'Delivery date is required'
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
   const handleSubmit = (e) => {
     e.preventDefault()
+    if (!validate()) return
     console.log('RFQ Submitted (mock):', form)
-    alert('RFQ ready to send! (Backend not connected yet — logged to console)')
+    alert('RFQ ready to send!')
   }
 
   const inputStyle = {
@@ -40,12 +52,25 @@ export default function RFQForm() {
     marginBottom: '1rem',
   }
 
+  const errorInputStyle = {
+    ...inputStyle,
+    border: '1px solid #E74C3C',
+    marginBottom: '0.35rem',
+  }
+
   const labelStyle = {
     display: 'block',
     fontWeight: 600,
     fontSize: '0.85rem',
     color: 'var(--text-secondary)',
     marginBottom: '0.35rem',
+  }
+
+  const errorTextStyle = {
+    color: '#E74C3C',
+    fontSize: '0.75rem',
+    marginTop: '-0.75rem',
+    marginBottom: '0.75rem',
   }
 
   return (
@@ -65,10 +90,24 @@ export default function RFQForm() {
       </h2>
 
       <label style={labelStyle}>Product</label>
-      <input style={inputStyle} type="text" name="product" value={form.product} onChange={handleChange} required />
+      <input
+        style={errors.product ? errorInputStyle : inputStyle}
+        type="text"
+        name="product"
+        value={form.product}
+        onChange={handleChange}
+      />
+      {errors.product && <p style={errorTextStyle}>{errors.product}</p>}
 
       <label style={labelStyle}>Quantity</label>
-      <input style={inputStyle} type="number" name="quantity" value={form.quantity} onChange={handleChange} required />
+      <input
+        style={errors.quantity ? errorInputStyle : inputStyle}
+        type="number"
+        name="quantity"
+        value={form.quantity}
+        onChange={handleChange}
+      />
+      {errors.quantity && <p style={errorTextStyle}>{errors.quantity}</p>}
 
       <label style={labelStyle}>Material</label>
       <input style={inputStyle} type="text" name="material" value={form.material} onChange={handleChange} />
@@ -77,10 +116,24 @@ export default function RFQForm() {
       <input style={inputStyle} type="number" name="budget" value={form.budget} onChange={handleChange} />
 
       <label style={labelStyle}>Delivery Date</label>
-      <input style={inputStyle} type="date" name="deliveryDate" value={form.deliveryDate} onChange={handleChange} />
+      <input
+        style={errors.deliveryDate ? errorInputStyle : inputStyle}
+        type="date"
+        name="deliveryDate"
+        value={form.deliveryDate}
+        onChange={handleChange}
+      />
+      {errors.deliveryDate && <p style={errorTextStyle}>{errors.deliveryDate}</p>}
 
       <label style={labelStyle}>Payment Terms</label>
-      <input style={inputStyle} type="text" name="paymentTerms" value={form.paymentTerms} onChange={handleChange} placeholder="e.g. 50% advance, 50% on delivery" />
+      <input
+        style={inputStyle}
+        type="text"
+        name="paymentTerms"
+        value={form.paymentTerms}
+        onChange={handleChange}
+        placeholder="e.g. 50% advance, 50% on delivery"
+      />
 
       <label style={labelStyle}>Shipping Method</label>
       <select style={inputStyle} name="shippingMethod" value={form.shippingMethod} onChange={handleChange}>
