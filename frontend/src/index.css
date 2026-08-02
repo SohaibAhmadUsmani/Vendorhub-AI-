@@ -111,6 +111,62 @@ body {
 }
 
 /* ==========================================================================
+   GLOBAL MODERN SCROLLBAR STYLING (LENIS-INSPIRED)
+   ========================================================================== */
+
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #6C5CE7 0%, #0EA5E9 100%);
+  border-radius: 9999px;
+  border: 1px solid var(--border-color);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #5A4AD1 0%, #0284C7 100%);
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #6C5CE7 var(--bg-main);
+}
+
+/* ==========================================================================
+   ANIMATIONS & KEYFRAMES (ANIMATE-UI & INSPIRA-UI INSPIRED)
+   ========================================================================== */
+
+@keyframes modalPopIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.92) translateY(24px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-pop-in {
+  animation: modalPopIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.inspira-glowing-border {
+  border: 1px solid transparent;
+  background-image: linear-gradient(var(--bg-card), var(--bg-card)), linear-gradient(135deg, #6C5CE7, #0EA5E9);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  box-shadow: 0 0 15px rgba(108, 92, 231, 0.2);
+}
+
+/* ==========================================================================
    DESIGN SYSTEM UTILITIES & PATTERNS
    ========================================================================== */
 

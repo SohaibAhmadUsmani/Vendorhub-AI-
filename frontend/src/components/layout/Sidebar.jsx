@@ -1,3 +1,4 @@
+import React from "react";
 import { NavLink } from "react-router-dom";
 import {
     LayoutDashboard, Search,
@@ -8,6 +9,7 @@ import {
     BarChart3, Wallet, Settings,
     Package
 } from "lucide-react";
+import VendorHubLogo from "./VendorHubLogo";
 
 function Sidebar({ collapsed }) {
     const navigationItems = [
@@ -16,7 +18,7 @@ function Sidebar({ collapsed }) {
         { label: "RFQs", path: "/buyer/rfqs", icon: FileText, badge: "12" },
         { label: "Quotes", path: "/buyer/quotes", icon: MessageSquare, badge: "48" },
         { label: "Orders", path: "/buyer/orders", icon: ShoppingCart, badge: "8" },
-        { label: "Vendors", path: "/buyer/vendors", icon: Users },
+        { label: "Vendors & Profiles", path: "/buyer/vendors", icon: Users },
         { label: "Saved Vendors", path: "/buyer/saved-vendors", icon: Bookmark },
         { label: "Product Catalog", path: "/buyer/product-catalog", icon: Package },
         { label: "Messages", path: "/buyer/messages", icon: MessageCircle, badge: "5" },
@@ -36,22 +38,16 @@ function Sidebar({ collapsed }) {
         >
             {/* Brand Header */}
             <div
-                className={`mb-6 flex items-center gap-3 ${
+                className={`mb-6 flex items-center ${
                     collapsed ? "justify-center" : "px-2"
                 }`}
             >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#6C5CE7] font-extrabold text-white text-lg shadow-[0_0_15px_rgba(108,92,231,0.4)]">
-                    V
-                </div>
-                {!collapsed && (
-                    <div className="min-w-0 flex-1">
-                        <h2 className="m-0 truncate font-heading text-lg font-extrabold text-white leading-tight">
-                            VendorHub <span className="text-[#6C5CE7]">AI</span>
-                        </h2>
-                        <p className="m-0 truncate text-[11px] font-medium text-[#64748B] mt-0.5">
-                            Smarter Sourcing. Better Business.
-                        </p>
+                {collapsed ? (
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#6C5CE7] to-[#0EA5E9] font-extrabold text-white text-lg shadow-[0_0_15px_rgba(108,92,231,0.4)]">
+                        V
                     </div>
+                ) : (
+                    <VendorHubLogo size="normal" lightMode={false} />
                 )}
             </div>
 
@@ -97,7 +93,7 @@ function Sidebar({ collapsed }) {
                 ))}
             </nav>
 
-            {/* Upgrade to Pro Card Widget (design_system.md) */}
+            {/* Upgrade to Pro Card Widget */}
             {!collapsed && (
                 <div className="mt-6 rounded-2xl border border-[#1F2A40] bg-[#151D30] p-4 text-center shadow-card">
                     <div className="mb-1 text-xl">👑</div>
@@ -109,7 +105,7 @@ function Sidebar({ collapsed }) {
                     </p>
                     <button
                         type="button"
-                        className="w-full min-h-[40px] rounded-xl bg-[#6C5CE7] px-3 py-2 text-xs font-bold text-white shadow-md transition-all hover:bg-[#5A4AD1] active:scale-95 cursor-pointer"
+                        className="w-full min-h-[40px] rounded-xl bg-gradient-to-r from-[#6C5CE7] to-[#0EA5E9] px-3 py-2 text-xs font-bold text-white shadow-md transition-all hover:opacity-90 active:scale-95 cursor-pointer"
                     >
                         Upgrade Now
                     </button>
