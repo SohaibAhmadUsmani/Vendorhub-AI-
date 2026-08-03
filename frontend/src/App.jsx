@@ -13,11 +13,19 @@ import VendorMatchingPage from "./pages/VendorMatchingPage";
 import RFQGeneratorPage from "./pages/RFQGeneratorPage";
 import TeammateModulePlaceholder from "./components/layout/TeammateModulePlaceholder";
 import "./App.css";
+import Signup from "./pages/auth/Signup";
+import Login from "./pages/auth/Login";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+
+       <Route path="/signup" element={<Signup />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/" element={<Navigate to="/buyer/dashboard" replace />} />
         <Route path="/buyer" element={<DashboardLayout />}>
           <Route path="dashboard" element={<Dashboard />} />
@@ -42,6 +50,7 @@ function App() {
           <Route path="vendor-analytics" element={<TeammateModulePlaceholder pageTitle="Vendor Analytics" />} />
           <Route path="spend-summary" element={<TeammateModulePlaceholder pageTitle="Spend Summary" />} />
           <Route path="settings" element={<TeammateModulePlaceholder pageTitle="Settings" />} />
+
         </Route>
       </Routes>
     </BrowserRouter>
