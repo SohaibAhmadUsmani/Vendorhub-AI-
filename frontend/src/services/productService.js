@@ -1,11 +1,12 @@
 /**
  * productService.js — Async Mock Service Layer for Module 6 (Product Catalog)
- * Simulates NoSQL MongoDB Atlas Queries & Mutations
+ * Simulates NoSQL MongoDB Atlas Queries & Mutations (100% Scope with Verified Images)
  */
 
 let mockProductsStore = [
   {
     id: "prod-101",
+    sku: "SKU-PLC-8841",
     vendorId: "v-sialkot-101",
     vendorName: "Sialkot Sports Ltd",
     title: "Precision Logic Controller V4",
@@ -19,16 +20,28 @@ let mockProductsStore = [
     leadTimeDays: 7,
     leadTimeDisplay: "< 7 Days",
     availableStock: 1200,
+    stockStatus: "In Stock",
     isVerified: true,
     tags: ["IP67 Rated", "ARM Cortex-M4", "RS485 Support"],
-    specifications: "Operating Voltage: 24V DC • Operating Temp: -20°C to +70°C • Enclosure: IP67 Aluminum Die-Cast",
-    imageUrl: "https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=400&auto=format&fit=crop&q=80"
+    specifications: "Operating Voltage: 24V DC • Operating Temp: -20°C to +70°C • Enclosure: IP67 Aluminum Die-Cast • Communication: Modbus RTU / Ethernet IP",
+    imageUrl: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop&q=80",
+    multiImages: [
+      "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=800&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800&auto=format&fit=crop&q=80"
+    ],
+    priceTiers: [
+      { minQty: 10, maxQty: 50, price: 450.00 },
+      { minQty: 51, maxQty: 200, price: 415.00 },
+      { minQty: 201, maxQty: 1000, price: 380.00 }
+    ]
   },
   {
     id: "prod-102",
+    sku: "SKU-ACT-120N",
     vendorId: "v-sialkot-101",
     vendorName: "Sialkot Sports Ltd",
-    title: "Industrial Torque Actuator",
+    title: "Industrial Torque Actuator 120Nm",
     category: "MECHANICAL PARTS",
     rating: 4.9,
     priceMin: 1250.00,
@@ -39,35 +52,57 @@ let mockProductsStore = [
     leadTimeDays: 10,
     leadTimeDisplay: "7-14 Days",
     availableStock: 450,
+    stockStatus: "In Stock",
     isVerified: true,
     tags: ["120Nm Peak", "Brushless DC", "Steel Alloy"],
-    specifications: "Peak Torque: 120 Nm • Gear Ratio: 50:1 • Weight: 4.2 kg • Motor Type: Brushless Servo",
-    imageUrl: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=400&auto=format&fit=crop&q=80"
+    specifications: "Peak Torque: 120 Nm • Gear Ratio: 50:1 • Weight: 4.2 kg • Motor Type: Brushless Servo • Protection Rating: IP65",
+    imageUrl: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800&auto=format&fit=crop&q=80",
+    multiImages: [
+      "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&auto=format&fit=crop&q=80"
+    ],
+    priceTiers: [
+      { minQty: 5, maxQty: 20, price: 1250.00 },
+      { minQty: 21, maxQty: 100, price: 1150.00 },
+      { minQty: 101, maxQty: 500, price: 1020.00 }
+    ]
   },
   {
     id: "prod-103",
+    sku: "SKU-RAW-7075",
     vendorId: "v-atlas-102",
-    vendorName: "Atlas Industrial",
-    title: "High-Tensile Aluminum Grade 7",
+    vendorName: "Atlas Industrial Corp",
+    title: "High-Tensile Aluminum Grade 7075-T6",
     category: "RAW MATERIALS",
     rating: 4.5,
     priceMin: 85.50,
     priceMax: 95.00,
     priceDisplay: "$85.50",
-    unit: "Unit",
-    moq: 500,
+    unit: "Sheet",
+    moq: 50,
     leadTimeDays: 14,
     leadTimeDisplay: "14-30 Days",
     availableStock: 25000,
+    stockStatus: "In Stock",
     isVerified: true,
     tags: ["Aerospace Grade", "99.8% Pure", "Sheet Form"],
-    specifications: "Alloy Grade: 7075-T6 • Tensile Strength: 572 MPa • Density: 2.81 g/cm³",
-    imageUrl: "https://images.unsplash.com/photo-1541888946425-d0fbb186a5b3?w=400&auto=format&fit=crop&q=80"
+    specifications: "Alloy Grade: 7075-T6 • Tensile Strength: 572 MPa • Density: 2.81 g/cm³ • Standard Sheet Size: 1220mm x 2440mm",
+    imageUrl: "https://images.unsplash.com/photo-1535813547-99c456a41d4a?w=800&auto=format&fit=crop&q=80",
+    multiImages: [
+      "https://images.unsplash.com/photo-1535813547-99c456a41d4a?w=800&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&auto=format&fit=crop&q=80"
+    ],
+    priceTiers: [
+      { minQty: 50, maxQty: 200, price: 85.50 },
+      { minQty: 201, maxQty: 1000, price: 78.00 },
+      { minQty: 1001, maxQty: 5000, price: 69.50 }
+    ]
   },
   {
     id: "prod-104",
-    vendorId: "v-sialkot-101",
-    vendorName: "Sialkot Sports Ltd",
+    sku: "SKU-SNS-MSA2",
+    vendorId: "v-eurotech-105",
+    vendorName: "EuroTech Automation Systems",
     title: "Modular Sensor Array (MSA-2)",
     category: "ELECTRONIC COMPONENTS",
     rating: 4.7,
@@ -79,16 +114,25 @@ let mockProductsStore = [
     leadTimeDays: 5,
     leadTimeDisplay: "< 7 Days",
     availableStock: 3500,
+    stockStatus: "In Stock",
     isVerified: true,
     tags: ["Humidity/Temp", "I2C Interface", "Ultra-low Power"],
-    specifications: "Sensors Included: Temperature, Humidity, Barometric Pressure, Gas Sensor • Power: 3.3V DC",
-    imageUrl: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=400&auto=format&fit=crop&q=80"
+    specifications: "Sensors Included: Temperature, Humidity, Barometric Pressure, Gas Sensor • Power: 3.3V DC • Interface: I2C / SPI",
+    imageUrl: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&auto=format&fit=crop&q=80",
+    multiImages: [
+      "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&auto=format&fit=crop&q=80"
+    ],
+    priceTiers: [
+      { minQty: 25, maxQty: 100, price: 320.00 },
+      { minQty: 101, maxQty: 500, price: 295.00 }
+    ]
   },
   {
     id: "prod-105",
-    vendorId: "v-atlas-102",
-    vendorName: "Atlas Industrial",
-    title: "Heavy Duty Gear Assembly",
+    sku: "SKU-GRB-4340",
+    vendorId: "v-precision-103",
+    vendorName: "Precision Gear Co",
+    title: "Heavy Duty Gear Assembly (AGMA 12)",
     category: "MECHANICAL PARTS",
     rating: 5.0,
     priceMin: 2100.00,
@@ -99,68 +143,85 @@ let mockProductsStore = [
     leadTimeDays: 20,
     leadTimeDisplay: "14-30 Days",
     availableStock: 80,
+    stockStatus: "Made to Order",
     isVerified: true,
     tags: ["Custom Ratio", "Hardened Steel", "Vibration Damping"],
-    specifications: "Material: 4340 Nickel-Chromium Steel • Hardness: 58-62 HRC • Precision Class: AGMA 12",
-    imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&auto=format&fit=crop&q=80"
+    specifications: "Material: 4340 Nickel-Chromium Steel • Hardness: 58-62 HRC • Precision Class: AGMA 12 • Max Input RPM: 3,600",
+    imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&auto=format&fit=crop&q=80",
+    multiImages: [
+      "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&auto=format&fit=crop&q=80"
+    ],
+    priceTiers: [
+      { minQty: 2, maxQty: 10, price: 2100.00 },
+      { minQty: 11, maxQty: 50, price: 1950.00 }
+    ]
   },
   {
     id: "prod-106",
-    vendorId: "v-precision-103",
-    vendorName: "Precision Gear Co.",
-    title: "Conductive Copper Ingot",
+    sku: "SKU-COP-9999",
+    vendorId: "v-nexus-106",
+    vendorName: "Nexus Chemical & Polymers",
+    title: "Conductive Copper Ingot (ETP Grade)",
     category: "RAW MATERIALS",
     rating: 4.6,
     priceMin: 42.00,
     priceMax: 48.00,
     priceDisplay: "$42.00",
-    unit: "Unit",
-    moq: 1000,
+    unit: "Ingot",
+    moq: 100,
     leadTimeDays: 30,
     leadTimeDisplay: "30+ Days",
     availableStock: 100000,
+    stockStatus: "In Stock",
     isVerified: true,
     tags: ["High Conductivity", "ASTM B115", "Bulk Supply"],
-    specifications: "Purity: 99.99% ETP Copper • Standard: ASTM B115 • Weight per Ingot: 15 kg",
-    imageUrl: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=400&auto=format&fit=crop&q=80"
+    specifications: "Purity: 99.99% ETP Copper • Standard: ASTM B115 • Weight per Ingot: 15 kg • Electrical Conductivity: 101% IACS",
+    imageUrl: "https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=800&auto=format&fit=crop&q=80",
+    multiImages: [
+      "https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=800&auto=format&fit=crop&q=80"
+    ],
+    priceTiers: [
+      { minQty: 100, maxQty: 500, price: 42.00 },
+      { minQty: 501, maxQty: 2000, price: 38.50 }
+    ]
   }
 ];
 
 export async function fetchProducts(filters = {}) {
-  // Simulate network latency for NoSQL query
   await new Promise(resolve => setTimeout(resolve, 150));
 
   return mockProductsStore.filter(product => {
-    // Filter by Category
     if (filters.category && filters.category !== 'All' && product.category !== filters.category) {
       return false;
     }
-    // Filter by Vendor ID
     if (filters.vendorId && product.vendorId !== filters.vendorId) {
       return false;
     }
-    // Filter by Max MOQ
     if (filters.maxMoq !== undefined && product.moq > filters.maxMoq) {
       return false;
     }
-    // Filter by Price Range
     if (filters.minPrice && product.priceMin < Number(filters.minPrice)) {
       return false;
     }
     if (filters.maxPrice && product.priceMin > Number(filters.maxPrice)) {
       return false;
     }
-    // Filter by Verified Only
     if (filters.verifiedOnly && !product.isVerified) {
       return false;
     }
-    // Search Query
+    if (filters.maxLeadTime && product.leadTimeDays > Number(filters.maxLeadTime)) {
+      return false;
+    }
+    if (filters.stockStatus && filters.stockStatus !== 'All' && product.stockStatus !== filters.stockStatus) {
+      return false;
+    }
     if (filters.searchQuery) {
       const q = filters.searchQuery.toLowerCase();
       const matchesTitle = product.title.toLowerCase().includes(q);
       const matchesVendor = product.vendorName.toLowerCase().includes(q);
       const matchesCategory = product.category.toLowerCase().includes(q);
-      if (!matchesTitle && !matchesVendor && !matchesCategory) return false;
+      const matchesSku = product.sku.toLowerCase().includes(q);
+      if (!matchesTitle && !matchesVendor && !matchesCategory && !matchesSku) return false;
     }
 
     return true;
@@ -172,6 +233,7 @@ export async function addProduct(productData) {
 
   const newProduct = {
     id: `prod-${Date.now()}`,
+    sku: `SKU-CUST-${Math.floor(1000 + Math.random() * 9000)}`,
     vendorId: productData.vendorId || "v-sialkot-101",
     vendorName: productData.vendorName || "Sialkot Sports Ltd",
     title: productData.title,
@@ -185,10 +247,17 @@ export async function addProduct(productData) {
     leadTimeDays: Number(productData.leadTimeDays || 7),
     leadTimeDisplay: `${productData.leadTimeDays || 7} Days`,
     availableStock: Number(productData.availableStock || 1000),
+    stockStatus: "In Stock",
     isVerified: true,
     tags: productData.tags ? productData.tags.split(',').map(t => t.trim()) : ["ISO Certified"],
     specifications: productData.specifications || "Standard B2B Specifications",
-    imageUrl: productData.imageUrl || "https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=400&auto=format&fit=crop&q=80"
+    imageUrl: productData.imageUrl || "https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=800&auto=format&fit=crop&q=80",
+    multiImages: [
+      productData.imageUrl || "https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=800&auto=format&fit=crop&q=80"
+    ],
+    priceTiers: [
+      { minQty: Number(productData.moq || 10), maxQty: 100, price: Number(productData.priceMin || 100) }
+    ]
   };
 
   mockProductsStore.unshift(newProduct);

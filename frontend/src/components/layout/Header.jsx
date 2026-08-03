@@ -1,8 +1,10 @@
+import React from "react";
 import { Menu, Search, Bell, ChevronDown } from "lucide-react";
+import VendorHubLogo from "./VendorHubLogo";
 
 function Header({ toggleSidebar }) {
     return (
-        <header className="flex h-16 items-center justify-between border-b border-[var(--border-card)] bg-[var(--bg-card)] px-6 sticky top-0 z-20">
+        <header className="flex h-16 items-center justify-between border-b border-[var(--border-card)] bg-[var(--bg-card)] px-6 sticky top-0 z-20 shadow-sm">
 
             {/* Left side */}
             <div className="flex min-w-0 items-center gap-4">
@@ -15,14 +17,14 @@ function Header({ toggleSidebar }) {
                     <Menu size={20} />
                 </button>
 
-                <h1 className="whitespace-nowrap font-heading text-lg font-bold text-[var(--text-primary)]">
-                    Buyer Dashboard
-                </h1>
+                <div className="hidden sm:block">
+                    <VendorHubLogo size="small" lightMode={true} />
+                </div>
             </div>
 
             {/* Right side */}
             <div className="flex items-center gap-4">
-                <div className="flex w-64 items-center gap-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-main)] px-3 py-2">
+                <div className="flex w-64 md:w-80 items-center gap-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-main)] px-3 py-2 inspira-glowing-border">
                     <Search size={16} className="text-[var(--text-muted)] shrink-0" />
 
                     <input
@@ -45,16 +47,16 @@ function Header({ toggleSidebar }) {
                 {/* Profile */}
                 <div className="flex items-center gap-3 border-l border-[var(--border-color)] pl-4">
                     <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#6C5CE7] font-bold text-white shadow-sm text-sm">
-                        K
+                        M
                     </div>
 
                     <div className="flex items-center gap-2 cursor-pointer">
                         <div className="leading-tight">
                             <p className="text-xs font-bold text-[var(--text-primary)]">
-                                Khadija
+                                Muzammil Tanveer
                             </p>
                             <p className="text-[10px] text-[var(--text-muted)] font-medium">
-                                Buyer Manager
+                                Procurement Lead
                             </p>
                         </div>
                         <ChevronDown size={14} className="text-[var(--text-muted)]" />
