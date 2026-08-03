@@ -4,6 +4,7 @@ import DashboardLayout from "./components/layout/DashboardLayout";
 import Dashboard from "./pages/dashboard";
 import VendorProfileView from "./components/vendor/VendorProfileView";
 import ProductCatalogView from "./components/catalog/ProductCatalogView";
+import AnalyticsPage from "./pages/AnalyticsPage";
 import TeammateModulePlaceholder from "./components/layout/TeammateModulePlaceholder";
 import "./App.css";
 
@@ -27,7 +28,7 @@ function App() {
           <Route path="messages" element={<TeammateModulePlaceholder pageTitle="Messages" />} />
           <Route path="contracts" element={<TeammateModulePlaceholder pageTitle="Contracts" />} />
           <Route path="documents" element={<TeammateModulePlaceholder pageTitle="Documents" />} />
-          <Route path="analytics" element={<TeammateModulePlaceholder pageTitle="Analytics" />} />
+          <Route path="analytics" element={<AnalyticsPage />} />
           <Route path="spend-summary" element={<TeammateModulePlaceholder pageTitle="Spend Summary" />} />
           <Route path="settings" element={<TeammateModulePlaceholder pageTitle="Settings" />} />
         </Route>
