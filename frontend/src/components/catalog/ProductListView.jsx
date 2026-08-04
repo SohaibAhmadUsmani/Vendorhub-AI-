@@ -53,6 +53,10 @@ export default function ProductListView({
                     <img 
                       src={prod.imageUrl} 
                       alt={prod.title} 
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = 'https://images.unsplash.com/photo-1614632537197-38a17061c2bd?w=800&auto=format&fit=crop&q=80';
+                      }}
                       style={{ width: '40px', height: '40px', borderRadius: 'var(--radius-sm)', objectFit: 'cover' }} 
                     />
                     <div>
@@ -87,8 +91,23 @@ export default function ProductListView({
                 <td style={{ padding: '0.85rem 1rem', fontFamily: 'var(--font-mono)' }}>
                   {prod.moq} {prod.unit}s
                 </td>
-                <td style={{ padding: '0.85rem 1rem' }}>
-                  <span className="badge badge-active" style={{ fontSize: '0.7rem' }}>
+                <td style={{ padding: '0.85rem 1rem', whiteSpace: 'nowrap' }}>
+                  <span 
+                    style={{ 
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                      padding: '0.35rem 0.75rem',
+                      borderRadius: '20px',
+                      backgroundColor: '#E0F2FE',
+                      color: '#0369A1',
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      fontFamily: 'var(--font-mono)',
+                      whiteSpace: 'nowrap',
+                      border: '1px solid #BAE6FD'
+                    }}
+                  >
                     ⚡ {prod.leadTimeDisplay}
                   </span>
                 </td>

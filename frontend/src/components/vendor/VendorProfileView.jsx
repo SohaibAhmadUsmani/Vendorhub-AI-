@@ -76,7 +76,7 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
           marginBottom: '1.25rem', 
           display: 'flex', 
           alignItems: 'center', 
-          justify: 'space-between',
+          justifyContent: 'space-between',
           backgroundColor: 'var(--bg-card)',
           border: '1px solid var(--border-card)',
           flexWrap: 'wrap',
@@ -139,7 +139,7 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
         <div style={{
           padding: '1.5rem 2rem',
           display: 'flex',
-          justify: 'space-between',
+          justifyContent: 'space-between',
           alignItems: 'flex-end',
           marginTop: '-50px',
           position: 'relative',
@@ -158,7 +158,7 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
               overflow: 'hidden',
               display: 'flex',
               alignItems: 'center',
-              justify: 'center'
+              justifyContent: 'center'
             }}>
               <img 
                 src={vendorData.logoImage} 
@@ -304,7 +304,7 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
                       border: '1px solid var(--border-color)',
                       display: 'flex',
                       alignItems: 'center',
-                      justify: 'space-between'
+                      justifyContent: 'space-between'
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

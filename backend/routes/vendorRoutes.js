@@ -1,8 +1,18 @@
 const express = require('express');
 const router = express.Router();
-const { getVendorTest } = require('../controllers/vendorController');
+const {
+  getVendors,
+  getVendorById,
+  createVendor,
+  updateVendor
+} = require('../controllers/vendorController');
 
-// Module 5 — Vendor Profiles Routes
-router.get('/test', getVendorTest);
+router.route('/')
+  .get(getVendors)
+  .post(createVendor);
+
+router.route('/:id')
+  .get(getVendorById)
+  .put(updateVendor);
 
 module.exports = router;

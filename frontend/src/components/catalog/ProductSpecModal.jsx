@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
 
 /**
- * ProductSpecModal — Deep Specification View & Dynamic Tiered Pricing Calculator
+ * ProductSpecModal — Centered Product Specification Modal via React Portal
  * Conforms 100% to design_system.md and Visily PDF Page 3 (75% Scope)
  */
 export default function ProductSpecModal({ product, onClose, onSubmitRfq }) {
@@ -42,19 +43,23 @@ export default function ProductSpecModal({ product, onClose, onSubmitRfq }) {
     }, 1200);
   };
 
-  return (
+  return ReactDOM.createPortal(
     <div style={{
       position: 'fixed',
-      inset: 0,
+      top: 0,
+      left: 0,
+      width: '100vw',
+      height: '100vh',
       backgroundColor: 'rgba(11, 16, 33, 0.75)',
-      backdropFilter: 'blur(6px)',
-      zIndex: 50,
+      backdropFilter: 'blur(10px)',
+      zIndex: 99999,
       display: 'flex',
       alignItems: 'center',
-      justify: 'center',
-      padding: '1rem'
+      justifyContent: 'center',
+      padding: '1.5rem',
+      boxSizing: 'border-box'
     }}>
-      <div className="card-surface" style={{ maxWidth: '680px', width: '100%', maxHeight: '90vh', overflowY: 'auto', padding: '1.75rem', borderRadius: 'var(--radius-lg)' }}>
+      <div className="card-surface animate-modal-pop" style={{ maxWidth: '680px', width: '100%', maxHeight: '90vh', overflowY: 'auto', padding: '1.75rem', borderRadius: 'var(--radius-lg)', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.4)', backgroundColor: '#FFFFFF' }}>
         
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
@@ -212,8 +217,8 @@ export default function ProductSpecModal({ product, onClose, onSubmitRfq }) {
             </div>
           )}
         </form>
-
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

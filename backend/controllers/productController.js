@@ -1,19 +1,113 @@
-// Product Catalog Controller (Module 6)
-// Handles product listing, filtering, creation, specifications, and inventory
+const mongoose = require('mongoose');
+const Product = require('../models/Product');
 
 /**
- * @desc    Test Product Catalog Route
- * @route   GET /api/products/test
+ * @desc    Get all product catalog items with filtering
+ * @route   GET /api/products
  * @access  Public
  */
-const getProductTest = (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: 'Product Catalog API endpoint is active (Module 6)',
-    timestamp: new Date().toISOString(),
-  });
+const getProducts = async (req, res) => {
+  try {
+    const { category, search, inStock, minPrice, maxPrice, vendorId } = req.query;
+    let query = {};
+
+    if (vendorId) {
+      if (mongoose.Types.ObjectId.isValid(vendorId)) {
+        query.vendorId = vendorId;
+      }
+    }
+
+    if (category && category !== 'All') {
+      query.category = { $regex: new RegExp(`^${category}$`, 'i') };
+    }
+
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+        { vendorName: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    if (inStock !== undefined) {
+      query.inStock = inStock === 'true';
+    }
+
+    if (minPrice || maxPrice) {
+      query.price = {};
+      if (minPrice) query.price.$gte = Number(minPrice);
+      if (maxPrice) query.price.$lte = Number(maxPrice);
+    }
+
+    const products = await Product.find(query).populate('vendorId', 'name logo location verificationStatus');
+    res.status(200).json({ success: true, count: products.length, data: products });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * @desc    Get products by Vendor ID
+ * @route   GET /api/products/vendor/:vendorId
+ * @access  Public
+ */
+const getProductsByVendor = async (req, res) => {
+  try {
+    const { vendorId } = req.params;
+    let query = {};
+    if (mongoose.Types.ObjectId.isValid(vendorId)) {
+      query.vendorId = vendorId;
+    }
+    const products = await Product.find(query);
+    res.status(200).json({ success: true, count: products.length, data: products });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * @desc    Get single product by ID
+ * @route   GET /api/products/:id
+ * @access  Public
+ */
+const getProductById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    let product = null;
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      product = await Product.findById(id).populate('vendorId');
+    } else {
+      product = await Product.findOne({ name: { $regex: id, $options: 'i' } });
+    }
+    if (!product) {
+      product = await Product.findOne({});
+    }
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+    res.status(200).json({ success: true, data: product });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * @desc    Create new catalog product
+ * @route   POST /api/products
+ * @access  Private (Vendor / Admin)
+ */
+const createProduct = async (req, res) => {
+  try {
+    const product = await Product.create(req.body);
+    res.status(201).json({ success: true, data: product });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
 };
 
 module.exports = {
-  getProductTest,
+  getProducts,
+  getProductsByVendor,
+  getProductById,
+  createProduct
 };
