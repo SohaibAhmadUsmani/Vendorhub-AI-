@@ -1,38 +1,36 @@
 import { useState } from 'react'
 import MatchScoreCard from '../components/matching/MatchScoreCard'
 
-const mockVendors = [
-  { id: 1, name: 'Alpha Textiles Ltd.', price: 8, quality: 9, deliveryTime: 7, reviews: 9, location: 9, capacity: 8, certifications: 10, pastPerformance: 8 },
-  { id: 2, name: 'Beta Manufacturing Co.', price: 6, quality: 8, deliveryTime: 9, reviews: 7, location: 6, capacity: 9, certifications: 7, pastPerformance: 9 },
-  { id: 3, name: 'Gamma Global Suppliers', price: 9, quality: 6, deliveryTime: 6, reviews: 8, location: 7, capacity: 7, certifications: 6, pastPerformance: 7 },
-]
-
-const weights = {
-  price: 0.15, quality: 0.2, deliveryTime: 0.15, reviews: 0.15,
-  location: 0.1, capacity: 0.1, certifications: 0.1, pastPerformance: 0.05,
-}
-
-function scoreVendors(vendors) {
-  return vendors
-    .map((v) => {
-      const score = Object.keys(weights).reduce((sum, key) => sum + v[key] * weights[key], 0)
-      return { ...v, matchScore: Math.round(score * 10) }
-    })
-    .sort((a, b) => b.matchScore - a.matchScore)
-}
-
 export default function VendorMatchingPage() {
   const [requirement, setRequirement] = useState('')
-  const [results, setResults] = useState(scoreVendors(mockVendors))
+  const [results, setResults] = useState([])
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [searched, setSearched] = useState(false)
 
-  const handleSearch = (e) => {
+  const handleSearch = async (e) => {
     e.preventDefault()
     setLoading(true)
-    setTimeout(() => {
-      setResults(scoreVendors(mockVendors))
+    setError(null)
+
+    try {
+      const res = await fetch('/api/match', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requirement }),
+      })
+
+      if (!res.ok) throw new Error('Match request failed')
+
+      const data = await res.json()
+      setResults(data.results || [])
+      setSearched(true)
+    } catch (err) {
+      console.error(err)
+      setError('Could not fetch vendor matches. Please try again.')
+    } finally {
       setLoading(false)
-    }, 600)
+    }
   }
 
   return (
@@ -58,9 +56,19 @@ export default function VendorMatchingPage() {
         </button>
       </form>
 
-      {loading ? (
+      {loading && (
         <p className="text-slate-500 dark:text-slate-400 text-sm">Finding the best vendor matches...</p>
-      ) : (
+      )}
+
+      {error && (
+        <p className="text-red-500 text-sm">{error}</p>
+      )}
+
+      {!loading && searched && results.length === 0 && !error && (
+        <p className="text-slate-500 dark:text-slate-400 text-sm">No vendors found for this requirement.</p>
+      )}
+
+      {!loading && results.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl">
           {results.map((vendor) => (
             <MatchScoreCard key={vendor.id} vendor={vendor} />
