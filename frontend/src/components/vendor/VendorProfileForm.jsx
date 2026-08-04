@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
 
 /**
- * VendorProfileForm — Centered Glassmorphic Pop-up Modal (100% Redesigned UX)
- * Tabbed edit sections, spring animation (animate-pop-in), and WCAG compliant inputs
+ * VendorProfileForm — Centered Glassmorphic Pop-up Modal via React Portal
+ * Tabbed edit sections, spring scale animation (animate-modal-pop), and true viewport centering
  */
 export default function VendorProfileForm({ profile, onClose, onSaveProfile }) {
   const [activeFormTab, setActiveFormTab] = useState('basic');
@@ -50,29 +51,33 @@ export default function VendorProfileForm({ profile, onClose, onSaveProfile }) {
     }, 1000);
   };
 
-  return (
+  return ReactDOM.createPortal(
     <div style={{
       position: 'fixed',
-      inset: 0,
-      backgroundColor: 'rgba(11, 16, 33, 0.8)',
+      top: 0,
+      left: 0,
+      width: '100vw',
+      height: '100vh',
+      backgroundColor: 'rgba(11, 16, 33, 0.75)',
       backdropFilter: 'blur(10px)',
-      zIndex: 60,
+      zIndex: 99999,
       display: 'flex',
       alignItems: 'center',
-      justify: 'center',
-      padding: '1rem'
+      justifyContent: 'center',
+      padding: '1.5rem',
+      boxSizing: 'border-box'
     }}>
       <div 
-        className="card-surface animate-pop-in" 
+        className="card-surface animate-modal-pop" 
         style={{ 
-          maxWidth: '720px', 
+          maxWidth: '740px', 
           width: '100%', 
-          maxHeight: '92vh', 
+          maxHeight: '90vh', 
           overflowY: 'auto', 
           padding: '2rem',
           borderRadius: 'var(--radius-lg)',
-          backgroundColor: 'var(--bg-card)',
-          boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
+          backgroundColor: '#FFFFFF',
+          boxShadow: '0 25px 50px -12px rgba(0,0,0,0.4)',
           border: '1px solid var(--border-card)'
         }}
       >
@@ -343,10 +348,9 @@ export default function VendorProfileForm({ profile, onClose, onSaveProfile }) {
               {saving ? 'Saving Updates...' : '💾 Save Vendor Profile'}
             </button>
           </div>
-
         </form>
-
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

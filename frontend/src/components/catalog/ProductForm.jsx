@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
 
 /**
- * ProductForm — Add/Edit Product Modal Component for Module 6 (Product Catalog)
+ * ProductForm — Centered Add/Edit Product Modal via React Portal
  * Conforms 100% to design_system.md & SRS Page 7
  */
 export default function ProductForm({ onClose, onSaveProduct }) {
@@ -37,19 +38,23 @@ export default function ProductForm({ onClose, onSaveProduct }) {
     onClose();
   };
 
-  return (
+  return ReactDOM.createPortal(
     <div style={{
       position: 'fixed',
-      inset: 0,
+      top: 0,
+      left: 0,
+      width: '100vw',
+      height: '100vh',
       backgroundColor: 'rgba(11, 16, 33, 0.75)',
-      backdropFilter: 'blur(6px)',
-      zIndex: 50,
+      backdropFilter: 'blur(10px)',
+      zIndex: 99999,
       display: 'flex',
       alignItems: 'center',
-      justify: 'center',
-      padding: '1rem'
+      justifyContent: 'center',
+      padding: '1.5rem',
+      boxSizing: 'border-box'
     }}>
-      <div className="card-surface" style={{ maxWidth: '580px', width: '100%', maxHeight: '90vh', overflowY: 'auto', padding: '1.75rem' }}>
+      <div className="card-surface animate-modal-pop" style={{ maxWidth: '580px', width: '100%', maxHeight: '90vh', overflowY: 'auto', padding: '1.75rem', borderRadius: 'var(--radius-lg)', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.4)', backgroundColor: '#FFFFFF' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
           <h2 className="font-heading" style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0 }}>
             ➕ Add Product to Catalog
@@ -166,6 +171,7 @@ export default function ProductForm({ onClose, onSaveProduct }) {
         </form>
 
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

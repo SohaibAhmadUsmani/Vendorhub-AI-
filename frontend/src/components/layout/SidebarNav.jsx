@@ -1,4 +1,5 @@
 import React from 'react';
+import VendorHubLogo from './VendorHubLogo';
 
 /**
  * SidebarNav — Production-Grade Navy Sidebar
@@ -30,37 +31,15 @@ export default function SidebarNav({ currentView, setCurrentView }) {
       color: '#94A3B8',
       display: 'flex',
       flexDirection: 'column',
-      justify: 'space-between',
+      justifyContent: 'space-between',
       padding: '1.25rem 1rem',
       flexShrink: 0,
       minHeight: '100vh'
     }}>
       <div>
         {/* Brand Logo Header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.75rem', padding: '0 0.5rem' }}>
-          <div style={{
-            width: '38px',
-            height: '38px',
-            borderRadius: '10px',
-            backgroundColor: '#6C5CE7',
-            display: 'flex',
-            alignItems: 'center',
-            justify: 'center',
-            color: '#fff',
-            fontWeight: 800,
-            fontSize: '1.2rem',
-            boxShadow: 'var(--shadow-ai-glow)'
-          }}>
-            V
-          </div>
-          <div>
-            <h2 className="font-heading" style={{ color: '#FFFFFF', fontSize: '1.15rem', fontWeight: 800, margin: 0, lineHeight: 1.2 }}>
-              VendorHub AI
-            </h2>
-            <span style={{ fontSize: '0.65rem', color: '#64748B', display: 'block' }}>
-              Smarter Sourcing. Better Business.
-            </span>
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', padding: '0.25rem 0.5rem 1rem', borderBottom: '1px solid rgba(30, 41, 59, 0.7)' }}>
+          <VendorHubLogo size="normal" showTagline={true} lightMode={false} />
         </div>
 
         {/* Navigation Items List */}
@@ -75,7 +54,7 @@ export default function SidebarNav({ currentView, setCurrentView }) {
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  justify: 'space-between',
+                  justifyContent: 'space-between',
                   width: '100%',
                   padding: '0.6rem 0.85rem',
                   borderRadius: '10px',

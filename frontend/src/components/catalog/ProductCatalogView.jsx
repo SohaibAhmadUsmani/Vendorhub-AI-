@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { SlidersHorizontal, RotateCcw } from 'lucide-react';
 import ProductCard from './ProductCard';
 import ProductListView from './ProductListView';
 import ProductSpecModal from './ProductSpecModal';
@@ -8,7 +9,7 @@ import { fetchProducts, addProduct } from '../../services/productService';
 
 /**
  * ProductCatalogView — Module 6 (Product Catalog) 100% Completion View
- * Redesigned Pill Badge Filter Header, Inspira AI Search Border, View Switcher & RFQ Basket
+ * Redesigned Filter Header, Sliders Icon, Spacious Layout & Working Reset Button
  */
 export default function ProductCatalogView({ vendorIdFilter = null }) {
   const [products, setProducts] = useState([]);
@@ -98,52 +99,66 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
 
   const selectedProductsObjects = products.filter(p => selectedProductIds.includes(p.id));
 
+  // Strict 6 Items Per Page Pagination Logic
+  const ITEMS_PER_PAGE = 6;
+  const totalItems = products.length;
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE) || 1;
+
+  useEffect(() => {
+    if (activePage > totalPages) {
+      setActivePage(1);
+    }
+  }, [totalItems, totalPages, activePage]);
+
+  const startIndex = (activePage - 1) * ITEMS_PER_PAGE;
+  const paginatedProducts = products.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  const startItemNum = totalItems > 0 ? startIndex + 1 : 0;
+  const endItemNum = Math.min(startIndex + ITEMS_PER_PAGE, totalItems);
+  // Smart Pagination Range Helper (e.g. 1 2 3 ... 10)
+  const getPaginationRange = (current, total) => {
+    if (total <= 5) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+    if (current <= 3) {
+      return [1, 2, 3, '...', total];
+    }
+    if (current >= total - 2) {
+      return [1, '...', total - 2, total - 1, total];
+    }
+    return [1, '...', current - 1, current, current + 1, '...', total];
+  };
+
+  const paginationRange = getPaginationRange(activePage, totalPages);
+
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '270px 1fr', gap: '1.5rem', padding: '1rem', maxWidth: '1440px', margin: '0 auto', position: 'relative' }}>
       
-      {/* LEFT FILTER SIDEBAR WITH REDESIGNED PILL BADGE HEADER */}
+      {/* LEFT FILTER SIDEBAR WITH ELEGANT ENTERPRISE HEADER */}
       <aside className="card-surface" style={{ padding: '1.25rem' }}>
         
-        {/* Redesigned Pill Badge Filter Header */}
-        <div style={{ 
-          display: 'flex', 
-          justify: 'space-between', 
-          alignItems: 'center', 
-          marginBottom: '1.25rem',
-          padding: '0.6rem 0.85rem',
-          backgroundColor: 'var(--bg-main)',
-          borderRadius: 'var(--radius-md)',
-          border: '1px solid var(--border-color)'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span style={{ fontSize: '1.1rem' }}>🎛️</span>
-            <h3 className="font-heading" style={{ fontSize: '0.95rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
+        {/* Spacious, Enterprise Grade Filter & Specs Header */}
+        <div className="flex items-center justify-between gap-2 mb-4 pb-3 border-b border-[var(--border-color)]">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#6C5CE7]/10 text-[#6C5CE7] shrink-0">
+              <SlidersHorizontal size={16} />
+            </div>
+            <h3 className="font-heading text-sm font-bold text-[var(--text-primary)] truncate">
               Filter & Specs
             </h3>
             {activeFilterCount > 0 && (
-              <span 
-                style={{
-                  backgroundColor: 'var(--primary-purple)',
-                  color: '#FFFFFF',
-                  fontSize: '0.7rem',
-                  fontWeight: 800,
-                  width: '20px',
-                  height: '20px',
-                  borderRadius: '50%',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justify: 'center'
-                }}
-              >
+              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#6C5CE7] text-[10px] font-bold text-white shrink-0">
                 {activeFilterCount}
               </span>
             )}
           </div>
 
           <button 
+            type="button"
             onClick={handleResetFilters}
-            style={{ background: 'none', border: 'none', color: 'var(--primary-purple)', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}
+            className="inline-flex items-center gap-1 text-xs font-semibold text-[#6C5CE7] hover:text-[#5A4AD1] hover:underline transition-colors shrink-0 cursor-pointer"
+            title="Reset all filters"
           >
+            <RotateCcw size={12} />
             Reset
           </button>
         </div>
@@ -159,6 +174,7 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
             className="inspira-glowing-border"
             style={{
               width: '100%',
+              boxSizing: 'border-box',
               padding: '0.45rem 0.65rem',
               borderRadius: 'var(--radius-sm)',
               fontSize: '0.8rem',
@@ -170,12 +186,12 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
         {/* Category Radio Group */}
         <div style={{ marginBottom: '1.5rem' }}>
           <h4 style={{ fontSize: '0.825rem', fontWeight: 700, marginBottom: '0.5rem', color: 'var(--text-primary)' }}>Category</h4>
-          {['All', 'ELECTRONIC COMPONENTS', 'MECHANICAL PARTS', 'RAW MATERIALS', 'INDUSTRIAL TOOLS'].map((cat) => (
-            <label key={cat} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.4rem', cursor: 'pointer' }}>
+          {['All', 'Sports & Outdoor', 'Apparel & Textiles', 'Industrial Tools', 'Mechanical Parts', 'Raw Materials', 'Electronic Components'].map((cat) => (
+            <label key={cat} style={{ display: 'flex', items: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.4rem', cursor: 'pointer' }}>
               <input 
                 type="radio" 
                 name="categoryFilter"
-                checked={activeCategory === cat}
+                checked={activeCategory.toLowerCase() === cat.toLowerCase()}
                 onChange={() => setActiveCategory(cat)}
                 style={{ accentColor: 'var(--primary-purple)' }} 
               />
@@ -186,14 +202,15 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
 
         {/* Max MOQ Slider */}
         <div style={{ marginBottom: '1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.825rem', marginBottom: '0.35rem' }}>
-            <span style={{ fontWeight: 700 }}>Max MOQ Limit</span>
-            <span className="font-mono" style={{ color: 'var(--primary-purple)', fontWeight: 700 }}>{moqMax}</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.825rem', fontWeight: 700, marginBottom: '0.35rem' }}>
+            <span>Max MOQ</span>
+            <span className="font-mono" style={{ color: 'var(--primary-purple)' }}>{moqMax} pcs</span>
           </div>
           <input 
             type="range" 
-            min="1" 
+            min="10" 
             max="1000" 
+            step="10"
             value={moqMax}
             onChange={(e) => setMoqMax(e.target.value)}
             style={{ width: '100%', accentColor: 'var(--primary-purple)' }}
@@ -202,74 +219,93 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
 
         {/* Max Lead Time Slider */}
         <div style={{ marginBottom: '1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.825rem', marginBottom: '0.35rem' }}>
-            <span style={{ fontWeight: 700 }}>Max Lead Time (Days)</span>
-            <span className="font-mono" style={{ color: 'var(--primary-purple)', fontWeight: 700 }}>{maxLeadTime} Days</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.825rem', fontWeight: 700, marginBottom: '0.35rem' }}>
+            <span>Max Lead Time</span>
+            <span className="font-mono" style={{ color: 'var(--primary-purple)' }}>{maxLeadTime} Days</span>
           </div>
           <input 
             type="range" 
             min="1" 
-            max="60" 
+            max="90" 
             value={maxLeadTime}
             onChange={(e) => setMaxLeadTime(e.target.value)}
             style={{ width: '100%', accentColor: 'var(--primary-purple)' }}
           />
         </div>
 
-        {/* Stock Status Selection */}
+        {/* Stock Status Radio */}
         <div style={{ marginBottom: '1.5rem' }}>
-          <h4 style={{ fontSize: '0.825rem', fontWeight: 700, marginBottom: '0.5rem', color: 'var(--text-primary)' }}>Stock Status</h4>
-          {['All', 'In Stock', 'Made to Order'].map((status) => (
-            <label key={status} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.35rem', cursor: 'pointer' }}>
+          <h4 style={{ fontSize: '0.825rem', fontWeight: 700, marginBottom: '0.5rem', color: 'var(--text-primary)' }}>Availability</h4>
+          {['All', 'In Stock', 'Out of Stock'].map((st) => (
+            <label key={st} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.4rem', cursor: 'pointer' }}>
               <input 
                 type="radio" 
-                name="stockStatusFilter"
-                checked={stockStatusFilter === status}
-                onChange={() => setStockStatusFilter(status)}
+                name="stockFilter"
+                checked={stockStatusFilter === st}
+                onChange={() => setStockStatusFilter(st)}
                 style={{ accentColor: 'var(--primary-purple)' }} 
               />
-              {status}
+              {st}
             </label>
           ))}
         </div>
 
-        {/* Price Range Inputs */}
+        {/* Price Filter (Fixed width overflow) */}
         <div style={{ marginBottom: '1.5rem' }}>
-          <span style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.5rem' }}>Price Range (USD)</span>
+          <h4 style={{ fontSize: '0.825rem', fontWeight: 700, marginBottom: '0.5rem', color: 'var(--text-primary)' }}>Price Range ($)</h4>
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <input 
               type="number" 
-              placeholder="Min" 
+              placeholder="Min $" 
               value={minPriceInput}
               onChange={(e) => setMinPriceInput(e.target.value)}
-              style={{ width: '50%', padding: '0.35rem 0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.8rem', backgroundColor: 'var(--bg-main)' }} 
+              style={{
+                width: '100%',
+                minWidth: 0,
+                boxSizing: 'border-box',
+                padding: '0.4rem 0.5rem',
+                fontSize: '0.8rem',
+                borderRadius: 'var(--radius-sm)',
+                border: '1px solid var(--border-color)',
+                backgroundColor: 'var(--bg-main)',
+                color: 'var(--text-primary)'
+              }}
             />
-            <span style={{ color: 'var(--text-muted)' }}>-</span>
+            <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: 700 }}>–</span>
             <input 
               type="number" 
-              placeholder="Max" 
+              placeholder="Max $" 
               value={maxPriceInput}
               onChange={(e) => setMaxPriceInput(e.target.value)}
-              style={{ width: '50%', padding: '0.35rem 0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.8rem', backgroundColor: 'var(--bg-main)' }} 
+              style={{
+                width: '100%',
+                minWidth: 0,
+                boxSizing: 'border-box',
+                padding: '0.4rem 0.5rem',
+                fontSize: '0.8rem',
+                borderRadius: 'var(--radius-sm)',
+                border: '1px solid var(--border-color)',
+                backgroundColor: 'var(--bg-main)',
+                color: 'var(--text-primary)'
+              }}
             />
           </div>
         </div>
 
-        {/* Verified Suppliers Checkbox */}
-        <div style={{ marginBottom: '1.5rem' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.825rem', color: 'var(--text-secondary)', cursor: 'pointer' }}>
-            <input 
-              type="checkbox" 
-              checked={verifiedOnly}
-              onChange={(e) => setVerifiedOnly(e.target.checked)}
-              style={{ accentColor: 'var(--primary-purple)' }} 
-            />
-            Verified Suppliers Only
-          </label>
+        {/* Verified Suppliers Toggle */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.5rem', borderTop: '1px solid var(--border-color)' }}>
+          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)' }}>Verified Suppliers Only</span>
+          <input 
+            type="checkbox" 
+            checked={verifiedOnly}
+            onChange={(e) => setVerifiedOnly(e.target.checked)}
+            style={{ accentColor: 'var(--primary-purple)', width: '16px', height: '16px', cursor: 'pointer' }} 
+          />
         </div>
+
       </aside>
 
-      {/* MAIN CATALOG CONTENT AREA */}
+      {/* RIGHT MAIN CATALOG GRID AREA */}
       <div>
         
         {/* Bulk RFQ Success Banner */}
@@ -279,11 +315,11 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
           </div>
         )}
 
-        {/* Top Controls & View Switcher Bar */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
+        {/* Top View Bar Header */}
+        <div className="card-surface" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.25rem', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
-            <h2 className="font-heading" style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0 }}>
-              Product Catalog <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 400 }}>({products.length} Items Listed)</span>
+            <h2 className="font-heading" style={{ fontSize: '1.2rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
+              Product Catalog <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 400 }}>({totalItems} SKUs Total • Showing {startItemNum}-{endItemNum})</span>
             </h2>
             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: '0.35rem', fontSize: '0.8rem' }}>
               {activeCategory !== 'All' && <span className="badge badge-verified" style={{ fontSize: '0.7rem' }}>{activeCategory}</span>}
@@ -336,7 +372,7 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
           </div>
         </div>
 
-        {/* Product Cards Grid OR List View */}
+        {/* Product Cards Grid OR List View (Strictly 6 Items Per Page) */}
         {loading ? (
           <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
             <div className="font-mono" style={{ fontSize: '1rem', fontWeight: 700 }}>⚡ Fetching Catalog Products...</div>
@@ -354,7 +390,7 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
             gap: '1.25rem',
             marginBottom: '2rem'
           }}>
-            {products.map(prod => (
+            {paginatedProducts.map(prod => (
               <ProductCard 
                 key={prod.id}
                 product={prod}
@@ -366,42 +402,64 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
           </div>
         ) : (
           <ProductListView 
-            products={products}
+            products={paginatedProducts}
             selectedProductIds={selectedProductIds}
             onToggleSelectProduct={handleToggleSelectProduct}
             onSelectProductForSpec={(p) => setSelectedProductForSpec(p)}
           />
         )}
 
-        {/* Footer Pagination Bar */}
+        {/* Smart Ellipsis Footer Pagination Bar */}
         <div className="card-surface" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
           <div style={{ display: 'flex', gap: '1.5rem', fontSize: '0.85rem' }}>
-            <span className="font-mono">📦 <strong>1,245+</strong> TOTAL SKU IN CATALOG</span>
-            <span className="font-mono">⏱ <strong>4.2 Days</strong> AVG. RESPONSE TIME</span>
+            <span className="font-mono">📦 <strong>{totalItems}</strong> TOTAL SKUs IN CATALOG</span>
+            <span className="font-mono">📄 Page <strong>{activePage}</strong> of <strong>{totalPages}</strong></span>
           </div>
 
           <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
-            <button className="btn-outline-secondary" style={{ minHeight: '32px', padding: '0.2rem 0.6rem', fontSize: '0.8rem' }}>Previous</button>
-            {[1, 2, 3, 4, 5].map(num => (
-              <button 
-                key={num}
-                onClick={() => setActivePage(num)}
-                style={{
-                  minHeight: '32px',
-                  width: '32px',
-                  borderRadius: 'var(--radius-sm)',
-                  border: activePage === num ? 'none' : '1px solid var(--border-color)',
-                  backgroundColor: activePage === num ? 'var(--primary-purple)' : 'transparent',
-                  color: activePage === num ? '#fff' : 'var(--text-primary)',
-                  fontWeight: 700,
-                  fontSize: '0.8rem',
-                  cursor: 'pointer'
-                }}
-              >
-                {num}
-              </button>
+            <button 
+              className="btn-outline-secondary" 
+              style={{ minHeight: '32px', padding: '0.2rem 0.6rem', fontSize: '0.8rem', opacity: activePage === 1 ? 0.5 : 1, cursor: activePage === 1 ? 'not-allowed' : 'pointer' }}
+              disabled={activePage === 1}
+              onClick={() => setActivePage(prev => Math.max(prev - 1, 1))}
+            >
+              Previous
+            </button>
+            
+            {paginationRange.map((num, idx) => (
+              typeof num === 'number' ? (
+                <button 
+                  key={num}
+                  onClick={() => setActivePage(num)}
+                  style={{
+                    minHeight: '32px',
+                    width: '32px',
+                    borderRadius: 'var(--radius-sm)',
+                    border: activePage === num ? 'none' : '1px solid var(--border-color)',
+                    backgroundColor: activePage === num ? 'var(--primary-purple)' : 'transparent',
+                    color: activePage === num ? '#fff' : 'var(--text-primary)',
+                    fontWeight: 700,
+                    fontSize: '0.8rem',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {num}
+                </button>
+              ) : (
+                <span key={`ellipsis-${idx}`} style={{ padding: '0 0.25rem', color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 700 }}>
+                  ...
+                </span>
+              )
             ))}
-            <button className="btn-outline-secondary" style={{ minHeight: '32px', padding: '0.2rem 0.6rem', fontSize: '0.8rem' }}>Next</button>
+            
+            <button 
+              className="btn-outline-secondary" 
+              style={{ minHeight: '32px', padding: '0.2rem 0.6rem', fontSize: '0.8rem', opacity: activePage === totalPages ? 0.5 : 1, cursor: activePage === totalPages ? 'not-allowed' : 'pointer' }}
+              disabled={activePage === totalPages}
+              onClick={() => setActivePage(prev => Math.min(prev + 1, totalPages))}
+            >
+              Next
+            </button>
           </div>
         </div>
 

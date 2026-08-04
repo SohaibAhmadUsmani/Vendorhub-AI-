@@ -22,7 +22,7 @@ export default function ProductCard({
       style={{
         display: 'flex',
         flexDirection: 'column',
-        justify: 'space-between',
+        justifyContent: 'space-between',
         height: '100%',
         padding: '1.25rem',
         border: isSelected ? '2px solid var(--primary-purple)' : '1px solid var(--border-card)',
@@ -32,45 +32,56 @@ export default function ProductCard({
       }}
     >
       <div>
-        {/* Multi-Select Checkbox Overlay */}
-        <div 
-          onClick={() => onToggleSelect && onToggleSelect(product.id)}
-          style={{
-            position: 'absolute',
-            top: '1rem',
-            right: '1rem',
-            zIndex: 10,
-            cursor: 'pointer',
-            backgroundColor: isSelected ? 'var(--primary-purple)' : 'rgba(255,255,255,0.9)',
-            color: isSelected ? '#FFFFFF' : 'var(--text-muted)',
-            borderRadius: '50%',
-            width: '28px',
-            height: '28px',
-            display: 'flex',
-            alignItems: 'center',
-            justify: 'center',
-            boxShadow: 'var(--shadow-sm)',
-            border: '1px solid var(--border-color)'
-          }}
-          title={isSelected ? "Deselect for bulk RFQ" : "Select for bulk RFQ"}
-        >
-          {isSelected ? '✓' : '+'}
-        </div>
-
-        {/* Product Image Header with Badges */}
+        {/* Product Image Header with Badges & Symmetrical Select Overlay */}
         <div style={{ position: 'relative', marginBottom: '0.75rem', overflow: 'hidden', borderRadius: 'var(--radius-md)' }}>
           <img 
             src={images[activeImageIndex]} 
             alt={product.title}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = 'https://images.unsplash.com/photo-1614632537197-38a17061c2bd?w=800&auto=format&fit=crop&q=80';
+            }}
             style={{
               width: '100%',
-              height: '170px',
+              height: '175px',
               objectFit: 'cover',
               display: 'block',
               borderRadius: 'var(--radius-md)',
               transition: 'transform 0.3s ease'
             }} 
           />
+
+          {/* Symmetrical Multi-Select Checkbox Badge */}
+          <div 
+            onClick={() => onToggleSelect && onToggleSelect(product.id)}
+            style={{
+              position: 'absolute',
+              top: '12px',
+              right: '12px',
+              zIndex: 10,
+              cursor: 'pointer',
+              backgroundColor: isSelected ? 'var(--primary-purple)' : 'rgba(255, 255, 255, 0.9)',
+              color: isSelected ? '#FFFFFF' : '#0F172A',
+              backdropFilter: 'blur(8px)',
+              borderRadius: '50%',
+              width: '32px',
+              height: '32px',
+              minWidth: '32px',
+              minHeight: '32px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              lineHeight: 1,
+              fontWeight: 800,
+              fontSize: '1.1rem',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
+              border: isSelected ? '2px solid #FFFFFF' : '1px solid rgba(255,255,255,0.8)',
+              transition: 'all 0.2s ease-in-out'
+            }}
+            title={isSelected ? "Deselect for bulk RFQ" : "Select for bulk RFQ"}
+          >
+            <span style={{ transform: 'translateY(-1px)' }}>{isSelected ? '✓' : '+'}</span>
+          </div>
 
           <span 
             className="badge" 
