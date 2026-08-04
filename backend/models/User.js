@@ -9,6 +9,12 @@ const userSchema = new mongoose.Schema({
   isVerified: { type: Boolean, default: false },
   twoFAEnabled: { type: Boolean, default: false },
   savedVendors: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Vendor' }],
+  verificationToken: { type: String, default: null },
+  verificationTokenExpires: { type: Date, default: null },
+  resetPasswordToken: { type: String, default: null },
+  resetPasswordTokenExpires: { type: Date, default: null },
+  twoFactorCode: { type: String, default: null },
+  twoFactorCodeExpires: { type: Date, default: null },
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

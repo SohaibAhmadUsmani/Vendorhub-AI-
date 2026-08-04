@@ -1,12 +1,14 @@
+import React from "react";
 import { Navigate, Routes, Route, BrowserRouter } from "react-router-dom";
 import DashboardLayout from "./components/layout/DashboardLayout";
 import Dashboard from "./pages/dashboard";
 import VendorMatchingPage from "./pages/VendorMatchingPage";
 import RFQGeneratorPage from "./pages/RFQGeneratorPage";
-
-function ModulePlaceholder({ name }) {
-  return <h1>{name} coming soon...</h1>;
-}
+import VendorProfileView from "./components/vendor/VendorProfileView";
+import ProductCatalogView from "./components/catalog/ProductCatalogView";
+import AnalyticsPage from "./pages/AnalyticsPage";
+import TeammateModulePlaceholder from "./components/layout/TeammateModulePlaceholder";
+import "./App.css";
 
 function App() {
   return (
@@ -17,16 +19,20 @@ function App() {
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="ai-search" element={<VendorMatchingPage />} />
           <Route path="rfqs" element={<RFQGeneratorPage />} />
-          <Route path="quotes" element={<ModulePlaceholder name="Quotes" />} />
-          <Route path="orders" element={<ModulePlaceholder name="Orders" />} />
-          <Route path="vendors" element={<ModulePlaceholder name="Vendors" />} />
-          <Route path="saved-vendors" element={<ModulePlaceholder name="Saved-vendors" />} />
-          <Route path="messages" element={<ModulePlaceholder name="Messages" />} />
-          <Route path="contracts" element={<ModulePlaceholder name="Contracts" />} />
-          <Route path="documents" element={<ModulePlaceholder name="Documents" />} />
-          <Route path="analytics" element={<ModulePlaceholder name="Analytics" />} />
-          <Route path="spend-summary" element={<ModulePlaceholder name="Spend Summary" />} />
-          <Route path="settings" element={<ModulePlaceholder name="Settings" />} />
+          <Route path="quotes" element={<TeammateModulePlaceholder pageTitle="Quotes" />} />
+          <Route path="orders" element={<TeammateModulePlaceholder pageTitle="Orders" />} />
+
+          {/* Muzammil's Module 5 & Module 6 Views */}
+          <Route path="vendors" element={<VendorProfileView />} />
+          <Route path="product-catalog" element={<ProductCatalogView />} />
+
+          <Route path="saved-vendors" element={<TeammateModulePlaceholder pageTitle="Saved Vendors" />} />
+          <Route path="messages" element={<TeammateModulePlaceholder pageTitle="Messages" />} />
+          <Route path="contracts" element={<TeammateModulePlaceholder pageTitle="Contracts" />} />
+          <Route path="documents" element={<TeammateModulePlaceholder pageTitle="Documents" />} />
+          <Route path="analytics" element={<AnalyticsPage />} />
+          <Route path="spend-summary" element={<TeammateModulePlaceholder pageTitle="Spend Summary" />} />
+          <Route path="settings" element={<TeammateModulePlaceholder pageTitle="Settings" />} />
         </Route>
       </Routes>
     </BrowserRouter>
