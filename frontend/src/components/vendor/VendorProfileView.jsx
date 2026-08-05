@@ -1,23 +1,36 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import ProductCatalogView from '../catalog/ProductCatalogView';
 import VendorProfileForm from './VendorProfileForm';
 import VendorTeamCard from './VendorTeamCard';
 import VendorRiskVerificationModal from './VendorRiskVerificationModal';
-import { fetchVendorProfile, fetchAllVendorProfiles, updateVendorProfile } from '../../services/vendorService';
+import VendorReviewModal from './VendorReviewModal';
+import { fetchVendorProfile, fetchAllVendorProfiles, updateVendorProfile, submitVendorReview, toggleSaveVendor } from '../../services/vendorService';
 
 /**
  * VendorProfileView — Module 5 (Vendor Profiles) 100% Completion View
  * Interactive 6-Vendor Switcher Dropdown, Centered Glassmorphic Edit Modal, 6 Tabs
  */
 export default function VendorProfileView({ initialVendorId = "v-sialkot-101" }) {
-  const [selectedVendorId, setSelectedVendorId] = useState(initialVendorId);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const queryVendorId = searchParams.get('id');
+
+  const [selectedVendorId, setSelectedVendorId] = useState(queryVendorId || initialVendorId);
   const [allVendors, setAllVendors] = useState([]);
   const [activeTab, setActiveTab] = useState('Overview');
   const [vendorData, setVendorData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showRiskModal, setShowRiskModal] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
   const [activeLightboxImage, setActiveLightboxImage] = useState(null);
+
+  useEffect(() => {
+    if (queryVendorId && queryVendorId !== selectedVendorId) {
+      setSelectedVendorId(queryVendorId);
+    }
+  }, [queryVendorId]);
 
   // Load Vendor List & Active Profile
   useEffect(() => {
@@ -33,10 +46,48 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
       setLoading(true);
       const data = await fetchVendorProfile(selectedVendorId);
       setVendorData(data);
+      
+      const savedVendors = JSON.parse(localStorage.getItem('saved_vendors') || '[]');
+      setIsSaved(savedVendors.includes(selectedVendorId));
+      
       setLoading(false);
     }
     loadData();
   }, [selectedVendorId]);
+
+  const handleVendorSelectChange = (vendorId) => {
+    setSelectedVendorId(vendorId);
+    setSearchParams({ id: vendorId });
+  };
+
+  const handleToggleSave = async () => {
+    const updated = await toggleSaveVendor(selectedVendorId, isSaved);
+    setIsSaved(updated.includes(selectedVendorId));
+  };
+
+  const handleSubmitReview = async (reviewData) => {
+    const updated = await submitVendorReview(selectedVendorId, reviewData);
+    if (updated) {
+      setVendorData(updated);
+    } else {
+      // Fallback local update
+      setVendorData(prev => ({
+        ...prev,
+        reviewCount: (prev.reviewCount || 0) + 1,
+        rating: Number(((prev.rating * prev.reviewCount + reviewData.rating) / (prev.reviewCount + 1)).toFixed(1)),
+        reviews: [
+          ...(prev.reviews || []),
+          {
+            reviewerName: reviewData.reviewerName,
+            reviewerCompany: reviewData.reviewerCompany,
+            rating: reviewData.rating,
+            comment: reviewData.comment,
+            date: new Date()
+          }
+        ]
+      }));
+    }
+  };
 
   const handleSaveProfile = async (updatedFields) => {
     const updated = await updateVendorProfile(selectedVendorId, {
@@ -50,6 +101,7 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
     });
     setVendorData(updated);
   };
+
 
   if (loading || !vendorData) {
     return (
@@ -258,7 +310,7 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
 
       {/* 1. OVERVIEW TAB */}
       {activeTab === 'Overview' && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '1.5rem' }}>
+        <div key="overview" style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '1.5rem', animation: 'vpvTabFade 0.3s ease' }}>
           
           {/* LEFT COLUMN: Profile Details */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -401,14 +453,14 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
 
       {/* 2. PRODUCT CATALOG TAB */}
       {activeTab === 'Product Catalog' && (
-        <div>
+        <div key="catalog" style={{ animation: 'vpvTabFade 0.3s ease' }}>
           <ProductCatalogView vendorIdFilter={selectedVendorId} />
         </div>
       )}
 
       {/* 3. FACILITY & VIDEO TAB */}
       {activeTab === 'Facility & Video' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <div key="facility" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', animation: 'vpvTabFade 0.3s ease' }}>
           <div className="card-surface">
             <h3 className="font-heading" style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.5rem' }}>
               📹 Factory Floor & Automated Assembly Line Video Tour
@@ -447,7 +499,7 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
 
       {/* 4. CERTIFICATIONS & RISK TAB */}
       {activeTab === 'Certifications & Risk' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <div key="certs" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', animation: 'vpvTabFade 0.3s ease' }}>
           <div className="card-surface" style={{ backgroundColor: '#F0FDF4', border: '1px solid #BBF7D0' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
@@ -487,34 +539,60 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
 
       {/* 5. TEAM & CONTACT TAB */}
       {activeTab === 'Team & Contact' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <div key="team" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', animation: 'vpvTabFade 0.3s ease' }}>
           <VendorTeamCard teamMembers={vendorData.teamMembers} contactDetails={vendorData.contactDetails} />
         </div>
       )}
 
       {/* 6. BUYER REVIEWS TAB */}
       {activeTab === 'Buyer Reviews' && (
-        <div className="card-surface">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+        <div key="reviews" className="card-surface" style={{ animation: 'vpvTabFade 0.3s ease' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
               <h3 className="font-heading" style={{ fontSize: '1.25rem', fontWeight: 700 }}>Verified Buyer Reviews</h3>
               <span style={{ fontSize: '0.9rem', color: '#F59E0B', fontWeight: 600 }}>
-                ★ {vendorData.rating} / 5.0 ({vendorData.reviewCount} total verified reviews)
+                ★ {vendorData.rating} / 5.0 ({vendorData.reviewCount || vendorData.reviews?.length || 0} total verified reviews)
               </span>
             </div>
-            <button className="btn-purple-primary">Write Review</button>
+            <button className="btn-purple-primary" onClick={() => setShowReviewModal(true)}>
+              ★ Write Review
+            </button>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div style={{ padding: '1.25rem', backgroundColor: 'var(--bg-main)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
-                <strong>TexStyle Procurement Team (UK)</strong>
-                <span style={{ color: '#F59E0B' }}>★★★★★</span>
+            {vendorData.reviews && vendorData.reviews.length > 0 ? (
+              vendorData.reviews.map((rev, idx) => (
+                <div key={idx} style={{ padding: '1.25rem', backgroundColor: 'var(--bg-main)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
+                    <div>
+                      <strong>{rev.reviewerName || rev.user || 'Verified Buyer'}</strong>
+                      {rev.reviewerCompany && <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: '0.5rem' }}>({rev.reviewerCompany})</span>}
+                    </div>
+                    <span style={{ color: '#F59E0B', fontWeight: 700 }}>
+                      {'★'.repeat(rev.rating || 5)}
+                    </span>
+                  </div>
+                  <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', margin: 0 }}>
+                    "{rev.comment}"
+                  </p>
+                  {rev.date && (
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.35rem', display: 'block' }}>
+                      {new Date(rev.date).toLocaleDateString()}
+                    </span>
+                  )}
+                </div>
+              ))
+            ) : (
+              <div style={{ padding: '1.25rem', backgroundColor: 'var(--bg-main)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
+                  <strong>TexStyle Procurement Team (UK)</strong>
+                  <span style={{ color: '#F59E0B' }}>★★★★★</span>
+                </div>
+                <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', margin: 0 }}>
+                  "High quality precision manufacturing. Delivered 5,000 units with full ISO documentation 3 days ahead of schedule."
+                </p>
               </div>
-              <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', margin: 0 }}>
-                "High quality precision manufacturing. Delivered 5,000 units with full ISO documentation 3 days ahead of schedule."
-              </p>
-            </div>
+            )}
           </div>
         </div>
       )}
@@ -530,8 +608,17 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
 
       {showRiskModal && (
         <VendorRiskVerificationModal
-          riskMetrics={vendorData.riskMetrics}
+          vendorData={vendorData}
           onClose={() => setShowRiskModal(false)}
+        />
+      )}
+
+      {showReviewModal && (
+        <VendorReviewModal
+          vendorName={vendorData.name}
+          isOpen={showReviewModal}
+          onClose={() => setShowReviewModal(false)}
+          onSubmit={handleSubmitReview}
         />
       )}
 
@@ -545,6 +632,12 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
         </div>
       )}
 
+      <style>{`
+        @keyframes vpvTabFade {
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </div>
   );
 }

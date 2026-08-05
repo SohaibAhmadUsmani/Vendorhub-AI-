@@ -1482,3 +1482,56 @@ export async function addProduct(productData) {
     return productData;
   }
 }
+
+export async function updateProduct(productId, updateData) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/${productId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: updateData.title || updateData.name,
+        category: updateData.category,
+        price: Number(updateData.priceMin || updateData.price || 50),
+        moq: Number(updateData.moq || 100),
+        leadTime: typeof updateData.leadTimeDays === 'number' ? `${updateData.leadTimeDays} days` : updateData.leadTime,
+        stockQuantity: Number(updateData.availableStock || updateData.stockQuantity || 1000),
+        inStock: updateData.stockStatus ? updateData.stockStatus === 'In Stock' : true,
+        image: updateData.imageUrl || updateData.image,
+        description: updateData.specifications || updateData.description
+      })
+    });
+    if (!res.ok) throw new Error('Failed to update product');
+    const json = await res.json();
+    return json.data;
+  } catch (error) {
+    console.error('Error updating product in API:', error);
+    return updateData;
+  }
+}
+
+export async function deleteProduct(productId) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/${productId}`, {
+      method: 'DELETE'
+    });
+    if (!res.ok) throw new Error('Failed to delete product');
+    const json = await res.json();
+    return json;
+  } catch (error) {
+    console.error('Error deleting product in API:', error);
+    return { success: false, message: error.message };
+  }
+}
+
+export async function fetchProductCategories() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/categories`);
+    if (!res.ok) throw new Error('Failed to fetch categories');
+    const json = await res.json();
+    return json.data || [];
+  } catch (error) {
+    console.warn('Backend categories API unavailable, using static fallback:', error);
+    return [];
+  }
+}
+

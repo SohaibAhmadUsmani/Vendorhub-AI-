@@ -39,22 +39,25 @@ export default function ProductForm({ onClose, onSaveProduct }) {
   };
 
   return ReactDOM.createPortal(
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100vw',
-      height: '100vh',
-      backgroundColor: 'rgba(11, 16, 33, 0.75)',
-      backdropFilter: 'blur(10px)',
-      zIndex: 99999,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '1.5rem',
-      boxSizing: 'border-box'
-    }}>
-      <div className="card-surface animate-modal-pop" style={{ maxWidth: '580px', width: '100%', maxHeight: '90vh', overflowY: 'auto', padding: '1.75rem', borderRadius: 'var(--radius-lg)', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.4)', backgroundColor: '#FFFFFF' }}>
+    <div 
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        backgroundColor: 'rgba(11, 16, 33, 0.75)',
+        backdropFilter: 'blur(10px)',
+        zIndex: 99999,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '1.5rem',
+        boxSizing: 'border-box',
+        animation: 'pfFadeIn 0.3s ease-out'
+      }}>
+      <div className="card-surface" style={{ maxWidth: '580px', width: '100%', maxHeight: '90vh', overflowY: 'auto', padding: '1.75rem', borderRadius: 'var(--radius-lg)', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.4)', backgroundColor: '#FFFFFF', animation: 'pfSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
           <h2 className="font-heading" style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0 }}>
             ➕ Add Product to Catalog
@@ -171,6 +174,10 @@ export default function ProductForm({ onClose, onSaveProduct }) {
         </form>
 
       </div>
+      <style>{`
+        @keyframes pfFadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pfSlideUp { from { opacity: 0; transform: translateY(20px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+      `}</style>
     </div>,
     document.body
   );

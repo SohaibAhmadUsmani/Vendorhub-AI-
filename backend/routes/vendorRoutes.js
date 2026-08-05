@@ -4,7 +4,10 @@ const {
   getVendors,
   getVendorById,
   createVendor,
-  updateVendor
+  updateVendor,
+  deleteVendor,
+  addVendorReview,
+  updateVendorRisk
 } = require('../controllers/vendorController');
 
 router.route('/')
@@ -13,6 +16,14 @@ router.route('/')
 
 router.route('/:id')
   .get(getVendorById)
-  .put(updateVendor);
+  .put(updateVendor)
+  .delete(deleteVendor);
+
+router.route('/:id/reviews')
+  .post(addVendorReview);
+
+router.route('/:id/risk')
+  .put(updateVendorRisk);
 
 module.exports = router;
+

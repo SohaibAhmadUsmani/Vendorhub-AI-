@@ -52,23 +52,27 @@ export default function VendorProfileForm({ profile, onClose, onSaveProfile }) {
   };
 
   return ReactDOM.createPortal(
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100vw',
-      height: '100vh',
-      backgroundColor: 'rgba(11, 16, 33, 0.75)',
-      backdropFilter: 'blur(10px)',
-      zIndex: 99999,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '1.5rem',
-      boxSizing: 'border-box'
-    }}>
+    <div 
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        backgroundColor: 'rgba(11, 16, 33, 0.75)',
+        backdropFilter: 'blur(10px)',
+        zIndex: 99999,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '1.5rem',
+        boxSizing: 'border-box',
+        animation: 'vpfFadeIn 0.3s ease-out'
+      }}
+    >
       <div 
-        className="card-surface animate-modal-pop" 
+        className="card-surface" 
         style={{ 
           maxWidth: '740px', 
           width: '100%', 
@@ -78,7 +82,8 @@ export default function VendorProfileForm({ profile, onClose, onSaveProfile }) {
           borderRadius: 'var(--radius-lg)',
           backgroundColor: '#FFFFFF',
           boxShadow: '0 25px 50px -12px rgba(0,0,0,0.4)',
-          border: '1px solid var(--border-card)'
+          border: '1px solid var(--border-card)',
+          animation: 'vpfSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1)'
         }}
       >
         
@@ -142,7 +147,7 @@ export default function VendorProfileForm({ profile, onClose, onSaveProfile }) {
           
           {/* TAB 1: BASIC INFO */}
           {activeFormTab === 'basic' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div key="basic" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', animation: 'vpfTabFade 0.25s ease' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div>
                   <label style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>Company Legal Name *</label>
@@ -215,7 +220,7 @@ export default function VendorProfileForm({ profile, onClose, onSaveProfile }) {
 
           {/* TAB 2: MANUFACTURING */}
           {activeFormTab === 'capacity' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div key="capacity" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', animation: 'vpfTabFade 0.25s ease' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div>
                   <label style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>Monthly Output Capacity</label>
@@ -276,7 +281,7 @@ export default function VendorProfileForm({ profile, onClose, onSaveProfile }) {
 
           {/* TAB 3: CERTS & AUDIT */}
           {activeFormTab === 'certs' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div key="certs" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', animation: 'vpfTabFade 0.25s ease' }}>
               <div>
                 <label style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>Verification Badge Status</label>
                 <select
@@ -302,7 +307,7 @@ export default function VendorProfileForm({ profile, onClose, onSaveProfile }) {
 
           {/* TAB 4: CONTACT & EXECUTIVES */}
           {activeFormTab === 'contact' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div key="contact" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', animation: 'vpfTabFade 0.25s ease' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div>
                   <label style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>Primary Inquiries Email</label>
@@ -350,6 +355,11 @@ export default function VendorProfileForm({ profile, onClose, onSaveProfile }) {
           </div>
         </form>
       </div>
+      <style>{`
+        @keyframes vpfFadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes vpfSlideUp { from { opacity: 0; transform: translateY(20px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes vpfTabFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+      `}</style>
     </div>,
     document.body
   );

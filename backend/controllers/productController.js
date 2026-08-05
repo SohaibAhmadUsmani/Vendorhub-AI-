@@ -105,9 +105,88 @@ const createProduct = async (req, res) => {
   }
 };
 
+/**
+ * @desc    Update existing catalog product
+ * @route   PUT /api/products/:id
+ * @access  Private (Vendor / Admin)
+ */
+const updateProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    let product;
+
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      product = await Product.findByIdAndUpdate(id, req.body, { new: true, runValidators: true });
+    } else {
+      product = await Product.findOneAndUpdate({ name: { $regex: id, $options: 'i' } }, req.body, { new: true });
+    }
+
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+
+    res.status(200).json({ success: true, data: product });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * @desc    Delete catalog product
+ * @route   DELETE /api/products/:id
+ * @access  Private (Vendor / Admin)
+ */
+const deleteProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    let product;
+
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      product = await Product.findByIdAndDelete(id);
+    } else {
+      product = await Product.findOneAndDelete({ name: { $regex: id, $options: 'i' } });
+    }
+
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+
+    res.status(200).json({ success: true, message: 'Product deleted successfully', data: {} });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * @desc    Get product category list with aggregated item counts
+ * @route   GET /api/products/categories
+ * @access  Public
+ */
+const getCategories = async (req, res) => {
+  try {
+    const categories = await Product.aggregate([
+      { $group: { _id: "$category", count: { $sum: 1 } } },
+      { $sort: { count: -1 } }
+    ]);
+
+    const result = categories.map(c => ({
+      name: c._id || 'Uncategorized',
+      count: c.count
+    }));
+
+    res.status(200).json({ success: true, data: result });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   getProducts,
   getProductsByVendor,
   getProductById,
-  createProduct
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  getCategories
 };
+

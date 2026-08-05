@@ -1,30 +1,34 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { SlidersHorizontal, RotateCcw } from 'lucide-react';
 import ProductCard from './ProductCard';
 import ProductListView from './ProductListView';
 import ProductSpecModal from './ProductSpecModal';
 import ProductForm from './ProductForm';
+import ProductEditModal from './ProductEditModal';
+import ConfirmDeleteModal from '../shared/ConfirmDeleteModal';
 import RFQBasketDrawer from './RFQBasketDrawer';
-import { fetchProducts, addProduct } from '../../services/productService';
+import { fetchProducts, addProduct, updateProduct, deleteProduct } from '../../services/productService';
 
 /**
  * ProductCatalogView — Module 6 (Product Catalog) 100% Completion View
  * Redesigned Filter Header, Sliders Icon, Spacious Layout & Working Reset Button
  */
 export default function ProductCatalogView({ vendorIdFilter = null }) {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
   
-  // Filter States
-  const [activeCategory, setActiveCategory] = useState('All');
+  // Filter States initialized from URL params if present
+  const [activeCategory, setActiveCategory] = useState(searchParams.get('category') || 'All');
   const [moqMax, setMoqMax] = useState(1000);
   const [maxLeadTime, setMaxLeadTime] = useState(60);
   const [stockStatusFilter, setStockStatusFilter] = useState('All');
   const [minPriceInput, setMinPriceInput] = useState('');
   const [maxPriceInput, setMaxPriceInput] = useState('');
   const [verifiedOnly, setVerifiedOnly] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const [activePage, setActivePage] = useState(1);
 
   // Multi-Product Selection Basket State
@@ -33,7 +37,11 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
   // Modals
   const [selectedProductForSpec, setSelectedProductForSpec] = useState(null);
   const [showAddProductModal, setShowAddProductModal] = useState(false);
+  const [productToEdit, setProductToEdit] = useState(null);
+  const [productToDelete, setProductToDelete] = useState(null);
   const [bulkRfqSuccessMsg, setBulkRfqSuccessMsg] = useState(false);
+
+  const effectiveVendorFilter = vendorIdFilter || searchParams.get('vendor');
 
   useEffect(() => {
     async function loadCatalog() {
@@ -47,13 +55,13 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
         maxPrice: maxPriceInput,
         verifiedOnly: verifiedOnly,
         searchQuery: searchQuery,
-        vendorId: vendorIdFilter
+        vendorId: effectiveVendorFilter
       });
       setProducts(data);
       setLoading(false);
     }
     loadCatalog();
-  }, [activeCategory, moqMax, maxLeadTime, stockStatusFilter, minPriceInput, maxPriceInput, verifiedOnly, searchQuery, vendorIdFilter]);
+  }, [activeCategory, moqMax, maxLeadTime, stockStatusFilter, minPriceInput, maxPriceInput, verifiedOnly, searchQuery, effectiveVendorFilter]);
 
   const handleResetFilters = () => {
     setActiveCategory('All');
@@ -64,6 +72,7 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
     setMaxPriceInput('');
     setVerifiedOnly(true);
     setSearchQuery('');
+    setSearchParams({});
   };
 
   const activeFilterCount = (activeCategory !== 'All' ? 1 : 0) + 
@@ -84,10 +93,27 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
     const refreshed = await fetchProducts({
       category: activeCategory,
       verifiedOnly: verifiedOnly,
-      vendorId: vendorIdFilter
+      vendorId: effectiveVendorFilter
     });
     setProducts(refreshed);
   };
+
+  const handleSaveEditedProduct = async (editedData) => {
+    await updateProduct(editedData.id, editedData);
+    setProducts(prev => prev.map(p => (p.id === editedData.id || p._id === editedData.id) ? { ...p, ...editedData, title: editedData.title, priceDisplay: `$${editedData.priceMin}` } : p));
+  };
+
+  const handleDeleteProduct = (prod) => {
+    setProductToDelete(prod);
+  };
+
+  const confirmDeleteProduct = async () => {
+    if (!productToDelete) return;
+    await deleteProduct(productToDelete.id || productToDelete._id);
+    setProducts(prev => prev.filter(p => p.id !== productToDelete.id && p._id !== productToDelete.id));
+    setProductToDelete(null);
+  };
+
 
   const handleSubmitBulkRfq = (selectedProds) => {
     setBulkRfqSuccessMsg(true);
@@ -397,6 +423,8 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
                 onViewDetails={(p) => setSelectedProductForSpec(p)}
                 isSelected={selectedProductIds.includes(prod.id)}
                 onToggleSelect={handleToggleSelectProduct}
+                onEdit={(p) => setProductToEdit(p)}
+                onDelete={(p) => handleDeleteProduct(p)}
               />
             ))}
           </div>
@@ -423,30 +451,21 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
               disabled={activePage === 1}
               onClick={() => setActivePage(prev => Math.max(prev - 1, 1))}
             >
-              Previous
+              Prev
             </button>
             
-            {paginationRange.map((num, idx) => (
-              typeof num === 'number' ? (
-                <button 
-                  key={num}
-                  onClick={() => setActivePage(num)}
-                  style={{
-                    minHeight: '32px',
-                    width: '32px',
-                    borderRadius: 'var(--radius-sm)',
-                    border: activePage === num ? 'none' : '1px solid var(--border-color)',
-                    backgroundColor: activePage === num ? 'var(--primary-purple)' : 'transparent',
-                    color: activePage === num ? '#fff' : 'var(--text-primary)',
-                    fontWeight: 700,
-                    fontSize: '0.8rem',
-                    cursor: 'pointer'
-                  }}
+            {paginationRange.map((page, i) => (
+              typeof page === 'number' ? (
+                <button
+                  key={i}
+                  className={activePage === page ? "btn-purple-primary" : "btn-outline-secondary"}
+                  style={{ minHeight: '32px', minWidth: '32px', padding: '0 0.5rem', fontSize: '0.8rem', justifyContent: 'center' }}
+                  onClick={() => setActivePage(page)}
                 >
-                  {num}
+                  {page}
                 </button>
               ) : (
-                <span key={`ellipsis-${idx}`} style={{ padding: '0 0.25rem', color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 700 }}>
+                <span key={i} style={{ padding: '0 0.25rem', color: 'var(--text-muted)' }}>
                   ...
                 </span>
               )
@@ -486,6 +505,22 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
           onSaveProduct={handleSaveNewProduct}
         />
       )}
+
+      {productToEdit && (
+        <ProductEditModal
+          product={productToEdit}
+          isOpen={Boolean(productToEdit)}
+          onClose={() => setProductToEdit(null)}
+          onSave={handleSaveEditedProduct}
+        />
+      )}
+
+      <ConfirmDeleteModal
+        isOpen={Boolean(productToDelete)}
+        itemName={productToDelete?.title || productToDelete?.name || 'this product'}
+        onConfirm={confirmDeleteProduct}
+        onCancel={() => setProductToDelete(null)}
+      />
 
     </div>
   );

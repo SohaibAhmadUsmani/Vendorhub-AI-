@@ -457,3 +457,53 @@ export async function updateVendorProfile(vendorId, updateData) {
     return updateData;
   }
 }
+
+export async function submitVendorReview(vendorId, reviewData) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/${vendorId}/reviews`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(reviewData)
+    });
+    if (!res.ok) throw new Error('Failed to submit review');
+    const json = await res.json();
+    return normalizeVendor(json.data);
+  } catch (error) {
+    console.error('Error submitting vendor review:', error);
+    return null;
+  }
+}
+
+export async function updateVendorRiskScore(vendorId, riskData) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/${vendorId}/risk`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(riskData)
+    });
+    if (!res.ok) throw new Error('Failed to update risk score');
+    const json = await res.json();
+    return normalizeVendor(json.data);
+  } catch (error) {
+    console.error('Error updating vendor risk score:', error);
+    return null;
+  }
+}
+
+export async function toggleSaveVendor(vendorId, isSaved) {
+  try {
+    const savedVendors = JSON.parse(localStorage.getItem('saved_vendors') || '[]');
+    let updated;
+    if (isSaved) {
+      updated = savedVendors.filter(id => id !== vendorId);
+    } else {
+      updated = [...savedVendors, vendorId];
+    }
+    localStorage.setItem('saved_vendors', JSON.stringify(updated));
+    return updated;
+  } catch (error) {
+    console.error('Error toggling saved vendor:', error);
+    return [];
+  }
+}
+
