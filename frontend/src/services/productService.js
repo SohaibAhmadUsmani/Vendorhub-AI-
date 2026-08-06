@@ -1478,8 +1478,31 @@ export async function addProduct(productData) {
     const json = await res.json();
     return json.data;
   } catch (error) {
-    console.error('Error creating product in database:', error);
-    return productData;
+    console.warn('Backend API unavailable, adding to local product dataset:', error);
+    const newProd = {
+      id: `p-custom-${Date.now()}`,
+      sku: `SKU-${Math.floor(1000 + Math.random() * 9000)}`,
+      vendorId: productData.vendorId || 'v-sialkot-101',
+      vendorName: productData.vendorName || 'Sialkot Sports Limited',
+      title: productData.title,
+      category: productData.category || 'Apparel & Textiles',
+      rating: 4.8,
+      priceMin: Number(productData.priceMin || 50),
+      priceMax: Number(productData.priceMin || 50),
+      priceDisplay: `$${productData.priceMin || 50}`,
+      unit: productData.unit || 'piece',
+      moq: Number(productData.moq || 100),
+      leadTimeDays: Number(productData.leadTimeDays || 14),
+      leadTimeDisplay: `${productData.leadTimeDays || 14} days`,
+      availableStock: Number(productData.availableStock || 1000),
+      stockStatus: productData.stockStatus || 'In Stock',
+      isVerified: true,
+      tags: ['Custom Upload'],
+      specifications: productData.specifications || '',
+      imageUrl: productData.imageUrl || 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800&auto=format&fit=crop&q=80'
+    };
+    INITIAL_PRODUCTS_DATA.unshift(newProd);
+    return newProd;
   }
 }
 
@@ -1504,7 +1527,19 @@ export async function updateProduct(productId, updateData) {
     const json = await res.json();
     return json.data;
   } catch (error) {
-    console.error('Error updating product in API:', error);
+    console.warn('Backend API unavailable, updating local dataset:', error);
+    const idx = INITIAL_PRODUCTS_DATA.findIndex(p => p.id === productId || p._id === productId);
+    if (idx !== -1) {
+      INITIAL_PRODUCTS_DATA[idx] = {
+        ...INITIAL_PRODUCTS_DATA[idx],
+        ...updateData,
+        title: updateData.title || INITIAL_PRODUCTS_DATA[idx].title,
+        priceMin: Number(updateData.priceMin || INITIAL_PRODUCTS_DATA[idx].priceMin),
+        priceDisplay: updateData.priceMin ? `$${updateData.priceMin}` : INITIAL_PRODUCTS_DATA[idx].priceDisplay,
+        imageUrl: updateData.imageUrl || INITIAL_PRODUCTS_DATA[idx].imageUrl
+      };
+      return INITIAL_PRODUCTS_DATA[idx];
+    }
     return updateData;
   }
 }

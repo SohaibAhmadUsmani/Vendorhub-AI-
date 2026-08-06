@@ -21,6 +21,8 @@ export default function VendorProfileForm({ profile, onClose, onSaveProfile }) {
     cncMachines: profile?.manufacturingCapabilities?.cncMachines || '45 Haas Units',
     factoryArea: profile?.manufacturingCapabilities?.factoryArea || '120,000 sq ft',
     verificationBadge: profile?.verificationBadge || 'Verified Platinum',
+    logoImage: profile?.logoImage || profile?.logoUrl || 'https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=300&auto=format&fit=crop&q=80',
+    coverImage: profile?.coverImage || profile?.coverUrl || 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1200&auto=format&fit=crop&q=80',
     email: profile?.contactDetails?.email || 'inquiry@sialkotsports.com',
     phone: profile?.contactDetails?.phone || '+92 52 4567890',
     whatsApp: profile?.contactDetails?.whatsApp || '+92 300 1234567',
@@ -40,8 +42,29 @@ export default function VendorProfileForm({ profile, onClose, onSaveProfile }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
+    const payload = {
+      ...profile,
+      ...formData,
+      logoImage: formData.logoImage || profile?.logoImage || profile?.logoUrl,
+      coverImage: formData.coverImage || profile?.coverImage || profile?.coverUrl,
+      contactDetails: {
+        ...profile?.contactDetails,
+        email: formData.email,
+        phone: formData.phone,
+        whatsApp: formData.whatsApp,
+        address: formData.address
+      },
+      manufacturingCapabilities: {
+        ...profile?.manufacturingCapabilities,
+        capacity: formData.capacity,
+        leadTime: formData.leadTime,
+        rndDept: formData.rndDept,
+        cncMachines: formData.cncMachines,
+        factoryArea: formData.factoryArea
+      }
+    };
     if (onSaveProfile) {
-      await onSaveProfile(formData);
+      await onSaveProfile(payload);
     }
     setSaving(false);
     setSuccessMsg(true);

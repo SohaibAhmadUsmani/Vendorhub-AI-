@@ -1,5 +1,20 @@
 @import "tailwindcss";
 
+/* View mode switch smooth animation */
+@keyframes viewSwitchFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-view-switch {
+  animation: viewSwitchFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 /* ==========================================================================
    VENDORHUB AI GLOBAL CSS CUSTOM PROPERTIES & DESIGN SYSTEM TOKENS
    Author: Muzammil Tanveer (Frontend Lead) & Khadija (Auth/Dashboard)

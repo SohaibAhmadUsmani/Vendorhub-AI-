@@ -11,10 +11,10 @@ function DashboardLayout() {
     };
 
     return (
-        <div className="flex min-h-screen bg-[var(--bg)]">
+        <div className="flex h-screen w-screen overflow-hidden bg-[var(--bg)]">
             <Sidebar collapsed={collapsed} />
 
-            <div className="flex min-h-screen min-w-0 flex-1 flex-col transition-all duration-300">
+            <div className="flex h-screen min-w-0 flex-1 flex-col overflow-y-auto transition-all duration-300">
                 <Header toggleSidebar={toggleSidebar} />
 
                 <main className="flex-1 p-6">

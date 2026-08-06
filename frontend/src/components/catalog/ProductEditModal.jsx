@@ -454,18 +454,53 @@ export default function ProductEditModal({ product, isOpen, onClose, onSave }) {
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />
                   </div>
-                  <input type="text" name="imageUrl" value={formData.imageUrl} onChange={handleChange}
-                    placeholder="https://images.unsplash.com/..."
-                    style={{
-                      flex: 1, minHeight: '48px', backgroundColor: 'var(--bg-main)',
-                      border: '1px solid var(--border-card)', color: 'var(--text-primary)',
-                      borderRadius: '12px', padding: '0.75rem 1rem', outline: 'none',
-                      fontSize: '0.8rem', fontFamily: 'var(--font-mono)',
-                      transition: 'all 0.2s', wordBreak: 'break-all'
-                    }}
-                    onFocus={(e) => { e.target.style.borderColor = '#6C5CE7'; e.target.style.boxShadow = '0 0 0 3px rgba(108,92,231,0.12)'; }}
-                    onBlur={(e) => { e.target.style.borderColor = 'var(--border-card)'; e.target.style.boxShadow = 'none'; }}
-                  />
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <input type="text" name="imageUrl" value={formData.imageUrl} onChange={handleChange}
+                      placeholder="https://images.unsplash.com/..."
+                      style={{
+                        width: '100%', minHeight: '48px', backgroundColor: 'var(--bg-main)',
+                        border: '1px solid var(--border-card)', color: 'var(--text-primary)',
+                        borderRadius: '12px', padding: '0.75rem 1rem', outline: 'none',
+                        fontSize: '0.8rem', fontFamily: 'var(--font-mono)',
+                        transition: 'all 0.2s', wordBreak: 'break-all'
+                      }}
+                      onFocus={(e) => { e.target.style.borderColor = '#6C5CE7'; e.target.style.boxShadow = '0 0 0 3px rgba(108,92,231,0.12)'; }}
+                      onBlur={(e) => { e.target.style.borderColor = 'var(--border-card)'; e.target.style.boxShadow = 'none'; }}
+                    />
+                    <div style={{ display: 'flex', items: 'center', gap: '0.5rem' }}>
+                      <input 
+                        type="file" 
+                        accept="image/*"
+                        id="edit-file-picker"
+                        style={{ display: 'none' }}
+                        onChange={async (e) => {
+                          const file = e.target.files[0];
+                          if (!file) return;
+                          const body = new FormData();
+                          body.append('file', file);
+                          try {
+                            const res = await fetch('http://localhost:5000/api/upload/image', {
+                              method: 'POST',
+                              body: body
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                              setFormData(prev => ({ ...prev, imageUrl: data.url }));
+                            } else {
+                              setFormData(prev => ({ ...prev, imageUrl: URL.createObjectURL(file) }));
+                            }
+                          } catch (err) {
+                            console.error("File upload error:", err);
+                            setFormData(prev => ({ ...prev, imageUrl: URL.createObjectURL(file) }));
+                          }
+                        }}
+                      />
+                      <label htmlFor="edit-file-picker" style={{ cursor: 'pointer', padding: '0.4rem 0.8rem', backgroundColor: '#F0EBFE', color: '#6C5CE7', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 700 }}>
+                        📁 Upload Local File
+                      </label>
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', alignSelf: 'center' }}>Uploads to backend/Cloudinary</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 

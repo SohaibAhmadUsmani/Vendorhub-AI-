@@ -4,11 +4,13 @@ const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
 const morgan = require('morgan');
+const path = require('path');
 const connectDB = require('./config/db');
 const vendorRoutes = require('./routes/vendorRoutes');
 const productRoutes = require('./routes/productRoutes');
 const matchRoutes = require('./routes/matchRoutes');
 const rfqRoutes = require('./routes/rfqRoutes');
+const uploadRoutes = require('./routes/uploadRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -20,11 +22,15 @@ app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
 
+// Static Uploads Folder
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // API Routes
 app.use('/api/vendors', vendorRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/match', matchRoutes);
 app.use('/api/rfq', rfqRoutes);
+app.use('/api/upload', uploadRoutes);
 
 io.on('connection', (socket) => {
   console.log('Client connected:', socket.id);

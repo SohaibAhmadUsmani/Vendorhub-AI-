@@ -453,7 +453,17 @@ export async function updateVendorProfile(vendorId, updateData) {
     const json = await res.json();
     return normalizeVendor(json.data);
   } catch (error) {
-    console.error('Error updating vendor profile:', error);
+    console.warn('Error updating vendor profile on API, updating local data:', error);
+    const idx = INITIAL_VENDORS_DATA.findIndex(v => v.id === vendorId || v._id === vendorId);
+    if (idx !== -1) {
+      INITIAL_VENDORS_DATA[idx] = {
+        ...INITIAL_VENDORS_DATA[idx],
+        ...updateData,
+        logoImage: updateData.logoImage || INITIAL_VENDORS_DATA[idx].logoImage,
+        coverImage: updateData.coverImage || INITIAL_VENDORS_DATA[idx].coverImage
+      };
+      return INITIAL_VENDORS_DATA[idx];
+    }
     return updateData;
   }
 }

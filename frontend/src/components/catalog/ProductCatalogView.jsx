@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { SlidersHorizontal, RotateCcw } from 'lucide-react';
+import { SlidersHorizontal, RotateCcw, Plus } from 'lucide-react';
 import ProductCard from './ProductCard';
 import ProductListView from './ProductListView';
 import ProductSpecModal from './ProductSpecModal';
@@ -163,8 +163,8 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
       <aside className="card-surface" style={{ padding: '1.25rem' }}>
         
         {/* Spacious, Enterprise Grade Filter & Specs Header */}
-        <div className="flex items-center justify-between gap-2 mb-4 pb-3 border-b border-[var(--border-color)]">
-          <div className="flex items-center gap-2 min-w-0">
+        <div className="flex items-center justify-between gap-2 mb-5 pb-3.5 border-b border-[var(--border-color)]">
+          <div className="flex items-center gap-2.5 min-w-0">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#6C5CE7]/10 text-[#6C5CE7] shrink-0">
               <SlidersHorizontal size={16} />
             </div>
@@ -172,7 +172,7 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
               Filter & Specs
             </h3>
             {activeFilterCount > 0 && (
-              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#6C5CE7] text-[10px] font-bold text-white shrink-0">
+              <span className="flex h-4.5 w-4.5 items-center justify-center rounded-full bg-[#6C5CE7] text-[10px] font-bold text-white shrink-0">
                 {activeFilterCount}
               </span>
             )}
@@ -342,7 +342,7 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
         )}
 
         {/* Top View Bar Header */}
-        <div className="card-surface" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.25rem', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
+        <div className="card-surface" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
             <h2 className="font-heading" style={{ fontSize: '1.2rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
               Product Catalog <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 400 }}>({totalItems} SKUs Total • Showing {startItemNum}-{endItemNum})</span>
@@ -354,7 +354,7 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', shrink: 0 }}>
             
             {/* View Mode Toggle Switcher */}
             <div style={{ display: 'flex', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
@@ -388,54 +388,72 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
               </button>
             </div>
 
-            <button 
-              className="btn-purple-primary" 
-              style={{ minHeight: '38px', padding: '0.4rem 1rem' }}
-              onClick={() => setShowAddProductModal(true)}
-            >
-              ➕ Add Product
-            </button>
+            <div style={{ display: 'flex', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
+              <button 
+                type="button"
+                onClick={() => setShowAddProductModal(true)}
+                style={{
+                  padding: '0.35rem 0.85rem',
+                  backgroundColor: 'var(--primary-purple)',
+                  color: '#fff',
+                  border: 'none',
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  boxSizing: 'border-box'
+                }}
+                className="hover:opacity-95 active:scale-95 transition-all"
+              >
+                <Plus size={14} strokeWidth={2.5} />
+                <span>Add Product</span>
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Product Cards Grid OR List View (Strictly 6 Items Per Page) */}
-        {loading ? (
-          <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-            <div className="font-mono" style={{ fontSize: '1rem', fontWeight: 700 }}>⚡ Fetching Catalog Products...</div>
-          </div>
-        ) : products.length === 0 ? (
-          <div className="card-surface" style={{ padding: '3rem', textAlign: 'center' }}>
-            <h3 className="font-heading">No Products Found</h3>
-            <p style={{ color: 'var(--text-muted)' }}>Try resetting your filter parameters.</p>
-            <button className="btn-outline-secondary" style={{ marginTop: '1rem' }} onClick={handleResetFilters}>Reset Filters</button>
-          </div>
-        ) : viewMode === 'grid' ? (
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-            gap: '1.25rem',
-            marginBottom: '2rem'
-          }}>
-            {paginatedProducts.map(prod => (
-              <ProductCard 
-                key={prod.id}
-                product={prod}
-                onViewDetails={(p) => setSelectedProductForSpec(p)}
-                isSelected={selectedProductIds.includes(prod.id)}
-                onToggleSelect={handleToggleSelectProduct}
-                onEdit={(p) => setProductToEdit(p)}
-                onDelete={(p) => handleDeleteProduct(p)}
-              />
-            ))}
-          </div>
-        ) : (
-          <ProductListView 
-            products={paginatedProducts}
-            selectedProductIds={selectedProductIds}
-            onToggleSelectProduct={handleToggleSelectProduct}
-            onSelectProductForSpec={(p) => setSelectedProductForSpec(p)}
-          />
-        )}
+        {/* Product Cards Grid OR List View (Strictly 6 Items Per Page) with Smooth View Switch Animation */}
+        <div key={viewMode} className="animate-view-switch">
+          {loading ? (
+            <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+              <div className="font-mono" style={{ fontSize: '1rem', fontWeight: 700 }}>⚡ Fetching Catalog Products...</div>
+            </div>
+          ) : products.length === 0 ? (
+            <div className="card-surface" style={{ padding: '3rem', textAlign: 'center' }}>
+              <h3 className="font-heading">No Products Found</h3>
+              <p style={{ color: 'var(--text-muted)' }}>Try resetting your filter parameters.</p>
+              <button className="btn-outline-secondary" style={{ marginTop: '1rem' }} onClick={handleResetFilters}>Reset Filters</button>
+            </div>
+          ) : viewMode === 'grid' ? (
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+              gap: '1.25rem',
+              marginBottom: '2rem'
+            }}>
+              {paginatedProducts.map(prod => (
+                <ProductCard 
+                  key={prod.id}
+                  product={prod}
+                  onViewDetails={(p) => setSelectedProductForSpec(p)}
+                  isSelected={selectedProductIds.includes(prod.id)}
+                  onToggleSelect={handleToggleSelectProduct}
+                  onEdit={(p) => setProductToEdit(p)}
+                  onDelete={(p) => handleDeleteProduct(p)}
+                />
+              ))}
+            </div>
+          ) : (
+            <ProductListView 
+              products={paginatedProducts}
+              selectedProductIds={selectedProductIds}
+              onToggleSelectProduct={handleToggleSelectProduct}
+              onSelectProductForSpec={(p) => setSelectedProductForSpec(p)}
+            />
+          )}
+        </div>
 
         {/* Smart Ellipsis Footer Pagination Bar */}
         <div className="card-surface" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', flexWrap: 'wrap', gap: '1rem' }}>

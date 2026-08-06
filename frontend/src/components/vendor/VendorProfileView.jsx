@@ -91,12 +91,13 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
 
   const handleSaveProfile = async (updatedFields) => {
     const updated = await updateVendorProfile(selectedVendorId, {
+      ...vendorData,
       ...updatedFields,
+      logoImage: updatedFields.logoImage || vendorData?.logoImage || vendorData?.logoUrl || 'https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=300&auto=format&fit=crop&q=80',
+      coverImage: updatedFields.coverImage || vendorData?.coverImage || vendorData?.coverUrl || 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1200&auto=format&fit=crop&q=80',
       manufacturingCapabilities: {
-        ...vendorData.manufacturingCapabilities,
-        capacity: updatedFields.capacity,
-        leadTime: updatedFields.leadTime,
-        rndDept: updatedFields.rndDept
+        ...vendorData?.manufacturingCapabilities,
+        ...updatedFields.manufacturingCapabilities
       }
     });
     setVendorData(updated);
@@ -249,7 +250,7 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
           </div>
 
           {/* Right Action Buttons */}
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
             <button 
               className="btn-purple-primary" 
               style={{ minHeight: '40px', padding: '0.4rem 1rem' }}
@@ -263,6 +264,18 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
               onClick={() => setShowRiskModal(true)}
             >
               🛡 Audit Report
+            </button>
+            <button 
+              className="btn-outline-secondary" 
+              style={{ minHeight: '40px', padding: '0.4rem 1rem' }}
+              onClick={async () => {
+                const { exportVendorCatalogPDF } = await import('../../services/pdfExportService');
+                const { fetchProducts } = await import('../../services/productService');
+                const products = await fetchProducts({ vendorId: selectedVendorId });
+                exportVendorCatalogPDF(vendorData, products);
+              }}
+            >
+              📄 Export PDF Catalog
             </button>
           </div>
         </div>
@@ -315,6 +328,31 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
           {/* LEFT COLUMN: Profile Details */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             
+            {/* SaaS Analytics Style High-Density Metric Summary Bar */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
+              <div className="card-surface" style={{ padding: '1rem 1.25rem', borderLeft: '4px solid #6C5CE7' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, display: 'block' }}>ANNUAL EXPORT VOL</span>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', marginTop: '0.25rem' }}>
+                  <span className="font-heading" style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-primary)' }}>$4.8M+</span>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#15803D', backgroundColor: '#DCFCE7', padding: '0.1rem 0.4rem', borderRadius: '6px' }}>+18.4%</span>
+                </div>
+              </div>
+              <div className="card-surface" style={{ padding: '1rem 1.25rem', borderLeft: '4px solid #0EA5E9' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, display: 'block' }}>ON-TIME FULFILLMENT</span>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', marginTop: '0.25rem' }}>
+                  <span className="font-heading" style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-primary)' }}>99.2%</span>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0369A1', backgroundColor: '#E0F2FE', padding: '0.1rem 0.4rem', borderRadius: '6px' }}>Target: 98%</span>
+                </div>
+              </div>
+              <div className="card-surface" style={{ padding: '1rem 1.25rem', borderLeft: '4px solid #22C55E' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, display: 'block' }}>QUALITY PASS RATE</span>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', marginTop: '0.25rem' }}>
+                  <span className="font-heading" style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-primary)' }}>99.8%</span>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#15803D', backgroundColor: '#DCFCE7', padding: '0.1rem 0.4rem', borderRadius: '6px' }}>Zero Defect</span>
+                </div>
+              </div>
+            </div>
+
             {/* Company Background */}
             <div className="card-surface">
               <h3 className="font-heading" style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '0.75rem' }}>
