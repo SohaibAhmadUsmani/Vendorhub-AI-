@@ -10,6 +10,7 @@ const vendorRoutes = require('./routes/vendorRoutes');
 const productRoutes = require('./routes/productRoutes');
 const matchRoutes = require('./routes/matchRoutes');
 const rfqRoutes = require('./routes/rfqRoutes');
+
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const vendorDashboardRoutes = require('./routes/vendorDashboardRoutes');
 const quoteRoutes = require('./routes/quoteRoutes');
@@ -53,6 +54,9 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/analytics', analyticsRoutes);
 
 app.use('/api/auth', authRoutes);
+
+app.use('/api/auth', authRoutes);
+
 
 // Module 11 — Real-time Messaging (Socket.io)
 io.on('connection', (socket) => {
