@@ -83,7 +83,7 @@ export default function SidebarNav({ currentView, setCurrentView }) {
                     color: isActive ? '#FFFFFF' : '#6C5CE7',
                     padding: '0.1rem 0.45rem',
                     borderRadius: '999px',
-                    fontWeight: 700
+                    fontWeight: 700 , 
                   }}>
                     {item.badge}
                   </span>
