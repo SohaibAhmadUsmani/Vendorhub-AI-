@@ -1,10 +1,18 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { Menu, Search, Bell, ChevronDown } from "lucide-react";
+import { useNotifications } from "../../contexts/NotificationContext";
 import VendorHubLogo from "./VendorHubLogo";
 
 function Header({ toggleSidebar }) {
     const [searchQuery, setSearchQuery] = useState("");
+    const [open, setOpen] = useState(false);
 
+    const {
+        notifications,
+        unreadCount,
+        markAllRead,
+    } = useNotifications();
     return (
         <header className="flex h-16 items-center justify-between border-b border-[var(--border-card)] bg-[var(--bg-card)] px-6 sticky top-0 z-20 shadow-sm">
 
