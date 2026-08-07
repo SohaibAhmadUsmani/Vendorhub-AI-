@@ -26,7 +26,7 @@ function Header({ toggleSidebar }) {
 
             {/* Right side — Clean, Direct Input Search Bar (No ⌘K badge, No popups) */}
             <div className="flex items-center gap-4">
-                <div className="flex w-72 md:w-96 lg:w-[440px] items-center gap-2.5 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-main)] px-3.5 py-1.5 shadow-xs transition-all focus-within:border-[#6C5CE7] focus-within:ring-2 focus-within:ring-[#6C5CE7]/20">
+                <div className="header-search flex w-72 md:w-96 lg:w-[440px] items-center gap-2.5 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-main)] px-3.5 py-1.5 shadow-xs transition-all focus-within:border-[#6C5CE7] focus-within:ring-2 focus-within:ring-[#6C5CE7]/20">
                     <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#6C5CE7]/10 text-[#6C5CE7] shrink-0">
                         <Search size={15} />
                     </div>
