@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
 
 /**
- * VendorProfileForm — Edit Vendor Profile Modal for Module 5 (Vendor Profiles)
- * Conforms 100% to design_system.md & SRS Page 6
+ * VendorProfileForm — Centered Glassmorphic Pop-up Modal via React Portal
+ * Tabbed edit sections, spring scale animation (animate-modal-pop), and true viewport centering
  */
 export default function VendorProfileForm({ profile, onClose, onSaveProfile }) {
+  const [activeFormTab, setActiveFormTab] = useState('basic');
   const [formData, setFormData] = useState({
     name: profile?.name || 'Sialkot Sports Ltd',
     location: profile?.location || 'Sialkot, Pakistan',
@@ -15,10 +17,20 @@ export default function VendorProfileForm({ profile, onClose, onSaveProfile }) {
     description: profile?.description || 'Established in 1982, Sialkot Sports Ltd has evolved into a premier industrial manufacturing hub.',
     capacity: profile?.manufacturingCapabilities?.capacity || '50k pcs/mo',
     leadTime: profile?.manufacturingCapabilities?.leadTime || '7-10 Days',
-    rndDept: profile?.manufacturingCapabilities?.rndDept || '15 Engineers'
+    rndDept: profile?.manufacturingCapabilities?.rndDept || '15 Engineers',
+    cncMachines: profile?.manufacturingCapabilities?.cncMachines || '45 Haas Units',
+    factoryArea: profile?.manufacturingCapabilities?.factoryArea || '120,000 sq ft',
+    verificationBadge: profile?.verificationBadge || 'Verified Platinum',
+    logoImage: profile?.logoImage || profile?.logoUrl || 'https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=300&auto=format&fit=crop&q=80',
+    coverImage: profile?.coverImage || profile?.coverUrl || 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1200&auto=format&fit=crop&q=80',
+    email: profile?.contactDetails?.email || 'inquiry@sialkotsports.com',
+    phone: profile?.contactDetails?.phone || '+92 52 4567890',
+    whatsApp: profile?.contactDetails?.whatsApp || '+92 300 1234567',
+    address: profile?.contactDetails?.address || 'Plot 42, Small Industrial Estate, Sialkot, Pakistan'
   });
 
   const [saving, setSaving] = useState(false);
+  const [successMsg, setSuccessMsg] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -30,147 +42,348 @@ export default function VendorProfileForm({ profile, onClose, onSaveProfile }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
+    const payload = {
+      ...profile,
+      ...formData,
+      logoImage: formData.logoImage || profile?.logoImage || profile?.logoUrl,
+      coverImage: formData.coverImage || profile?.coverImage || profile?.coverUrl,
+      contactDetails: {
+        ...profile?.contactDetails,
+        email: formData.email,
+        phone: formData.phone,
+        whatsApp: formData.whatsApp,
+        address: formData.address
+      },
+      manufacturingCapabilities: {
+        ...profile?.manufacturingCapabilities,
+        capacity: formData.capacity,
+        leadTime: formData.leadTime,
+        rndDept: formData.rndDept,
+        cncMachines: formData.cncMachines,
+        factoryArea: formData.factoryArea
+      }
+    };
     if (onSaveProfile) {
-      await onSaveProfile(formData);
+      await onSaveProfile(payload);
     }
     setSaving(false);
-    onClose();
+    setSuccessMsg(true);
+    setTimeout(() => {
+      setSuccessMsg(false);
+      onClose();
+    }, 1000);
   };
 
-  return (
-    <div style={{
-      position: 'fixed',
-      inset: 0,
-      backgroundColor: 'rgba(11, 16, 33, 0.75)',
-      backdropFilter: 'blur(6px)',
-      zIndex: 50,
-      display: 'flex',
-      alignItems: 'center',
-      justify: 'center',
-      padding: '1rem'
-    }}>
-      <div className="card-surface" style={{ maxWidth: '600px', width: '100%', maxHeight: '90vh', overflowY: 'auto', padding: '1.75rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-          <h2 className="font-heading" style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0 }}>
-            ✏️ Edit Vendor Profile
-          </h2>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '1.25rem', cursor: 'pointer' }}>✕</button>
+  return ReactDOM.createPortal(
+    <div 
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        backgroundColor: 'rgba(11, 16, 33, 0.75)',
+        backdropFilter: 'blur(10px)',
+        zIndex: 99999,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '1.5rem',
+        boxSizing: 'border-box',
+        animation: 'vpfFadeIn 0.3s ease-out'
+      }}
+    >
+      <div 
+        className="card-surface" 
+        style={{ 
+          maxWidth: '740px', 
+          width: '100%', 
+          maxHeight: '90vh', 
+          overflowY: 'auto', 
+          padding: '2rem',
+          borderRadius: 'var(--radius-lg)',
+          backgroundColor: '#FFFFFF',
+          boxShadow: '0 25px 50px -12px rgba(0,0,0,0.4)',
+          border: '1px solid var(--border-card)',
+          animation: 'vpfSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1)'
+        }}
+      >
+        
+        {/* Modal Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid var(--border-color)', pb: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+            <span style={{ fontSize: '1.5rem' }}>✏️</span>
+            <div>
+              <h2 className="font-heading" style={{ fontSize: '1.35rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
+                Edit Vendor Profile
+              </h2>
+              <span className="font-mono" style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                Update company specs, manufacturing capabilities & contact details
+              </span>
+            </div>
+          </div>
+          <button 
+            onClick={onClose} 
+            style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: 'var(--text-muted)' }}
+          >
+            ✕
+          </button>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-            <div>
-              <label style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>Company Name *</label>
-              <input 
-                type="text" 
-                name="name" 
-                required
-                value={formData.name} 
-                onChange={handleChange}
-                style={{ width: '100%', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.9rem' }}
-              />
-            </div>
-            <div>
-              <label style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>Location / Region</label>
-              <input 
-                type="text" 
-                name="location" 
-                value={formData.location} 
-                onChange={handleChange}
-                style={{ width: '100%', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.9rem' }}
-              />
-            </div>
-          </div>
+        {/* Tab Selection Header inside Form */}
+        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', pb: '0.5rem' }}>
+          {[
+            { id: 'basic', label: '1. Basic Info & Branding' },
+            { id: 'capacity', label: '2. Manufacturing & Plant' },
+            { id: 'certs', label: '3. Compliance & Audit' },
+            { id: 'contact', label: '4. Contact & Team' }
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveFormTab(tab.id)}
+              style={{
+                padding: '0.5rem 0.85rem',
+                fontSize: '0.825rem',
+                fontWeight: activeFormTab === tab.id ? 700 : 500,
+                color: activeFormTab === tab.id ? '#FFFFFF' : 'var(--text-secondary)',
+                backgroundColor: activeFormTab === tab.id ? 'var(--primary-purple)' : 'transparent',
+                borderRadius: 'var(--radius-sm)',
+                border: 'none',
+                cursor: 'pointer'
+              }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
-            <div>
-              <label style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>Year Founded</label>
-              <input 
-                type="text" 
-                name="founded" 
-                value={formData.founded} 
-                onChange={handleChange}
-                style={{ width: '100%', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.9rem' }}
-              />
-            </div>
-            <div>
-              <label style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>Staff Size</label>
-              <input 
-                type="text" 
-                name="staff" 
-                value={formData.staff} 
-                onChange={handleChange}
-                style={{ width: '100%', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.9rem' }}
-              />
-            </div>
-            <div>
-              <label style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>Business Type</label>
-              <input 
-                type="text" 
-                name="businessType" 
-                value={formData.businessType} 
-                onChange={handleChange}
-                style={{ width: '100%', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.9rem' }}
-              />
-            </div>
+        {/* Success Banner */}
+        {successMsg && (
+          <div style={{ backgroundColor: '#DCFCE7', color: '#15803D', padding: '0.85rem', borderRadius: 'var(--radius-md)', marginBottom: '1rem', fontWeight: 700, fontSize: '0.85rem', textAlign: 'center' }}>
+            ✓ Vendor Profile Updated Successfully!
           </div>
+        )}
 
-          <div>
-            <label style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>Company Background Description</label>
-            <textarea 
-              name="description" 
-              rows="3" 
-              value={formData.description} 
-              onChange={handleChange}
-              style={{ width: '100%', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.85rem' }}
-            />
-          </div>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          
+          {/* TAB 1: BASIC INFO */}
+          {activeFormTab === 'basic' && (
+            <div key="basic" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', animation: 'vpfTabFade 0.25s ease' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>Company Legal Name *</label>
+                  <input 
+                    type="text" 
+                    name="name" 
+                    required
+                    value={formData.name} 
+                    onChange={handleChange}
+                    style={{ width: '100%', padding: '0.55rem 0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.9rem', backgroundColor: 'var(--bg-main)', color: 'var(--text-primary)' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>Headquarters Location *</label>
+                  <input 
+                    type="text" 
+                    name="location" 
+                    value={formData.location} 
+                    onChange={handleChange}
+                    style={{ width: '100%', padding: '0.55rem 0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.9rem', backgroundColor: 'var(--bg-main)', color: 'var(--text-primary)' }}
+                  />
+                </div>
+              </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
-            <div>
-              <label style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>Monthly Capacity</label>
-              <input 
-                type="text" 
-                name="capacity" 
-                value={formData.capacity} 
-                onChange={handleChange}
-                placeholder="50k pcs/mo"
-                style={{ width: '100%', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.85rem' }}
-              />
-            </div>
-            <div>
-              <label style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>Sample Lead Time</label>
-              <input 
-                type="text" 
-                name="leadTime" 
-                value={formData.leadTime} 
-                onChange={handleChange}
-                placeholder="7-10 Days"
-                style={{ width: '100%', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.85rem' }}
-              />
-            </div>
-            <div>
-              <label style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>R&D Team Size</label>
-              <input 
-                type="text" 
-                name="rndDept" 
-                value={formData.rndDept} 
-                onChange={handleChange}
-                placeholder="15 Engineers"
-                style={{ width: '100%', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.85rem' }}
-              />
-            </div>
-          </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>Year Founded</label>
+                  <input 
+                    type="text" 
+                    name="founded" 
+                    value={formData.founded} 
+                    onChange={handleChange}
+                    style={{ width: '100%', padding: '0.55rem 0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.9rem', backgroundColor: 'var(--bg-main)', color: 'var(--text-primary)' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>Staff Count</label>
+                  <input 
+                    type="text" 
+                    name="staff" 
+                    value={formData.staff} 
+                    onChange={handleChange}
+                    style={{ width: '100%', padding: '0.55rem 0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.9rem', backgroundColor: 'var(--bg-main)', color: 'var(--text-primary)' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>Business Model</label>
+                  <input 
+                    type="text" 
+                    name="businessType" 
+                    value={formData.businessType} 
+                    onChange={handleChange}
+                    style={{ width: '100%', padding: '0.55rem 0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.9rem', backgroundColor: 'var(--bg-main)', color: 'var(--text-primary)' }}
+                  />
+                </div>
+              </div>
 
-          <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
-            <button type="button" className="btn-outline-secondary" onClick={onClose}>Cancel</button>
+              <div>
+                <label style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>Executive Summary & Description</label>
+                <textarea 
+                  name="description" 
+                  rows="4" 
+                  value={formData.description} 
+                  onChange={handleChange}
+                  style={{ width: '100%', padding: '0.55rem 0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.85rem', backgroundColor: 'var(--bg-main)', color: 'var(--text-primary)' }}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* TAB 2: MANUFACTURING */}
+          {activeFormTab === 'capacity' && (
+            <div key="capacity" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', animation: 'vpfTabFade 0.25s ease' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>Monthly Output Capacity</label>
+                  <input 
+                    type="text" 
+                    name="capacity" 
+                    value={formData.capacity} 
+                    onChange={handleChange}
+                    style={{ width: '100%', padding: '0.55rem 0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.9rem', backgroundColor: 'var(--bg-main)', color: 'var(--text-primary)' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>Standard Sample Lead Time</label>
+                  <input 
+                    type="text" 
+                    name="leadTime" 
+                    value={formData.leadTime} 
+                    onChange={handleChange}
+                    style={{ width: '100%', padding: '0.55rem 0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.9rem', backgroundColor: 'var(--bg-main)', color: 'var(--text-primary)' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>R&D Team Engineers</label>
+                  <input 
+                    type="text" 
+                    name="rndDept" 
+                    value={formData.rndDept} 
+                    onChange={handleChange}
+                    style={{ width: '100%', padding: '0.55rem 0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.9rem', backgroundColor: 'var(--bg-main)', color: 'var(--text-primary)' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>CNC Machine Count</label>
+                  <input 
+                    type="text" 
+                    name="cncMachines" 
+                    value={formData.cncMachines} 
+                    onChange={handleChange}
+                    style={{ width: '100%', padding: '0.55rem 0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.9rem', backgroundColor: 'var(--bg-main)', color: 'var(--text-primary)' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>Factory Floor Area</label>
+                  <input 
+                    type="text" 
+                    name="factoryArea" 
+                    value={formData.factoryArea} 
+                    onChange={handleChange}
+                    style={{ width: '100%', padding: '0.55rem 0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.9rem', backgroundColor: 'var(--bg-main)', color: 'var(--text-primary)' }}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: CERTS & AUDIT */}
+          {activeFormTab === 'certs' && (
+            <div key="certs" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', animation: 'vpfTabFade 0.25s ease' }}>
+              <div>
+                <label style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>Verification Badge Status</label>
+                <select
+                  name="verificationBadge"
+                  value={formData.verificationBadge}
+                  onChange={handleChange}
+                  style={{ width: '100%', padding: '0.55rem 0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.9rem', backgroundColor: 'var(--bg-main)', color: 'var(--text-primary)' }}
+                >
+                  <option value="Verified Platinum">Verified Platinum</option>
+                  <option value="Verified Gold">Verified Gold</option>
+                  <option value="Verified Silver">Verified Silver</option>
+                </select>
+              </div>
+
+              <div style={{ padding: '1rem', backgroundColor: 'var(--bg-main)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', fontSize: '0.85rem' }}>
+                <strong>🏆 Active Audit Compliance Marks:</strong>
+                <p style={{ color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                  ISO 9001:2015, BSCI Social Compliance, CE Mark, TÜV SÜD Facility Audit.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 4: CONTACT & EXECUTIVES */}
+          {activeFormTab === 'contact' && (
+            <div key="contact" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', animation: 'vpfTabFade 0.25s ease' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>Primary Inquiries Email</label>
+                  <input 
+                    type="email" 
+                    name="email" 
+                    value={formData.email} 
+                    onChange={handleChange}
+                    style={{ width: '100%', padding: '0.55rem 0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.9rem', backgroundColor: 'var(--bg-main)', color: 'var(--text-primary)' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>Direct WhatsApp Business</label>
+                  <input 
+                    type="text" 
+                    name="whatsApp" 
+                    value={formData.whatsApp} 
+                    onChange={handleChange}
+                    style={{ width: '100%', padding: '0.55rem 0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.9rem', backgroundColor: 'var(--bg-main)', color: 'var(--text-primary)' }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>Plant Street Address</label>
+                <input 
+                  type="text" 
+                  name="address" 
+                  value={formData.address} 
+                  onChange={handleChange}
+                  style={{ width: '100%', padding: '0.55rem 0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.9rem', backgroundColor: 'var(--bg-main)', color: 'var(--text-primary)' }}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Form Actions Footer */}
+          <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', marginTop: '1rem', borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
+            <button type="button" className="btn-outline-secondary" onClick={onClose}>
+              Cancel
+            </button>
             <button type="submit" className="btn-purple-primary" disabled={saving}>
-              {saving ? 'Updating...' : '💾 Update Vendor Profile'}
+              {saving ? 'Saving Updates...' : '💾 Save Vendor Profile'}
             </button>
           </div>
         </form>
-
       </div>
-    </div>
+      <style>{`
+        @keyframes vpfFadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes vpfSlideUp { from { opacity: 0; transform: translateY(20px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes vpfTabFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+      `}</style>
+    </div>,
+    document.body
   );
 }

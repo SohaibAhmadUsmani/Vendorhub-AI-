@@ -1,25 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 /**
- * ProductCard — Foundational component for Module 6 (Product Catalog)
- * Conforms 100% to design_system.md and SRS Page 7
+ * ProductCard — Foundational component for Module 6 (Product Catalog) 75% Completion Scope
+ * Supports multi-image hover, multi-select checkbox, stock badges, and tier indicators
  */
-export default function ProductCard({ product, onViewDetails }) {
-  const defaultProduct = {
-    id: "prod-101",
-    title: "Stainless Steel Seamless Pipe (316L Grade)",
-    category: "Pipes & Metal Fabrication",
-    imageUrl: "https://images.unsplash.com/photo-1541888946425-d0fbb186a5b3?w=400&auto=format&fit=crop&q=80",
-    priceRange: "$12.50 - $18.00",
-    unit: "Meter",
-    moq: "500 Meters",
-    leadTime: "14 Days",
-    availableStock: "25,000 Meters",
-    vendorName: "Industrial Dynamics Corp.",
-    specifications: "ISO/ASTM Certified • High Corrosion Resistance • OD: 10mm - 500mm"
-  };
+export default function ProductCard({ 
+  product, 
+  onViewDetails, 
+  isSelected = false, 
+  onToggleSelect,
+  onEdit,
+  onDelete
+}) {
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
 
-  const data = product || defaultProduct;
+  const images = product.multiImages && product.multiImages.length > 0 
+    ? product.multiImages 
+    : [product.imageUrl];
 
   return (
     <div 
@@ -27,26 +24,67 @@ export default function ProductCard({ product, onViewDetails }) {
       style={{
         display: 'flex',
         flexDirection: 'column',
-        justify: 'space-between',
+        justifyContent: 'space-between',
         height: '100%',
-        padding: '1.25rem'
+        padding: '1.25rem',
+        border: isSelected ? '2px solid var(--primary-purple)' : '1px solid var(--border-card)',
+        backgroundColor: isSelected ? 'var(--primary-purple-light)' : 'var(--bg-card)',
+        position: 'relative',
+        transition: 'all 0.2s ease-in-out'
       }}
     >
       <div>
-        {/* Product Image Header with Badges */}
-        <div style={{ position: 'relative', marginBottom: '1rem', overflow: 'hidden', borderRadius: 'var(--radius-md)' }}>
+        {/* Product Image Header with Badges & Symmetrical Select Overlay */}
+        <div style={{ position: 'relative', marginBottom: '0.75rem', overflow: 'hidden', borderRadius: 'var(--radius-md)' }}>
           <img 
-            src={data.imageUrl} 
-            alt={data.title}
+            src={images[activeImageIndex]} 
+            alt={product.title}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = 'https://images.unsplash.com/photo-1614632537197-38a17061c2bd?w=800&auto=format&fit=crop&q=80';
+            }}
             style={{
               width: '100%',
-              height: '180px',
+              height: '175px',
               objectFit: 'cover',
               display: 'block',
               borderRadius: 'var(--radius-md)',
               transition: 'transform 0.3s ease'
             }} 
           />
+
+          {/* Symmetrical Multi-Select Checkbox Badge */}
+          <div 
+            onClick={() => onToggleSelect && onToggleSelect(product.id)}
+            style={{
+              position: 'absolute',
+              top: '12px',
+              right: '12px',
+              zIndex: 10,
+              cursor: 'pointer',
+              backgroundColor: isSelected ? 'var(--primary-purple)' : 'rgba(255, 255, 255, 0.9)',
+              color: isSelected ? '#FFFFFF' : '#0F172A',
+              backdropFilter: 'blur(8px)',
+              borderRadius: '50%',
+              width: '32px',
+              height: '32px',
+              minWidth: '32px',
+              minHeight: '32px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              lineHeight: 1,
+              fontWeight: 800,
+              fontSize: '1.1rem',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
+              border: isSelected ? '2px solid #FFFFFF' : '1px solid rgba(255,255,255,0.8)',
+              transition: 'all 0.2s ease-in-out'
+            }}
+            title={isSelected ? "Deselect for bulk RFQ" : "Select for bulk RFQ"}
+          >
+            <span style={{ transform: 'translateY(-1px)' }}>{isSelected ? '✓' : '+'}</span>
+          </div>
+
           <span 
             className="badge" 
             style={{
@@ -55,54 +93,126 @@ export default function ProductCard({ product, onViewDetails }) {
               left: '10px',
               backgroundColor: 'rgba(11, 16, 33, 0.85)',
               color: '#ffffff',
-              backdropFilter: 'blur(4px)'
+              backdropFilter: 'blur(4px)',
+              fontSize: '0.65rem'
             }}
           >
-            {data.category}
+            {product.category}
+          </span>
+
+          {/* Stock Status Badge */}
+          <span 
+            style={{
+              position: 'absolute',
+              bottom: '10px',
+              left: '10px',
+              backgroundColor: product.stockStatus === 'In Stock' ? '#DCFCE7' : '#FEF3C7',
+              color: product.stockStatus === 'In Stock' ? '#15803D' : '#B45309',
+              padding: '0.15rem 0.45rem',
+              borderRadius: 'var(--radius-sm)',
+              fontSize: '0.65rem',
+              fontWeight: 700
+            }}
+          >
+            ● {product.stockStatus || 'In Stock'}
           </span>
         </div>
 
-        {/* Product Meta */}
-        <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem', fontWeight: 500 }}>
-          Supplier: <strong style={{ color: 'var(--text-primary)' }}>{data.vendorName}</strong>
-        </p>
+        {/* Multi-Image Dots Bar */}
+        {images.length > 1 && (
+          <div style={{ display: 'flex', gap: '0.35rem', justifyContent: 'center', marginBottom: '0.75rem' }}>
+            {images.map((img, idx) => (
+              <span 
+                key={idx}
+                onClick={() => setActiveImageIndex(idx)}
+                style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  backgroundColor: activeImageIndex === idx ? 'var(--primary-purple)' : 'var(--border-color)',
+                  cursor: 'pointer'
+                }}
+              />
+            ))}
+          </div>
+        )}
 
-        <h3 className="font-heading" style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.5rem', lineHeight: '1.3' }}>
-          {data.title}
+        {/* Product Meta */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+          <span className="font-mono" style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
+            {product.sku}
+          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ fontSize: '0.75rem', color: '#F59E0B', fontWeight: 600 }}>
+              ★ {product.rating}
+            </span>
+            {onEdit && (
+              <button 
+                onClick={(e) => { e.stopPropagation(); onEdit(product); }}
+                style={{ fontSize: '0.7rem', color: 'var(--primary-purple)', cursor: 'pointer', background: 'none', border: 'none', fontWeight: 600 }}
+                title="Edit Product"
+              >
+                ✏️ Edit
+              </button>
+            )}
+            {onDelete && (
+              <button 
+                onClick={(e) => { e.stopPropagation(); onDelete(product); }}
+                style={{ fontSize: '0.7rem', color: '#EF4444', cursor: 'pointer', background: 'none', border: 'none', fontWeight: 600 }}
+                title="Delete Product"
+              >
+                🗑️
+              </button>
+            )}
+          </div>
+        </div>
+
+        <h3 className="font-heading" style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.35rem', lineHeight: '1.3' }}>
+          {product.title}
         </h3>
 
-        <p style={{ fontSize: '0.825rem', color: 'var(--text-secondary)', marginBottom: '1rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-          {data.specifications}
+        <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
+          Supplier: <strong style={{ color: 'var(--text-primary)' }}>{product.vendorName}</strong>
         </p>
       </div>
 
       {/* Pricing & Stock Details */}
-      <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '0.85rem', marginTop: '0.5rem' }}>
+      <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem', marginTop: '0.5rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.5rem' }}>
-          <span className="font-mono" style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--primary-purple)' }}>
-            {data.priceRange}
+          <span className="font-mono" style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--primary-purple)' }}>
+            {product.priceDisplay}
           </span>
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>/ {data.unit}</span>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>/ {product.unit}</span>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem', fontSize: '0.75rem' }}>
-          <span className="font-mono" style={{ backgroundColor: 'var(--primary-purple-light)', color: 'var(--primary-purple)', padding: '0.2rem 0.5rem', borderRadius: 'var(--radius-sm)', fontWeight: 600 }}>
-            📦 MOQ: {data.moq}
+        <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', marginBottom: '0.85rem', fontSize: '0.7rem' }}>
+          <span className="font-mono" style={{ backgroundColor: 'var(--bg-main)', color: 'var(--text-secondary)', padding: '0.2rem 0.4rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
+            📦 MOQ: {product.moq}
           </span>
-          <span className="font-mono" style={{ backgroundColor: '#E0F2FE', color: '#0369A1', padding: '0.2rem 0.5rem', borderRadius: 'var(--radius-sm)', fontWeight: 600 }}>
-            ⚡ Lead: {data.leadTime}
+          <span className="font-mono" style={{ backgroundColor: '#E0F2FE', color: '#0369A1', padding: '0.2rem 0.4rem', borderRadius: 'var(--radius-sm)' }}>
+            ⚡ Lead: {product.leadTimeDisplay}
           </span>
         </div>
 
         {/* View Specs Button */}
-        <button 
-          className="btn-purple-primary"
-          onClick={() => onViewDetails && onViewDetails(data)}
-          style={{ width: '100%', minHeight: '44px' }}
-        >
-          View Specifications
-        </button>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+          <button 
+            className="btn-purple-primary"
+            onClick={() => onViewDetails && onViewDetails(product)}
+            style={{ minHeight: '36px', fontSize: '0.8rem', justifyContent: 'center' }}
+          >
+            Order Spec
+          </button>
+          <button 
+            className={isSelected ? "btn-purple-primary" : "btn-outline-secondary"}
+            onClick={() => onToggleSelect && onToggleSelect(product.id)}
+            style={{ minHeight: '36px', fontSize: '0.8rem', justifyContent: 'center' }}
+          >
+            {isSelected ? '✓ Selected' : '+ Bundle'}
+          </button>
+        </div>
       </div>
     </div>
   );
 }
+
