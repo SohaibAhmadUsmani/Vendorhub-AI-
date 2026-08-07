@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { Menu, Search, Bell, ChevronDown } from "lucide-react";
 import VendorHubLogo from "./VendorHubLogo";
 
 function Header({ toggleSidebar }) {
+    const [searchQuery, setSearchQuery] = useState("");
+
     return (
         <header className="flex h-16 items-center justify-between border-b border-[var(--border-card)] bg-[var(--bg-card)] px-6 sticky top-0 z-20 shadow-sm">
 
@@ -17,20 +19,23 @@ function Header({ toggleSidebar }) {
                     <Menu size={20} />
                 </button>
 
-                <div className="hidden sm:block">
-                    <VendorHubLogo size="small" lightMode={true} />
+                <div className="hidden sm:block overflow-hidden">
+                    <VendorHubLogo size="small" showTagline={true} lightMode={true} />
                 </div>
             </div>
 
-            {/* Right side */}
+            {/* Right side — Clean, Direct Input Search Bar (No ⌘K badge, No popups) */}
             <div className="flex items-center gap-4">
-                <div className="flex w-64 md:w-80 items-center gap-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-main)] px-3 py-2 inspira-glowing-border">
-                    <Search size={16} className="text-[var(--text-muted)] shrink-0" />
-
+                <div className="header-search flex w-72 md:w-96 lg:w-[440px] items-center gap-2.5 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-main)] px-3.5 py-1.5 shadow-xs transition-all focus-within:border-[#6C5CE7] focus-within:ring-2 focus-within:ring-[#6C5CE7]/20">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#6C5CE7]/10 text-[#6C5CE7] shrink-0">
+                        <Search size={15} />
+                    </div>
                     <input
                         type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Search suppliers, products, or RFQs..."
-                        className="w-full bg-transparent text-xs text-[var(--text-primary)] outline-none placeholder:text-[var(--text-muted)] font-sans"
+                        className="w-full bg-transparent text-xs font-medium text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none border-none py-1"
                     />
                 </div>
 

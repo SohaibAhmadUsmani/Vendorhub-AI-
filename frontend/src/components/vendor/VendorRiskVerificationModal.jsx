@@ -1,27 +1,32 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 
 /**
- * VendorRiskVerificationModal — Modal displaying verification audit details, risk score breakdown, and compliance checks
+ * VendorRiskVerificationModal — Centered Audit Verification Modal via React Portal
  * Conforms 100% to design_system.md and SRS PDF Module 13 interface rules
  */
 export default function VendorRiskVerificationModal({ riskMetrics = {}, onClose }) {
   if (!riskMetrics) return null;
 
-  return (
+  return ReactDOM.createPortal(
     <div 
       style={{
         position: 'fixed',
-        inset: 0,
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
         backgroundColor: 'rgba(11, 16, 33, 0.75)',
-        backdropFilter: 'blur(6px)',
-        zIndex: 50,
+        backdropFilter: 'blur(10px)',
+        zIndex: 99999,
         display: 'flex',
         alignItems: 'center',
-        justify: 'center',
-        padding: '1rem'
+        justifyContent: 'center',
+        padding: '1.5rem',
+        boxSizing: 'border-box'
       }}
     >
-      <div className="card-surface" style={{ maxWidth: '580px', width: '100%', padding: '1.75rem', borderRadius: 'var(--radius-lg)' }}>
+      <div className="card-surface animate-modal-pop" style={{ maxWidth: '580px', width: '100%', padding: '1.75rem', borderRadius: 'var(--radius-lg)', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.4)', backgroundColor: '#FFFFFF' }}>
         
         {/* Modal Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
@@ -52,7 +57,7 @@ export default function VendorRiskVerificationModal({ riskMetrics = {}, onClose 
           borderRadius: 'var(--radius-md)',
           marginBottom: '1.25rem',
           display: 'flex',
-          justify: 'space-between',
+          justifyContent: 'space-between',
           alignItems: 'center'
         }}>
           <div>
@@ -96,6 +101,7 @@ export default function VendorRiskVerificationModal({ riskMetrics = {}, onClose 
         </div>
 
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
