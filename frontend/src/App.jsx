@@ -5,6 +5,8 @@ import Dashboard from "./pages/dashboard";
 import VendorProfileView from "./components/vendor/VendorProfileView";
 import ProductCatalogView from "./components/catalog/ProductCatalogView";
 import AnalyticsPage from "./pages/AnalyticsPage";
+import QuotesPage from "./pages/QuotesPage";
+import MessagesPage from "./pages/MessagesPage";
 import TeammateModulePlaceholder from "./components/layout/TeammateModulePlaceholder";
 import "./App.css";
 
@@ -17,7 +19,7 @@ function App() {
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="ai-search" element={<TeammateModulePlaceholder pageTitle="AI Search" />} />
           <Route path="rfqs" element={<TeammateModulePlaceholder pageTitle="RFQs" />} />
-          <Route path="quotes" element={<TeammateModulePlaceholder pageTitle="Quotes" />} />
+          <Route path="quotes" element={<QuotesPage />} />
           <Route path="orders" element={<TeammateModulePlaceholder pageTitle="Orders" />} />
           
           {/* Muzammil's Module 5 & Module 6 Views */}
@@ -25,7 +27,7 @@ function App() {
           <Route path="product-catalog" element={<ProductCatalogView />} />
           
           <Route path="saved-vendors" element={<TeammateModulePlaceholder pageTitle="Saved Vendors" />} />
-          <Route path="messages" element={<TeammateModulePlaceholder pageTitle="Messages" />} />
+          <Route path="messages" element={<MessagesPage />} />
           <Route path="contracts" element={<TeammateModulePlaceholder pageTitle="Contracts" />} />
           <Route path="documents" element={<TeammateModulePlaceholder pageTitle="Documents" />} />
           <Route path="analytics" element={<AnalyticsPage />} />
