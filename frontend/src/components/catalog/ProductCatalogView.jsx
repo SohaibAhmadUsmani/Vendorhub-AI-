@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { SlidersHorizontal, RotateCcw, Plus } from 'lucide-react';
+import { SlidersHorizontal, RotateCcw, Plus, X } from 'lucide-react';
 import ProductCard from './ProductCard';
 import ProductListView from './ProductListView';
 import ProductSpecModal from './ProductSpecModal';
@@ -155,12 +155,21 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
   };
 
   const paginationRange = getPaginationRange(activePage, totalPages);
+  const [showMobileFilter, setShowMobileFilter] = useState(false);
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '270px 1fr', gap: '1.5rem', padding: '1rem', maxWidth: '1440px', margin: '0 auto', position: 'relative' }}>
+    <div className="catalog-layout" style={{ display: 'grid', gridTemplateColumns: '270px 1fr', gap: '1.5rem', padding: '1rem', maxWidth: '1440px', margin: '0 auto', position: 'relative' }}>
       
+      {/* Mobile Backdrop Overlay for Filter Sidebar */}
+      {showMobileFilter && (
+        <div 
+          className="md:hidden fixed inset-0 bg-[#0B1021]/80 backdrop-blur-xs z-40 animate-fadeIn"
+          onClick={() => setShowMobileFilter(false)}
+        />
+      )}
+
       {/* LEFT FILTER SIDEBAR WITH ELEGANT ENTERPRISE HEADER */}
-      <aside className="card-surface" style={{ padding: '1.25rem' }}>
+      <aside className={`catalog-sidebar card-surface ${showMobileFilter ? 'mobile-open' : ''}`} style={{ padding: '1.25rem' }}>
         
         {/* Spacious, Enterprise Grade Filter & Specs Header */}
         <div className="flex items-center justify-between gap-2 mb-5 pb-3.5 border-b border-[var(--border-color)]">
@@ -178,15 +187,25 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
             )}
           </div>
 
-          <button 
-            type="button"
-            onClick={handleResetFilters}
-            className="inline-flex items-center gap-1 text-xs font-semibold text-[#6C5CE7] hover:text-[#5A4AD1] hover:underline transition-colors shrink-0 cursor-pointer"
-            title="Reset all filters"
-          >
-            <RotateCcw size={12} />
-            Reset
-          </button>
+          <div className="flex items-center gap-2">
+            <button 
+              type="button"
+              onClick={handleResetFilters}
+              className="inline-flex items-center gap-1 text-xs font-semibold text-[#6C5CE7] hover:text-[#5A4AD1] hover:underline transition-colors shrink-0 cursor-pointer"
+              title="Reset all filters"
+            >
+              <RotateCcw size={12} />
+              Reset
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowMobileFilter(false)}
+              className="md:hidden p-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] rounded-lg transition-colors cursor-pointer"
+              aria-label="Close filters"
+            >
+              <X size={18} />
+            </button>
+          </div>
         </div>
 
         {/* Natural Language Live Search with Inspira AI Border */}
@@ -354,8 +373,19 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', shrink: 0 }}>
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
             
+            {/* Mobile Filter Toggle Trigger */}
+            <button
+              type="button"
+              onClick={() => setShowMobileFilter(true)}
+              className="catalog-mobile-filter-btn btn-outline-secondary"
+              style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', display: 'none' }}
+            >
+              <SlidersHorizontal size={14} />
+              <span>Filters {activeFilterCount > 0 && `(${activeFilterCount})`}</span>
+            </button>
+
             {/* View Mode Toggle Switcher */}
             <div style={{ display: 'flex', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
               <button
@@ -427,7 +457,7 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
               <button className="btn-outline-secondary" style={{ marginTop: '1rem' }} onClick={handleResetFilters}>Reset Filters</button>
             </div>
           ) : viewMode === 'grid' ? (
-            <div style={{
+            <div className="catalog-product-grid" style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
               gap: '1.25rem',

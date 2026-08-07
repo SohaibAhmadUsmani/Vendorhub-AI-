@@ -7,11 +7,11 @@ import {
     Bookmark, MessageCircle,
     FileSignature, Files,
     BarChart3, Wallet, Settings,
-    Package, Sparkles, X, Crown
+    Package, Sparkles, X, Crown, MoreVertical, Menu
 } from "lucide-react";
 import VendorHubLogo from "./VendorHubLogo";
 
-function Sidebar({ collapsed }) {
+function Sidebar({ collapsed, toggleSidebar, onClose }) {
     const [showUpgradeCard, setShowUpgradeCard] = useState(true);
 
     const navigationItems = [
@@ -33,21 +33,34 @@ function Sidebar({ collapsed }) {
 
     return (
         <aside
-            className={`sticky top-0 flex h-screen flex-col
+            className={`sidebar-container ${collapsed ? "sidebar-collapsed w-20 px-3" : "sidebar-open w-[270px] px-4"} sticky top-0 flex h-screen flex-col
             border-r border-[#1E293B] bg-[#0B1021]
-            py-5 text-[#94A3B8] transition-all duration-300 ease-in-out shrink-0 z-30
-            ${collapsed ? "w-20 px-3" : "w-[270px] px-4"}`}
+            py-5 text-[#94A3B8] transition-all duration-300 ease-in-out shrink-0 z-50`}
         >
-            {/* Brand Header */}
+            {/* Sidebar Header: Centered Infinity Logo Emblem when collapsed, hidden when expanded */}
             <div
-                className={`mb-5 mt-1 pt-1 pb-4 border-b border-[#1E293B]/70 flex items-center transition-all duration-300 ${
-                    collapsed ? "justify-center" : "px-2"
+                className={`transition-all duration-300 ease-in-out ${
+                    collapsed
+                        ? "mb-5 mt-1 pt-1 pb-4 border-b border-[#1E293B]/70 flex items-center justify-center"
+                        : onClose
+                        ? "md:hidden flex justify-end pb-3 mb-2 border-b border-[#1E293B]/70"
+                        : "hidden"
                 }`}
             >
-                {collapsed ? (
-                    <VendorHubLogo size="small" iconOnly={true} lightMode={false} />
-                ) : (
-                    <VendorHubLogo size="normal" showTagline={true} lightMode={false} />
+                {collapsed && (
+                    <div className="flex items-center justify-center w-full transition-all duration-300 ease-in-out transform scale-100 opacity-100 hover:scale-110">
+                        <VendorHubLogo size={34} iconOnly={true} lightMode={false} />
+                    </div>
+                )}
+
+                {!collapsed && onClose && (
+                    <button
+                        onClick={onClose}
+                        className="md:hidden p-1.5 text-slate-400 hover:text-white rounded-lg transition-colors cursor-pointer"
+                        aria-label="Close sidebar"
+                    >
+                        <X size={20} />
+                    </button>
                 )}
             </div>
 

@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { authMiddleware, roleMiddleware } = require('../middleware/authMiddleware');
 const {
   getProducts,
   getProductsByVendor,
@@ -12,7 +13,7 @@ const {
 
 router.route('/')
   .get(getProducts)
-  .post(createProduct);
+  .post(authMiddleware, roleMiddleware('vendor', 'admin'), createProduct);
 
 router.route('/categories')
   .get(getCategories);
@@ -22,8 +23,9 @@ router.route('/vendor/:vendorId')
 
 router.route('/:id')
   .get(getProductById)
-  .put(updateProduct)
-  .delete(deleteProduct);
+  .put(authMiddleware, roleMiddleware('vendor', 'admin'), updateProduct)
+  .delete(authMiddleware, roleMiddleware('vendor', 'admin'), deleteProduct);
 
 module.exports = router;
+
 

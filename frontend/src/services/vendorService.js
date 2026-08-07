@@ -442,11 +442,20 @@ export async function fetchVendorProfile(vendorId) {
   }
 }
 
+function getAuthHeaders() {
+  const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
+}
+
 export async function updateVendorProfile(vendorId, updateData) {
   try {
     const res = await fetch(`${API_BASE_URL}/${vendorId}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(updateData)
     });
     if (!res.ok) throw new Error('Failed to update vendor');
@@ -472,7 +481,7 @@ export async function submitVendorReview(vendorId, reviewData) {
   try {
     const res = await fetch(`${API_BASE_URL}/${vendorId}/reviews`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(reviewData)
     });
     if (!res.ok) throw new Error('Failed to submit review');
@@ -488,7 +497,7 @@ export async function updateVendorRiskScore(vendorId, riskData) {
   try {
     const res = await fetch(`${API_BASE_URL}/${vendorId}/risk`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(riskData)
     });
     if (!res.ok) throw new Error('Failed to update risk score');

@@ -5,7 +5,11 @@ import VendorProfileForm from './VendorProfileForm';
 import VendorTeamCard from './VendorTeamCard';
 import VendorRiskVerificationModal from './VendorRiskVerificationModal';
 import VendorReviewModal from './VendorReviewModal';
+import ContactTeamMemberModal from './ContactTeamMemberModal';
+import FactoryVideoModal from './FactoryVideoModal';
+import CertificationViewerModal from './CertificationViewerModal';
 import { fetchVendorProfile, fetchAllVendorProfiles, updateVendorProfile, submitVendorReview, toggleSaveVendor } from '../../services/vendorService';
+
 
 /**
  * VendorProfileView — Module 5 (Vendor Profiles) 100% Completion View
@@ -23,8 +27,12 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
   const [showEditModal, setShowEditModal] = useState(false);
   const [showRiskModal, setShowRiskModal] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
+  const [selectedTeamMember, setSelectedTeamMember] = useState(null);
+  const [showVideoModal, setShowVideoModal] = useState(false);
+  const [selectedCertification, setSelectedCertification] = useState(null);
   const [isSaved, setIsSaved] = useState(false);
   const [activeLightboxImage, setActiveLightboxImage] = useState(null);
+
 
   useEffect(() => {
     if (queryVendorId && queryVendorId !== selectedVendorId) {
@@ -250,7 +258,7 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
           </div>
 
           {/* Right Action Buttons */}
-          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <div className="profile-hero-actions" style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
             <button 
               className="btn-purple-primary" 
               style={{ minHeight: '40px', padding: '0.4rem 1rem' }}
@@ -281,7 +289,7 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
         </div>
 
         {/* Tab Header Navigation */}
-        <div style={{
+        <div className="profile-tab-bar" style={{
           display: 'flex',
           gap: '1.5rem',
           padding: '0 2rem',
@@ -323,13 +331,13 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
 
       {/* 1. OVERVIEW TAB */}
       {activeTab === 'Overview' && (
-        <div key="overview" style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '1.5rem', animation: 'vpvTabFade 0.3s ease' }}>
+        <div key="overview" className="profile-grid-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '1.5rem', animation: 'vpvTabFade 0.3s ease' }}>
           
           {/* LEFT COLUMN: Profile Details */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             
             {/* SaaS Analytics Style High-Density Metric Summary Bar */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
+            <div className="profile-grid-4col" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
               <div className="card-surface" style={{ padding: '1rem 1.25rem', borderLeft: '4px solid #6C5CE7' }}>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, display: 'block' }}>ANNUAL EXPORT VOL</span>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', marginTop: '0.25rem' }}>
@@ -414,7 +422,7 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
               <h3 className="font-heading" style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '1rem' }}>
                 ⚙️ Manufacturing Plant Capabilities
               </h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '1rem' }}>
+              <div className="profile-grid-3col" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '1rem' }}>
                 <div style={{ padding: '0.85rem', backgroundColor: 'var(--bg-main)', borderRadius: 'var(--radius-md)' }}>
                   <span className="font-mono" style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>MONTHLY CAPACITY</span>
                   <strong style={{ fontSize: '0.95rem', color: 'var(--text-primary)' }}>{vendorData.manufacturingCapabilities.capacity}</strong>
@@ -500,19 +508,35 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
       {activeTab === 'Facility & Video' && (
         <div key="facility" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', animation: 'vpvTabFade 0.3s ease' }}>
           <div className="card-surface">
-            <h3 className="font-heading" style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.5rem' }}>
-              📹 Factory Floor & Automated Assembly Line Video Tour
-            </h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+              <h3 className="font-heading" style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0 }}>
+                📹 Factory Floor & Automated Assembly Line Video Tour
+              </h3>
+              <button 
+                className="btn-purple-primary" 
+                style={{ minHeight: '34px', fontSize: '0.75rem' }}
+                onClick={() => setShowVideoModal(true)}
+              >
+                ▶ Launch Video Player
+              </button>
+            </div>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
               {vendorData.videoTitle || "Virtual plant tour showcasing automated CNC machining and quality assurance inspection."}
             </p>
-            <div style={{ position: 'relative', paddingBottom: '45%', height: 0, overflow: 'hidden', borderRadius: 'var(--radius-md)', backgroundColor: '#0B1021' }}>
+            <div 
+              onClick={() => setShowVideoModal(true)}
+              style={{ position: 'relative', paddingBottom: '45%', height: 0, overflow: 'hidden', borderRadius: 'var(--radius-md)', backgroundColor: '#0B1021', cursor: 'pointer' }}
+            >
               <iframe 
                 src={vendorData.videoUrl} 
                 title="Factory Tour"
-                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 0 }}
-                allowFullScreen
+                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 0, pointerEvents: 'none' }}
               />
+              <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.2)', display: 'flex', itemsCenter: 'center', justifyContent: 'center' }}>
+                <div style={{ padding: '1rem 1.5rem', borderRadius: '9999px', backgroundColor: 'rgba(108,92,231,0.9)', color: 'white', fontWeight: 700, fontSize: '0.9rem', boxShadow: '0 10px 25px rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  ▶ Play Factory Tour Video
+                </div>
+              </div>
             </div>
           </div>
 
@@ -559,15 +583,23 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
 
           <div className="card-surface">
             <h3 className="font-heading" style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '1rem' }}>
-              Active Certifications & Compliance Licenses
+              Active Certifications & Compliance Licenses (Click to Inspect Document)
             </h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem' }}>
+            <div className="profile-grid-2col" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem' }}>
               {vendorData.certifications.map((cert) => (
-                <div key={cert.id} style={{ padding: '1.25rem', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--bg-card)' }}>
+                <div 
+                  key={cert.id || cert.title} 
+                  onClick={() => setSelectedCertification(cert)}
+                  style={{ padding: '1.25rem', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--bg-card)', cursor: 'pointer' }}
+                  className="hover:border-purple-500 transition-all hover:-translate-y-1 shadow-sm hover:shadow-md"
+                >
                   <div style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>🏆</div>
-                  <h4 className="font-heading" style={{ fontSize: '1rem', fontWeight: 700, margin: '0 0 0.35rem' }}>{cert.title}</h4>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '0 0 0.75rem', lineHeight: '1.4' }}>{cert.desc}</p>
-                  <span className="badge badge-active" style={{ fontSize: '0.75rem' }}>{cert.badge} (Valid: {cert.validThru})</span>
+                  <h4 className="font-heading" style={{ fontSize: '1rem', fontWeight: 700, margin: '0 0 0.35rem' }}>{cert.title || cert.name}</h4>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '0 0 0.75rem', lineHeight: '1.4' }}>{cert.desc || cert.issuer}</p>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span className="badge badge-active" style={{ fontSize: '0.75rem' }}>{cert.badge || 'Verified'}</span>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--primary-purple)', fontWeight: 600 }}>🔍 Inspect Doc</span>
+                  </div>
                 </div>
               ))}
             </div>
@@ -577,8 +609,12 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
 
       {/* 5. TEAM & CONTACT TAB */}
       {activeTab === 'Team & Contact' && (
-        <div key="team" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', animation: 'vpvTabFade 0.3s ease' }}>
-          <VendorTeamCard teamMembers={vendorData.teamMembers} contactDetails={vendorData.contactDetails} />
+        <div key="team" className="team-card-grid" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', animation: 'vpvTabFade 0.3s ease' }}>
+          <VendorTeamCard 
+            teamMembers={vendorData.teamMembers} 
+            contactDetails={vendorData.contactDetails}
+            onContactMember={(member) => setSelectedTeamMember(member)} 
+          />
         </div>
       )}
 
@@ -635,6 +671,22 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
         </div>
       )}
 
+      {/* Mobile Sticky CTA Bar (< 768px) */}
+      <div className="mobile-bottom-cta md:hidden fixed bottom-0 left-0 right-0 p-3 bg-white/95 dark:bg-[#0B1021]/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 z-30 flex items-center gap-2">
+        <button 
+          onClick={() => setShowEditModal(true)}
+          className="flex-1 py-2.5 px-3 bg-[#6C5CE7] hover:bg-[#5A4AD1] text-white text-xs font-bold rounded-xl shadow-md text-center"
+        >
+          ✏️ Edit Vendor Profile
+        </button>
+        <a 
+          href={`mailto:${vendorData.contactDetails?.email}`}
+          className="flex-1 py-2.5 px-3 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-700 text-center"
+        >
+          ✉️ Direct Contact
+        </a>
+      </div>
+
       {/* Modals */}
       {showEditModal && (
         <VendorProfileForm 
@@ -660,6 +712,34 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
         />
       )}
 
+      {selectedTeamMember && (
+        <ContactTeamMemberModal
+          isOpen={Boolean(selectedTeamMember)}
+          onClose={() => setSelectedTeamMember(null)}
+          member={selectedTeamMember}
+          vendorName={vendorData.name}
+        />
+      )}
+
+      {showVideoModal && (
+        <FactoryVideoModal
+          isOpen={showVideoModal}
+          onClose={() => setShowVideoModal(false)}
+          videoUrl={vendorData.videoUrl}
+          videoTitle={vendorData.videoTitle}
+          vendorName={vendorData.name}
+        />
+      )}
+
+      {selectedCertification && (
+        <CertificationViewerModal
+          isOpen={Boolean(selectedCertification)}
+          onClose={() => setSelectedCertification(null)}
+          certification={selectedCertification}
+          vendorName={vendorData.name}
+        />
+      )}
+
       {/* Lightbox Modal */}
       {activeLightboxImage && (
         <div 
@@ -669,6 +749,7 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
           <img src={activeLightboxImage} alt="Enlarged Facility" style={{ maxWidth: '90%', maxHeight: '90%', borderRadius: 'var(--radius-md)' }} />
         </div>
       )}
+
 
       <style>{`
         @keyframes vpvTabFade {

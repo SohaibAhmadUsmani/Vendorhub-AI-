@@ -1,11 +1,16 @@
 const mongoose = require('mongoose');
 
 const certificationSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  issuer: { type: String, required: true },
+  title: { type: String },
+  name: { type: String },
+  issuer: { type: String },
+  desc: { type: String },
   year: { type: String },
+  validThru: { type: String },
   image: { type: String },
-  verified: { type: Boolean, default: true }
+  documentUrl: { type: String },
+  verified: { type: Boolean, default: true },
+  badge: { type: String, default: 'Verified' }
 });
 
 const teamMemberSchema = new mongoose.Schema({
@@ -13,7 +18,10 @@ const teamMemberSchema = new mongoose.Schema({
   role: { type: String, required: true },
   email: { type: String },
   phone: { type: String },
-  avatar: { type: String }
+  whatsApp: { type: String },
+  avatar: { type: String },
+  photo: { type: String },
+  languages: { type: String }
 });
 
 const reviewSchema = new mongoose.Schema({
@@ -28,23 +36,34 @@ const vendorSchema = new mongoose.Schema({
   name: { type: String, required: true, unique: true },
   tagline: { type: String },
   logo: { type: String },
+  logoImage: { type: String },
   bannerImage: { type: String },
+  coverImage: { type: String },
   location: { type: String, required: true },
   country: { type: String, required: true },
   rating: { type: Number, default: 4.8 },
   reviewCount: { type: Number, default: 0 },
   verificationStatus: { type: String, enum: ['Verified', 'Pending', 'Unverified'], default: 'Verified' },
+  verificationBadge: { type: String, default: 'Verified Platinum' },
   responseTime: { type: String, default: '< 2 hours' },
   languages: [{ type: String }],
   overview: { type: String, required: true },
+  description: { type: String },
   establishedYear: { type: Number },
+  founded: { type: String },
   employeeCount: { type: String },
+  staff: { type: String },
+  businessType: { type: String },
+  industryRank: { type: String },
+  compliance: { type: String },
   factoryDetails: {
     area: { type: String },
     productionLines: { type: Number },
     annualOutput: { type: String },
     factoryPhotos: [{ type: String }],
-    videoTourUrl: { type: String }
+    videoTourUrl: { type: String },
+    videoUrl: { type: String },
+    videoTitle: { type: String }
   },
   certifications: [certificationSchema],
   team: [teamMemberSchema],
@@ -58,9 +77,27 @@ const vendorSchema = new mongoose.Schema({
     email: { type: String },
     phone: { type: String },
     website: { type: String },
-    address: { type: String }
+    address: { type: String },
+    whatsApp: { type: String }
   },
   reviews: [reviewSchema]
 }, { timestamps: true });
 
+vendorSchema.pre('save', function(next) {
+  if (!this.description) this.description = this.overview;
+  if (!this.overview) this.overview = this.description;
+  if (!this.logoImage) this.logoImage = this.logo;
+  if (!this.logo) this.logo = this.logoImage;
+  if (!this.coverImage) this.coverImage = this.bannerImage;
+  if (!this.bannerImage) this.bannerImage = this.coverImage;
+  if (this.certifications && this.certifications.length > 0) {
+    this.certifications.forEach(c => {
+      if (!c.title) c.title = c.name;
+      if (!c.name) c.name = c.title;
+    });
+  }
+  next();
+});
+
 module.exports = mongoose.model('Vendor', vendorSchema);
+

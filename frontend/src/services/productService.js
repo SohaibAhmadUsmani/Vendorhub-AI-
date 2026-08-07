@@ -1345,6 +1345,8 @@ export async function fetchProducts(filters = {}) {
     if (filters.searchQuery) queryParams.append('search', filters.searchQuery);
     if (filters.minPrice) queryParams.append('minPrice', filters.minPrice);
     if (filters.maxPrice) queryParams.append('maxPrice', filters.maxPrice);
+    queryParams.append('limit', filters.limit || '100');
+
 
     const res = await fetch(`${API_BASE_URL}?${queryParams.toString()}`);
     if (!res.ok) throw new Error('Failed to fetch products from API');
@@ -1457,26 +1459,45 @@ function filterLocalProducts(list, filters) {
   return filtered;
 }
 
+function getAuthHeaders() {
+  const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
+}
+
 export async function addProduct(productData) {
   try {
     const res = await fetch(API_BASE_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify({
-        name: productData.title,
+        name: productData.title || productData.name,
+        title: productData.title || productData.name,
         category: productData.category || 'Apparel & Textiles',
-        price: Number(productData.priceMin || 50),
+        price: Number(productData.priceMin || productData.price || 50),
+        priceMin: Number(productData.priceMin || productData.price || 50),
+        priceMax: Number(productData.priceMax || productData.priceMin || 50),
+        priceDisplay: `$${productData.priceMin || 50}`,
+        unit: productData.unit || 'piece',
         moq: Number(productData.moq || 100),
         leadTime: `${productData.leadTimeDays || 14} days`,
+        leadTimeDays: Number(productData.leadTimeDays || 14),
         stockQuantity: Number(productData.availableStock || 1000),
+        availableStock: Number(productData.availableStock || 1000),
+        stockStatus: productData.stockStatus || 'In Stock',
         vendorId: productData.vendorId,
         vendorName: productData.vendorName,
-        image: productData.imageUrl
+        image: productData.imageUrl || productData.image,
+        imageUrl: productData.imageUrl || productData.image,
+        specifications: productData.specifications
       })
     });
     if (!res.ok) throw new Error('Failed to create product');
     const json = await res.json();
-    return json.data;
+    return normalizeProduct(json.data);
   } catch (error) {
     console.warn('Backend API unavailable, adding to local product dataset:', error);
     const newProd = {
@@ -1510,22 +1531,28 @@ export async function updateProduct(productId, updateData) {
   try {
     const res = await fetch(`${API_BASE_URL}/${productId}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify({
         name: updateData.title || updateData.name,
+        title: updateData.title || updateData.name,
         category: updateData.category,
         price: Number(updateData.priceMin || updateData.price || 50),
+        priceMin: Number(updateData.priceMin || updateData.price || 50),
         moq: Number(updateData.moq || 100),
         leadTime: typeof updateData.leadTimeDays === 'number' ? `${updateData.leadTimeDays} days` : updateData.leadTime,
+        leadTimeDays: typeof updateData.leadTimeDays === 'number' ? updateData.leadTimeDays : 14,
         stockQuantity: Number(updateData.availableStock || updateData.stockQuantity || 1000),
+        availableStock: Number(updateData.availableStock || updateData.stockQuantity || 1000),
+        stockStatus: updateData.stockStatus || 'In Stock',
         inStock: updateData.stockStatus ? updateData.stockStatus === 'In Stock' : true,
         image: updateData.imageUrl || updateData.image,
-        description: updateData.specifications || updateData.description
+        imageUrl: updateData.imageUrl || updateData.image,
+        description: updateData.description || updateData.specifications
       })
     });
     if (!res.ok) throw new Error('Failed to update product');
     const json = await res.json();
-    return json.data;
+    return normalizeProduct(json.data);
   } catch (error) {
     console.warn('Backend API unavailable, updating local dataset:', error);
     const idx = INITIAL_PRODUCTS_DATA.findIndex(p => p.id === productId || p._id === productId);
@@ -1547,7 +1574,8 @@ export async function updateProduct(productId, updateData) {
 export async function deleteProduct(productId) {
   try {
     const res = await fetch(`${API_BASE_URL}/${productId}`, {
-      method: 'DELETE'
+      method: 'DELETE',
+      headers: getAuthHeaders()
     });
     if (!res.ok) throw new Error('Failed to delete product');
     const json = await res.json();

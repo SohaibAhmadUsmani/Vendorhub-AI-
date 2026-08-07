@@ -399,6 +399,201 @@ html, body, #root {
 /* Dark containers (sidebar) get a dark-tuned scrollbar */
 aside ::-webkit-scrollbar-thumb,
 .sidebar-scroll ::-webkit-scrollbar-thumb {
+  background-size: 24px 24px;
+}
+
+/* Card Container */
+.card-surface {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-card);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.card-surface:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
+  border-color: var(--primary-purple);
+}
+
+/* Typography Helpers */
+.font-heading {
+  font-family: var(--font-heading);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Button Variants */
+.btn-purple-primary {
+  min-height: 44px;
+  min-width: 44px;
+  background-color: var(--primary-purple);
+  color: #ffffff;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: var(--shadow-card);
+  transition: all 0.2s ease;
+}
+
+.btn-purple-primary:hover {
+  background-color: var(--primary-purple-hover);
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-1px);
+}
+
+.btn-purple-primary:active {
+  transform: scale(0.97);
+}
+
+.btn-outline-secondary {
+  min-height: 44px;
+  min-width: 44px;
+  background-color: transparent;
+  color: var(--text-primary);
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.btn-outline-secondary:hover {
+  background-color: var(--primary-purple-light);
+  border-color: var(--primary-purple);
+  color: var(--primary-purple);
+}
+
+.btn-cyan-accent {
+  min-height: 44px;
+  min-width: 44px;
+  background-color: var(--accent-cyan);
+  color: #ffffff;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.btn-cyan-accent:hover {
+  background-color: #0284C7;
+}
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.badge-verified {
+  background-color: #E0F2FE;
+  color: #0369A1;
+  border: 1px solid #BAE6FD;
+}
+
+.badge-active {
+  background-color: var(--status-active-bg);
+  color: var(--status-active-text);
+}
+
+.badge-match {
+  background-color: var(--match-badge-bg);
+  color: var(--match-badge-text);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+@keyframes slideUpBounce {
+  0% {
+    transform: translate(-50%, 100%);
+    opacity: 0;
+  }
+  70% {
+    transform: translate(-50%, -10px);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up-bounce {
+  animation: slideUpBounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* ==========================================================================
+   PREMIUM ENTERPRISE SCROLLBARS & MODAL POP ANIMATIONS
+   ========================================================================== */
+
+/* Firefox — thin modern scrollbar with auto-blend */
+html, body, #root {
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(108, 92, 231, 0.3) transparent !important;
+}
+
+/* Webkit — sleek minimal scrollbar with hover reveal */
+::-webkit-scrollbar {
+  width: 6px !important;
+  height: 6px !important;
+}
+::-webkit-scrollbar-track {
+  background: transparent !important;
+  border-radius: 100px !important;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.18) !important;
+  border-radius: 100px !important;
+  transition: background 0.3s ease !important;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(108, 92, 231, 0.55) !important;
+}
+::-webkit-scrollbar-thumb:active {
+  background: rgba(108, 92, 231, 0.75) !important;
+}
+::-webkit-scrollbar-corner {
+  background: transparent !important;
+}
+
+/* Dark containers (sidebar) get a dark-tuned scrollbar */
+aside ::-webkit-scrollbar-thumb,
+.sidebar-scroll ::-webkit-scrollbar-thumb {
   background: rgba(148, 163, 184, 0.12) !important;
 }
 aside ::-webkit-scrollbar-thumb:hover,
@@ -422,3 +617,309 @@ aside ::-webkit-scrollbar-thumb:hover,
   animation: modalScaleUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* ═══ COMPREHENSIVE MOBILE-FIRST RESPONSIVE STYLES ═══ */
+
+/* === Small Phones (Samsung Galaxy S8+, iPhone SE) <= 375px === */
+@media (max-width: 375px) {
+  .card-surface { padding: 0.75rem !important; }
+  .btn-purple-primary, .btn-outline-secondary, .btn-cyan-accent {
+    min-height: 40px; font-size: 0.8rem !important; padding: 0.45rem 0.75rem !important;
+  }
+  .badge { font-size: 0.6rem; padding: 0.15rem 0.4rem; }
+  .main-content { padding: 0.5rem !important; }
+}
+
+/* === Mobile Sidebar Drawer (<768px) === */
+@media (max-width: 768px) {
+  .sidebar-container {
+    position: fixed !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    left: -300px !important;
+    width: 270px !important;
+    z-index: 50 !important;
+    transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+  }
+  .sidebar-container.sidebar-open {
+    left: 0 !important;
+  }
+  .sidebar-container.sidebar-collapsed {
+    left: -300px !important;
+  }
+}
+
+/* === All Phones <= 640px === */
+@media (max-width: 640px) {
+
+  /* === HEADER: Compact on mobile === */
+  header {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+  /* Compact search bar on mobile */
+  .header-search {
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: 160px !important;
+    flex-shrink: 1 !important;
+  }
+  /* Hide profile name on mobile, keep avatar */
+  header .leading-tight { display: none !important; }
+  header .border-l { border-left: none !important; padding-left: 0.5rem !important; }
+
+  /* === MAIN CONTENT === */
+  .main-content { padding: 0.75rem !important; }
+
+  /* Card and surface adjustments */
+  .card-surface { padding: 0.875rem !important; border-radius: var(--radius-md) !important; }
+  .card-surface:hover { transform: none !important; } /* Disable hover lift on touch */
+
+  /* Button touch targets - minimum 44px */
+  .btn-purple-primary, .btn-outline-secondary, .btn-cyan-accent {
+    min-height: 44px !important; min-width: 44px !important;
+    font-size: 0.85rem !important; padding: 0.5rem 0.875rem !important;
+  }
+
+  /* Badges */
+  .badge { font-size: 0.65rem; }
+
+  /* Mobile sticky bottom CTA bar */
+  .mobile-bottom-cta {
+    display: flex !important;
+    position: fixed; bottom: 0; left: 0; right: 0;
+    padding: 0.75rem 1rem;
+    background-color: var(--bg-card);
+    border-top: 1px solid var(--border-card);
+    backdrop-filter: blur(12px);
+    z-index: 30;
+    gap: 0.5rem;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+  }
+
+  /* Full-width inputs on mobile - prevents iOS zoom */
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+}
+
+/* === Medium Phones (390-430px): iPhone 12 Pro, 14 Pro Max, Pixel 7/8 === */
+@media (min-width: 376px) and (max-width: 480px) {
+  .main-content { padding: 0.75rem !important; }
+  .card-surface { padding: 1rem !important; }
+}
+
+/* === Tablets (iPad Mini 768px, iPad Air 820px) === */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .card-surface { padding: 1.25rem; }
+  .mobile-bottom-cta { display: none !important; }
+
+  /* Sidebar narrower on tablets */
+  .sidebar-container {
+    width: 220px !important;
+  }
+  .sidebar-container.w-20 {
+    width: 64px !important;
+  }
+
+  .main-content { padding: 1rem !important; }
+}
+
+/* === Desktop === */
+@media (min-width: 1025px) {
+  .mobile-bottom-cta { display: none !important; }
+}
+
+/* === Modal Responsive Overrides === */
+@media (max-width: 640px) {
+  .modal-responsive {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+  }
+  .modal-responsive-padded {
+    width: calc(100% - 16px) !important;
+    max-width: calc(100% - 16px) !important;
+    border-radius: var(--radius-md) !important;
+  }
+}
+
+/* === Vendor Profile Responsive === */
+@media (max-width: 768px) {
+  /* Stack 2-column grids to single column */
+  .profile-grid-2col {
+    grid-template-columns: 1fr !important;
+  }
+  .profile-grid-3col {
+    grid-template-columns: 1fr !important;
+  }
+  .profile-grid-4col {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  /* Hero section adjustments */
+  .profile-hero-actions {
+    flex-direction: column !important;
+    width: 100% !important;
+  }
+  .profile-hero-actions button,
+  .profile-hero-actions .btn-purple-primary,
+  .profile-hero-actions .btn-outline-secondary {
+    width: 100% !important;
+    justify-content: center;
+  }
+  /* Section tab bar - horizontal scroll */
+  .profile-tab-bar {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    flex-wrap: nowrap !important;
+    gap: 0.25rem !important;
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+  .profile-tab-bar::-webkit-scrollbar {
+    display: none;
+  }
+  .profile-tab-bar button {
+    font-size: 0.78rem !important;
+    padding: 0.65rem 0.35rem !important;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-grid-4col {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* === Vendor Profile Mobile-Specific Overrides === */
+@media (max-width: 640px) {
+  /* Vendor selector - full width select */
+  .card-surface select {
+    min-width: unset !important;
+    width: 100% !important;
+  }
+
+  /* Cover banner height reduce */
+  .card-surface > div[style*="height: 200px"],
+  .card-surface > div[style*="height:200px"] {
+    height: 120px !important;
+  }
+
+  /* Profile info row - stack vertically */
+  .card-surface > div[style*="padding: 1.5rem 2rem"],
+  .card-surface > div[style*="padding:1.5rem 2rem"] {
+    padding: 0.75rem !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  /* Vendor name heading smaller */
+  .font-heading[style*="fontSize: '1.75rem'"],
+  .font-heading[style*="font-size: 1.75rem"],
+  h1.font-heading {
+    font-size: 1.25rem !important;
+  }
+
+  /* Avatar smaller on mobile */
+  .card-surface div[style*="width: '100px'"],
+  .card-surface div[style*="width:100px"] {
+    width: 64px !important;
+    height: 64px !important;
+  }
+
+  /* Location/rating row wrap */
+  div[style*="gap: '1rem'"][style*="fontSize: '0.9rem'"] {
+    flex-wrap: wrap !important;
+  }
+  .team-member-card {
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: 0.75rem !important;
+    padding: 1rem !important;
+  }
+  .team-member-card img {
+    margin: 0 auto;
+  }
+  .team-member-actions {
+    justify-content: center !important;
+    width: 100% !important;
+  }
+  .team-member-actions button,
+  .team-member-actions a {
+    flex: 1 !important;
+    justify-content: center !important;
+    text-align: center !important;
+  }
+}
+
+/* === Safe area padding for notched phones === */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .mobile-bottom-cta {
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+  }
+}
+
+/* === Prevent content jump when modal opens === */
+body.modal-open {
+  overflow: hidden;
+  padding-right: 6px; /* scrollbar width compensation */
+}
+
+/* === Catalog Mobile Responsive Drawer === */
+@media (max-width: 768px) {
+  .catalog-layout {
+    grid-template-columns: 1fr !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .catalog-sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    left: -320px !important;
+    width: 300px !important;
+    z-index: 50 !important;
+    overflow-y: auto !important;
+    transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+    display: block !important;
+    margin-bottom: 0 !important;
+  }
+  .catalog-sidebar.mobile-open {
+    left: 0 !important;
+  }
+  .catalog-mobile-filter-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.35rem !important;
+  }
+  .catalog-product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
+    gap: 0.75rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .catalog-product-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .catalog-mobile-filter-btn {
+    display: none !important;
+  }
+}
+
+/* === Print media - hide interactive elements === */
+@media print {
+  .mobile-bottom-cta,
+  .sidebar-container,
+  .btn-purple-primary,
+  .btn-outline-secondary,
+  .btn-cyan-accent { display: none !important; }
+}
