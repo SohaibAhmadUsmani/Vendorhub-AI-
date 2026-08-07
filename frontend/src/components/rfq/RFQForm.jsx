@@ -75,17 +75,17 @@ export default function RFQForm() {
   }
 
   const inputBase =
-    'w-full min-h-[44px] bg-white dark:bg-[#0B1021]/80 border text-slate-900 dark:text-slate-100 placeholder-slate-400 rounded-xl px-4 py-2.5 outline-none transition-all duration-200 focus:ring-2 focus:ring-[#6C5CE7]/20'
+    'w-full min-h-[44px] bg-white border text-slate-900 placeholder-slate-400 rounded-xl px-4 py-2.5 outline-none transition-all duration-200 focus:ring-2 focus:ring-[#6C5CE7]/20'
 
-  const inputNormal = `${inputBase} border-slate-200 dark:border-slate-800 focus:border-[#6C5CE7] dark:focus:border-[#6C5CE7]`
+  const inputNormal = `${inputBase} border-slate-200 focus:border-[#6C5CE7]`
   const inputError = `${inputBase} border-red-500 focus:ring-red-500/20 focus:border-red-500`
 
   return (
     <form
       onSubmit={handleSubmit}
-      className="max-w-xl mx-auto bg-white dark:bg-[#151D30] border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-card"
+      className="w-full bg-white border border-slate-200/80 rounded-2xl p-6 sm:p-8 shadow-card"
     >
-      <h2 className="font-sans text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-6">
+      <h2 className="font-sans text-xl sm:text-2xl font-bold text-slate-900 mb-6 text-center">
         Create RFQ
       </h2>
 
@@ -101,7 +101,7 @@ export default function RFQForm() {
       )}
 
       <div className="mb-4">
-        <label className="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Product</label>
+        <label className="block text-sm font-semibold text-slate-600 mb-1.5">Product</label>
         <input
           className={errors.product ? inputError : inputNormal}
           type="text"
@@ -114,7 +114,7 @@ export default function RFQForm() {
       </div>
 
       <div className="mb-4">
-        <label className="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Quantity</label>
+        <label className="block text-sm font-semibold text-slate-600 mb-1.5">Quantity</label>
         <input
           className={errors.quantity ? inputError : inputNormal}
           type="number"
@@ -128,17 +128,17 @@ export default function RFQForm() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
         <div>
-          <label className="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Material</label>
+          <label className="block text-sm font-semibold text-slate-600 mb-1.5">Material</label>
           <input className={inputNormal} type="text" name="material" value={form.material} onChange={handleChange} />
         </div>
         <div>
-          <label className="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Budget</label>
+          <label className="block text-sm font-semibold text-slate-600 mb-1.5">Budget</label>
           <input className={inputNormal} type="number" name="budget" value={form.budget} onChange={handleChange} placeholder="$" />
         </div>
       </div>
 
       <div className="mb-4">
-        <label className="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Delivery Date</label>
+        <label className="block text-sm font-semibold text-slate-600 mb-1.5">Delivery Date</label>
         <input
           className={errors.deliveryDate ? inputError : inputNormal}
           type="date"
@@ -150,7 +150,7 @@ export default function RFQForm() {
       </div>
 
       <div className="mb-4">
-        <label className="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Payment Terms</label>
+        <label className="block text-sm font-semibold text-slate-600 mb-1.5">Payment Terms</label>
         <input
           className={inputNormal}
           type="text"
@@ -162,7 +162,7 @@ export default function RFQForm() {
       </div>
 
       <div className="mb-4">
-        <label className="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Shipping Method</label>
+        <label className="block text-sm font-semibold text-slate-600 mb-1.5">Shipping Method</label>
         <select className={inputNormal} name="shippingMethod" value={form.shippingMethod} onChange={handleChange}>
           <option value="">Select shipping method</option>
           <option value="sea">Sea Freight</option>
@@ -172,9 +172,9 @@ export default function RFQForm() {
       </div>
 
       <div className="mb-6">
-        <label className="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Attachments</label>
+        <label className="block text-sm font-semibold text-slate-600 mb-1.5">Attachments</label>
         <input
-          className="w-full text-sm text-slate-600 dark:text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-[#F0EBFE] file:text-[#6C5CE7] file:font-semibold hover:file:bg-[#E4DAFC] file:cursor-pointer"
+          className="w-full text-sm text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-[#F0EBFE] file:text-[#6C5CE7] file:font-semibold hover:file:bg-[#E4DAFC] file:cursor-pointer"
           type="file"
           onChange={handleFileChange}
         />
