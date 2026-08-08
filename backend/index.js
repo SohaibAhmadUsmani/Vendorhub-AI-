@@ -4,6 +4,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
 const morgan = require('morgan');
+const path = require('path');
 const connectDB = require('./config/db');
 const vendorRoutes = require('./routes/vendorRoutes');
 const productRoutes = require('./routes/productRoutes');
@@ -12,6 +13,7 @@ const rfqRoutes = require('./routes/rfqRoutes');
 const quoteRoutes = require('./routes/quoteRoutes');
 const negotiationRoutes = require('./routes/negotiationRoutes');
 const messageRoutes = require('./routes/messageRoutes');
+const uploadRoutes = require('./routes/uploadRoutes');
 const Message = require('./models/Message');
 const Conversation = require('./models/Conversation');
 
@@ -25,6 +27,9 @@ app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
 
+// Static Uploads Folder
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // API Routes
 app.use('/api/vendors', vendorRoutes);
 app.use('/api/products', productRoutes);
@@ -33,6 +38,7 @@ app.use('/api/rfq', rfqRoutes);
 app.use('/api/quotes', quoteRoutes);
 app.use('/api/negotiation', negotiationRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // Module 11 — Real-time Messaging (Socket.io)
 io.on('connection', (socket) => {

@@ -106,9 +106,106 @@ const updateVendor = async (req, res) => {
   }
 };
 
+/**
+ * @desc    Delete vendor profile
+ * @route   DELETE /api/vendors/:id
+ * @access  Private (Admin)
+ */
+const deleteVendor = async (req, res) => {
+  try {
+    const { id } = req.params;
+    let vendor;
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      vendor = await Vendor.findByIdAndDelete(id);
+    } else {
+      vendor = await Vendor.findOneAndDelete({ name: { $regex: id, $options: 'i' } });
+    }
+    if (!vendor) {
+      return res.status(404).json({ success: false, message: 'Vendor not found' });
+    }
+    res.status(200).json({ success: true, message: 'Vendor deleted successfully', data: {} });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * @desc    Add review to vendor profile (Aiman Module 15 integration)
+ * @route   POST /api/vendors/:id/reviews
+ * @access  Private (Buyer)
+ */
+const addVendorReview = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reviewerName, reviewerCompany, rating, comment } = req.body;
+
+    let vendor = mongoose.Types.ObjectId.isValid(id)
+      ? await Vendor.findById(id)
+      : await Vendor.findOne({ name: { $regex: id, $options: 'i' } });
+
+    if (!vendor) {
+      return res.status(404).json({ success: false, message: 'Vendor not found' });
+    }
+
+    const newReview = {
+      reviewerName: reviewerName || 'Verified Buyer',
+      reviewerCompany: reviewerCompany || 'Enterprise Client',
+      rating: Number(rating) || 5,
+      comment: comment || 'Great service and quality products.',
+      date: new Date()
+    };
+
+    vendor.reviews.push(newReview);
+    vendor.reviewCount = vendor.reviews.length;
+    const totalRating = vendor.reviews.reduce((acc, item) => item.rating + acc, 0);
+    vendor.rating = Number((totalRating / vendor.reviews.length).toFixed(1));
+
+    await vendor.save();
+    res.status(201).json({ success: true, data: vendor });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * @desc    Update vendor risk metrics (Namra Module 13 integration)
+ * @route   PUT /api/vendors/:id/risk
+ * @access  Private (Admin / Risk AI Service)
+ */
+const updateVendorRisk = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { overallScore, complianceRisk, operationalRisk, financialRisk } = req.body;
+
+    let vendor = mongoose.Types.ObjectId.isValid(id)
+      ? await Vendor.findById(id)
+      : await Vendor.findOne({ name: { $regex: id, $options: 'i' } });
+
+    if (!vendor) {
+      return res.status(404).json({ success: false, message: 'Vendor not found' });
+    }
+
+    vendor.riskBreakdown = {
+      overallScore: overallScore !== undefined ? Number(overallScore) : vendor.riskBreakdown.overallScore,
+      complianceRisk: complianceRisk || vendor.riskBreakdown.complianceRisk,
+      operationalRisk: operationalRisk || vendor.riskBreakdown.operationalRisk,
+      financialRisk: financialRisk || vendor.riskBreakdown.financialRisk
+    };
+
+    await vendor.save();
+    res.status(200).json({ success: true, data: vendor });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   getVendors,
   getVendorById,
   createVendor,
-  updateVendor
+  updateVendor,
+  deleteVendor,
+  addVendorReview,
+  updateVendorRisk
 };
+

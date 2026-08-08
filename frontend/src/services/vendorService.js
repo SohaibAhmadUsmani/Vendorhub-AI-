@@ -442,18 +442,87 @@ export async function fetchVendorProfile(vendorId) {
   }
 }
 
+function getAuthHeaders() {
+  const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
+}
+
 export async function updateVendorProfile(vendorId, updateData) {
   try {
     const res = await fetch(`${API_BASE_URL}/${vendorId}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(updateData)
     });
     if (!res.ok) throw new Error('Failed to update vendor');
     const json = await res.json();
     return normalizeVendor(json.data);
   } catch (error) {
-    console.error('Error updating vendor profile:', error);
+    console.warn('Error updating vendor profile on API, updating local data:', error);
+    const idx = INITIAL_VENDORS_DATA.findIndex(v => v.id === vendorId || v._id === vendorId);
+    if (idx !== -1) {
+      INITIAL_VENDORS_DATA[idx] = {
+        ...INITIAL_VENDORS_DATA[idx],
+        ...updateData,
+        logoImage: updateData.logoImage || INITIAL_VENDORS_DATA[idx].logoImage,
+        coverImage: updateData.coverImage || INITIAL_VENDORS_DATA[idx].coverImage
+      };
+      return INITIAL_VENDORS_DATA[idx];
+    }
     return updateData;
   }
 }
+
+export async function submitVendorReview(vendorId, reviewData) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/${vendorId}/reviews`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(reviewData)
+    });
+    if (!res.ok) throw new Error('Failed to submit review');
+    const json = await res.json();
+    return normalizeVendor(json.data);
+  } catch (error) {
+    console.error('Error submitting vendor review:', error);
+    return null;
+  }
+}
+
+export async function updateVendorRiskScore(vendorId, riskData) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/${vendorId}/risk`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(riskData)
+    });
+    if (!res.ok) throw new Error('Failed to update risk score');
+    const json = await res.json();
+    return normalizeVendor(json.data);
+  } catch (error) {
+    console.error('Error updating vendor risk score:', error);
+    return null;
+  }
+}
+
+export async function toggleSaveVendor(vendorId, isSaved) {
+  try {
+    const savedVendors = JSON.parse(localStorage.getItem('saved_vendors') || '[]');
+    let updated;
+    if (isSaved) {
+      updated = savedVendors.filter(id => id !== vendorId);
+    } else {
+      updated = [...savedVendors, vendorId];
+    }
+    localStorage.setItem('saved_vendors', JSON.stringify(updated));
+    return updated;
+  } catch (error) {
+    console.error('Error toggling saved vendor:', error);
+    return [];
+  }
+}
+

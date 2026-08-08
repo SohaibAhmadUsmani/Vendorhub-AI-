@@ -7,6 +7,7 @@ import ProductCatalogView from "./components/catalog/ProductCatalogView";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import QuotesPage from "./pages/QuotesPage";
 import MessagesPage from "./pages/MessagesPage";
+import NotificationsPage from "./pages/NotificationsPage";
 import TeammateModulePlaceholder from "./components/layout/TeammateModulePlaceholder";
 import "./App.css";
 
@@ -28,6 +29,7 @@ function App() {
           
           <Route path="saved-vendors" element={<TeammateModulePlaceholder pageTitle="Saved Vendors" />} />
           <Route path="messages" element={<MessagesPage />} />
+          <Route path="notifications" element={<NotificationsPage />} />
           <Route path="contracts" element={<TeammateModulePlaceholder pageTitle="Contracts" />} />
           <Route path="documents" element={<TeammateModulePlaceholder pageTitle="Documents" />} />
           <Route path="analytics" element={<AnalyticsPage />} />
