@@ -7,13 +7,18 @@
 
 :root {
   /* --- Brand & Primary Colors --- */
-  --primary-purple: #6C5CE7;
-  --primary-purple-hover: #5A4AD1;
-  --primary-purple-light: #F0EBFE;
+  --primary-purple: #6C63FF;
+  --primary-purple-hover: #5851E8;
+  --primary-purple-light: #F0EEFF;
+  /* Very light purple recommendation-tile surface. */
+  --purple-card-tint: #F4F1FF;
+  /* Deeper indigo-purple surface for the AI right-rail cards. */
+  --purple-card-surface: #B9BEF0;
+  --accent-indigo: #4F46E5;
   --accent-cyan: #0EA5E9;
   --accent-cyan-light: #E0F2FE;
 
-  /* --- Sidebar Tokens (Dark Navy Anchor) --- */
+  /* --- Sidebar Tokens (Dark Navy Anchor — layout shell) --- */
   --sidebar-bg: #0B1021;
   --sidebar-border: #1E293B;
   --sidebar-text: #94A3B8;
@@ -21,11 +26,22 @@
   --sidebar-active-pill: #6C5CE7;
 
   /* --- Main Canvas & Card Surface (Light Mode) --- */
-  --bg-main: #F6F8FD;
+  --bg-main: #F4F5F8;
+  --bg-primary: #F4F5F8;
   --bg-card: #FFFFFF;
-  --bg-hero: linear-gradient(135deg, #F0EBFE 0%, #F8FAFC 100%);
-  --border-color: #E2E8F0;
-  --border-card: #E5E7EB;
+  --bg-hero: linear-gradient(135deg, #F0EEFF 0%, #F4F5F8 100%);
+  --border-color: #E9ECF2;
+  --border-card: #E9ECF2;
+  --border-soft: rgba(15, 23, 42, 0.06);
+  --shadow-soft: 0 1px 2px rgba(16, 24, 40, 0.04), 0 18px 40px -28px rgba(16, 24, 40, 0.14);
+
+  /* --- Pastel Accent Surfaces (48px icon tiles) --- */
+  --pastel-purple: #F1EDFF;
+  --pastel-blue: #EAF1FF;
+  --pastel-cyan: #E5F5FF;
+  --pastel-green: #E7F8EF;
+  --pastel-amber: #FFF3DC;
+  --pastel-pink: #FCE7F6;
 
   /* --- Typography Colors (Light Mode) --- */
   --text-primary: #0F172A;
@@ -46,33 +62,33 @@
   --status-completed-bg: #D1FAE5;
   --status-completed-text: #047857;
 
-  --match-badge-bg: #F0EBFE;
-  --match-badge-text: #6C5CE7;
+  --match-badge-bg: #F0EEFF;
+  --match-badge-text: #6C63FF;
 
   /* --- Fonts --- */
-  --font-heading: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-heading: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
   /* --- Shadows & Radii --- */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 24px;
   --radius-full: 9999px;
 
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-  --shadow-hover: 0 10px 25px -5px rgba(108, 92, 231, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
-  --shadow-ai-glow: 0 0 20px rgba(108, 92, 231, 0.25);
+  --shadow-sm: 0 1px 2px 0 rgba(16, 24, 40, 0.04);
+  --shadow-card: 0 1px 2px rgba(16, 24, 40, 0.04), 0 14px 34px -22px rgba(16, 24, 40, 0.14);
+  --shadow-hover: 0 12px 28px -12px rgba(108, 99, 255, 0.28), 0 4px 8px -4px rgba(16, 24, 40, 0.06);
+  --shadow-ai-glow: 0 0 20px rgba(108, 99, 255, 0.25);
 
   /* --- Fallbacks & Khadija Variables --- */
   --text: #6b6375;
   --text-h: #08060d;
-  --bg: #F6F8FD;
-  --border: #E2E8F0;
-  --accent: #6C5CE7;
-  --accent-bg: rgba(108, 92, 231, 0.1);
-  --accent-border: rgba(108, 92, 231, 0.5);
+  --bg: #FAFBFD;
+  --border: #EEF1F6;
+  --accent: #6C63FF;
+  --accent-bg: rgba(108, 99, 255, 0.1);
+  --accent-border: rgba(108, 99, 255, 0.5);
 
   font-family: var(--font-body);
   color: var(--text-primary);
@@ -86,6 +102,9 @@
   --bg-hero: linear-gradient(135deg, #1A1838 0%, #151D30 100%);
   --border-color: #1E293B;
   --border-card: #1F2A40;
+  --primary-purple-light: #231E45;
+  --purple-card-surface: #2C2455;
+  --purple-card-tint: #241F3E;
 
   --text-primary: #F8FAFC;
   --text-secondary: #CBD5E1;
@@ -206,6 +225,89 @@ body {
   transform: translateY(-4px);
   box-shadow: var(--shadow-hover);
   border-color: var(--primary-purple);
+}
+
+/* Premium dashboard card — 24px radius, hairline border + soft shadow, 4px hover lift. */
+.dash-card {
+  background: var(--bg-card);
+  border: 1px solid #E9ECF2;
+  border-radius: 24px;
+  box-shadow: var(--shadow-card);
+  transition: transform 250ms ease, box-shadow 250ms ease, border-color 250ms ease;
+}
+
+.dash-card-hover:hover {
+  transform: translateY(-4px);
+  border-color: rgba(108, 99, 255, 0.24);
+  box-shadow: 0 16px 32px -16px rgba(108, 99, 255, 0.28), 0 4px 8px -4px rgba(16, 24, 40, 0.05);
+}
+
+/* 48px circular icon tile on a pastel surface (KPI/summary cards). */
+.icon-tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+}
+
+/* Gradient progress bar used by Vendor Health. */
+.progress-track {
+  height: 10px;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: #EEF1F7;
+}
+
+/* Soft panel used to ground card titles over any surface. */
+.card-tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+}
+
+[data-theme="dark"] .dash-card {
+  background: var(--bg-card);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 16px 40px -24px rgba(0, 0, 0, 0.5);
+}
+
+/* react-loading-skeleton — theme-aware via CSS custom properties. */
+.react-loading-skeleton {
+  --base-color: rgba(148, 163, 184, 0.16);
+  --highlight-color: rgba(255, 255, 255, 0.6);
+}
+
+[data-theme="dark"] .react-loading-skeleton {
+  --base-color: rgba(255, 255, 255, 0.08);
+  --highlight-color: rgba(255, 255, 255, 0.14);
+}
+
+/* Click ripple used by Quick Actions tiles. */
+@keyframes dashRipple {
+  from {
+    opacity: 0.35;
+    transform: scale(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(3.2);
+  }
+}
+
+.dash-ripple {
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.55);
+  animation: dashRipple 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* Typography Helpers */
@@ -405,5 +507,158 @@ aside ::-webkit-scrollbar-thumb:hover,
 
 .animate-modal-pop {
   animation: modalScaleUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ==========================================================================
+   SKELETON SHIMMER
+   ========================================================================== */
+
+@keyframes skeletonShimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-block {
+  position: relative;
+  overflow: hidden;
+  background: rgba(148, 163, 184, 0.14);
+  border-radius: var(--radius-sm);
+}
+
+.skeleton-block::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.55) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.4s ease-in-out infinite;
+}
+
+[data-theme="dark"] .skeleton-block::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.4s ease-in-out infinite;
+}
+
+/* ==========================================================================
+   PREMIUM DASHBOARD UTILITIES (LAYOUT REBUILD)
+   ========================================================================== */
+
+/* Brand gradient text — used to accent the vendor name inside the greeting. */
+.text-gradient-brand {
+  background: linear-gradient(120deg, #6C5CE7 0%, #0EA5E9 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Global keyboard focus ring — WCAG 2.2 AA keyboard operability. */
+:where(button, a, input, summary, [role="button"], [role="menuitem"]):focus-visible {
+  outline: 2px solid var(--primary-purple);
+  outline-offset: 2px;
+}
+
+/* Remove the native search input chrome so the pill keeps a clean surface. */
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+}
+
+/* ==========================================================================
+   WELCOME ROBOT (DASHBOARD AI ASSISTANT) — pure CSS keyframes.
+   Drop-in-from-top entrance (soft ease-out with a small settle bounce),
+   a gentle side-to-side "hi 👋" sway used while the speech bubble is up,
+   and a calm idle float. All transforms live in a single keyframe per phase
+   so they never fight each other. No Lottie / heavy animation libs.
+   ========================================================================== */
+
+@keyframes robot-drop {
+  0% {
+    opacity: 0;
+    transform: translateY(-130%);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(6px);
+  }
+  78% {
+    transform: translateY(-4px);
+  }
+  90% {
+    transform: translateY(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes robot-sway {
+  0%, 100% {
+    transform: translateX(0) rotate(0deg);
+  }
+  12% {
+    transform: translateX(-8px) rotate(-4deg);
+  }
+  32% {
+    transform: translateX(7px) rotate(4deg);
+  }
+  52% {
+    transform: translateX(-5px) rotate(-3deg);
+  }
+  72% {
+    transform: translateX(4px) rotate(2deg);
+  }
+  88% {
+    transform: translateX(-2px) rotate(-1deg);
+  }
+}
+
+@keyframes robot-float {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-5px) rotate(0.5deg);
+  }
+}
+
+/* Gentle vertical float used by the footer AI mascot card. */
+@keyframes float-y {
+  0%, 100% {
+    transform: translateY(-3px);
+  }
+  50% {
+    transform: translateY(4px);
+  }
+}
+
+.robot-drop {
+  animation: robot-drop 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.robot-sway {
+  animation: robot-sway 1.3s ease-in-out infinite;
+}
+.robot-float {
+  animation: robot-float 3.2s ease-in-out infinite;
+}
+.float-y {
+  animation: float-y 3s ease-in-out infinite;
 }
 

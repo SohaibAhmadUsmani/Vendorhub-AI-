@@ -6,6 +6,8 @@ const rfqSchema = new mongoose.Schema({
   quantity: { type: Number, required: true },
   material: { type: String },
   budget: { type: Number },
+  country: { type: String },
+  priority: { type: String, enum: ['low', 'medium', 'high', 'critical'], default: 'medium' },
   deliveryDate: { type: Date },
   paymentTerms: { type: String },
   shippingMethod: { type: String },

@@ -16,6 +16,7 @@ const productSchema = new mongoose.Schema({
   leadTime: { type: String, default: '14 days' },
   inStock: { type: Boolean, default: true },
   stockQuantity: { type: Number, default: 5000 },
+  views: { type: Number, default: 0 },
   image: { type: String },
   gallery: [{ type: String }],
   description: { type: String },
