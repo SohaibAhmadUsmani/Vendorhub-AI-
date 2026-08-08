@@ -222,7 +222,7 @@ export default function ProductForm({ onClose, onSaveProduct }) {
           <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
             <button type="button" className="btn-outline-secondary" onClick={onClose}>Cancel</button>
             <button type="submit" className="btn-purple-primary" disabled={saving}>
-              {saving ? 'Saving...' : '💾 Save Product to Catalog'}
+              {saving ? 'Saving...' : 'Save Product to Catalog'}
             </button>
           </div>
         </form>

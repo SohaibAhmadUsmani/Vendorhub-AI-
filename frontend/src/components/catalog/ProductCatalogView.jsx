@@ -6,6 +6,8 @@ import ProductListView from './ProductListView';
 import ProductSpecModal from './ProductSpecModal';
 import ProductForm from './ProductForm';
 import ProductEditModal from './ProductEditModal';
+import SkeletonLoader from '../shared/SkeletonLoader';
+import EmptyState from '../shared/EmptyState';
 import ConfirmDeleteModal from '../shared/ConfirmDeleteModal';
 import RFQBasketDrawer from './RFQBasketDrawer';
 import { fetchProducts, addProduct, updateProduct, deleteProduct } from '../../services/productService';
@@ -361,9 +363,9 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
         )}
 
         {/* Top View Bar Header */}
-        <div className="card-surface" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
+        <div className="card-surface" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.25rem 1.5rem', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
-            <h2 className="font-heading" style={{ fontSize: '1.2rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
+            <h2 className="font-heading" style={{ fontSize: '1.75rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
               Product Catalog <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 400 }}>({totalItems} SKUs Total • Showing {startItemNum}-{endItemNum})</span>
             </h2>
             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: '0.35rem', fontSize: '0.8rem' }}>
@@ -447,20 +449,20 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
         {/* Product Cards Grid OR List View (Strictly 6 Items Per Page) with Smooth View Switch Animation */}
         <div key={viewMode} className="animate-view-switch">
           {loading ? (
-            <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-              <div className="font-mono" style={{ fontSize: '1rem', fontWeight: 700 }}>⚡ Fetching Catalog Products...</div>
-            </div>
+            <SkeletonLoader type="card" count={6} />
           ) : products.length === 0 ? (
-            <div className="card-surface" style={{ padding: '3rem', textAlign: 'center' }}>
-              <h3 className="font-heading">No Products Found</h3>
-              <p style={{ color: 'var(--text-muted)' }}>Try resetting your filter parameters.</p>
-              <button className="btn-outline-secondary" style={{ marginTop: '1rem' }} onClick={handleResetFilters}>Reset Filters</button>
-            </div>
+            <EmptyState 
+              icon="📦" 
+              title="No Products Found" 
+              description="No catalog items matched your active filter parameters." 
+              actionLabel="Reset Filters" 
+              onAction={handleResetFilters} 
+            />
           ) : viewMode === 'grid' ? (
             <div className="catalog-product-grid" style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-              gap: '1.25rem',
+              gap: '1.5rem',
               marginBottom: '2rem'
             }}>
               {paginatedProducts.map(prod => (

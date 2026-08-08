@@ -7,7 +7,7 @@ import {
     Bookmark, MessageCircle,
     FileSignature, Files,
     BarChart3, Wallet, Settings,
-    Package, Sparkles, X, Crown, MoreVertical, Menu
+    Package, Sparkles, X, Crown, MoreVertical, Menu, Bell
 } from "lucide-react";
 import VendorHubLogo from "./VendorHubLogo";
 
@@ -24,6 +24,7 @@ function Sidebar({ collapsed, toggleSidebar, onClose }) {
         { label: "Saved Vendors", path: "/buyer/saved-vendors", icon: Bookmark },
         { label: "Product Catalog", path: "/buyer/product-catalog", icon: Package },
         { label: "Messages", path: "/buyer/messages", icon: MessageCircle },
+        { label: "Notifications", path: "/buyer/notifications", icon: Bell },
         { label: "Contracts", path: "/buyer/contracts", icon: FileSignature },
         { label: "Documents", path: "/buyer/documents", icon: Files },
         { label: "Analytics", path: "/buyer/analytics", icon: BarChart3 },

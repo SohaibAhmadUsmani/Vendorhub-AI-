@@ -107,14 +107,14 @@ export default function VendorHeaderCard({ vendor }) {
             <button 
               className="btn-outline-secondary"
               onClick={() => setIsSaved(!isSaved)}
-              style={{ minHeight: '44px', minWidth: '44px' }}
+              style={{ minHeight: '48px', padding: '0 1.25rem', borderRadius: '12px' }}
             >
               {isSaved ? '♥ Saved' : '♡ Save Vendor'}
             </button>
-            <button className="btn-cyan-accent" style={{ minHeight: '44px' }}>
+            <button className="btn-cyan-accent" style={{ minHeight: '48px', padding: '0 1.25rem', borderRadius: '12px' }}>
               💬 Contact Vendor
             </button>
-            <button className="btn-purple-primary" style={{ minHeight: '44px' }}>
+            <button className="btn-purple-primary" style={{ minHeight: '48px', padding: '0 1.25rem', borderRadius: '12px' }}>
               📝 Request RFQ
             </button>
           </div>

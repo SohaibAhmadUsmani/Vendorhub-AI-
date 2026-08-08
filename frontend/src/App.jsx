@@ -6,6 +6,8 @@ import VendorProfileView from "./components/vendor/VendorProfileView";
 import ProductCatalogView from "./components/catalog/ProductCatalogView";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import NotificationsPage from "./pages/NotificationsPage";
+import VendorMatchingPage from "./pages/VendorMatchingPage";
+import RFQGeneratorPage from "./pages/RFQGeneratorPage";
 import TeammateModulePlaceholder from "./components/layout/TeammateModulePlaceholder";
 import "./App.css";
 
@@ -16,8 +18,8 @@ function App() {
         <Route path="/" element={<Navigate to="/buyer/dashboard" replace />} />
         <Route path="/buyer" element={<DashboardLayout />}>
           <Route path="dashboard" element={<Dashboard />} />
-          <Route path="ai-search" element={<TeammateModulePlaceholder pageTitle="AI Search" />} />
-          <Route path="rfqs" element={<TeammateModulePlaceholder pageTitle="RFQs" />} />
+          <Route path="ai-search" element={<VendorMatchingPage />} />
+          <Route path="rfqs" element={<RFQGeneratorPage />} />
           <Route path="quotes" element={<TeammateModulePlaceholder pageTitle="Quotes" />} />
           <Route path="orders" element={<TeammateModulePlaceholder pageTitle="Orders" />} />
           

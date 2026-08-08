@@ -15,6 +15,7 @@ export default function ProductEditModal({ product, isOpen, onClose, onSave }) {
     availableStock: product.availableStock || product.stockQuantity || 1000,
     stockStatus: product.stockStatus || (product.inStock ? 'In Stock' : 'Low Stock'),
     imageUrl: product.imageUrl || product.image || '',
+    multiImages: product.multiImages && product.multiImages.length > 0 ? product.multiImages : (product.imageUrl ? [product.imageUrl] : []),
     specifications: product.specifications || ''
   });
 
@@ -455,7 +456,11 @@ export default function ProductEditModal({ product, isOpen, onClose, onSave }) {
                     />
                   </div>
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    <input type="text" name="imageUrl" value={formData.imageUrl} onChange={handleChange}
+                    <input type="text" name="imageUrl" value={formData.imageUrl} 
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setFormData(prev => ({ ...prev, imageUrl: val, multiImages: [val] }));
+                      }}
                       placeholder="https://images.unsplash.com/..."
                       style={{
                         width: '100%', minHeight: '48px', backgroundColor: 'var(--bg-main)',
@@ -484,14 +489,20 @@ export default function ProductEditModal({ product, isOpen, onClose, onSave }) {
                               body: body
                             });
                             const data = await res.json();
-                            if (data.success) {
-                              setFormData(prev => ({ ...prev, imageUrl: data.url }));
-                            } else {
-                              setFormData(prev => ({ ...prev, imageUrl: URL.createObjectURL(file) }));
-                            }
+                            const newUrl = data.success ? data.url : URL.createObjectURL(file);
+                            setFormData(prev => ({
+                              ...prev,
+                              imageUrl: newUrl,
+                              multiImages: [newUrl]
+                            }));
                           } catch (err) {
                             console.error("File upload error:", err);
-                            setFormData(prev => ({ ...prev, imageUrl: URL.createObjectURL(file) }));
+                            const localUrl = URL.createObjectURL(file);
+                            setFormData(prev => ({
+                              ...prev,
+                              imageUrl: localUrl,
+                              multiImages: [localUrl]
+                            }));
                           }
                         }}
                       />
@@ -545,10 +556,9 @@ export default function ProductEditModal({ product, isOpen, onClose, onSave }) {
                 className="btn-purple-primary"
                 style={{
                   minHeight: '44px', padding: '0.6rem 1.75rem', fontSize: '0.85rem',
-                  borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '0.5rem'
+                  borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center'
                 }}
               >
-                <span>💾</span>
                 {isSubmitting ? 'Saving...' : 'Save Product Changes'}
               </button>
             </div>

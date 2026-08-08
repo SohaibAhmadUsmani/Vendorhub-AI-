@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Trash2 } from 'lucide-react';
 
 /**
  * ProductCard — Foundational component for Module 6 (Product Catalog) 75% Completion Scope
@@ -26,16 +27,16 @@ export default function ProductCard({
         flexDirection: 'column',
         justifyContent: 'space-between',
         height: '100%',
-        padding: '1.25rem',
+        padding: '1.5rem',
         border: isSelected ? '2px solid var(--primary-purple)' : '1px solid var(--border-card)',
         backgroundColor: isSelected ? 'var(--primary-purple-light)' : 'var(--bg-card)',
         position: 'relative',
-        transition: 'all 0.2s ease-in-out'
+        transition: 'all 0.22s cubic-bezier(0.16, 1, 0.3, 1)'
       }}
     >
       <div>
         {/* Product Image Header with Badges & Symmetrical Select Overlay */}
-        <div style={{ position: 'relative', marginBottom: '0.75rem', overflow: 'hidden', borderRadius: 'var(--radius-md)' }}>
+        <div style={{ position: 'relative', marginBottom: '1rem', overflow: 'hidden', borderRadius: 'var(--radius-md)', height: '190px', backgroundColor: 'var(--bg-main)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <img 
             src={images[activeImageIndex]} 
             alt={product.title}
@@ -45,8 +46,9 @@ export default function ProductCard({
             }}
             style={{
               width: '100%',
-              height: '175px',
+              height: '100%',
               objectFit: 'cover',
+              objectPosition: 'center',
               display: 'block',
               borderRadius: 'var(--radius-md)',
               transition: 'transform 0.3s ease'
@@ -62,7 +64,7 @@ export default function ProductCard({
               right: '12px',
               zIndex: 10,
               cursor: 'pointer',
-              backgroundColor: isSelected ? 'var(--primary-purple)' : 'rgba(255, 255, 255, 0.9)',
+              backgroundColor: isSelected ? 'var(--primary-purple)' : 'rgba(255, 255, 255, 0.92)',
               color: isSelected ? '#FFFFFF' : '#0F172A',
               backdropFilter: 'blur(8px)',
               borderRadius: '50%',
@@ -76,7 +78,7 @@ export default function ProductCard({
               lineHeight: 1,
               fontWeight: 800,
               fontSize: '1.1rem',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.18)',
               border: isSelected ? '2px solid #FFFFFF' : '1px solid rgba(255,255,255,0.8)',
               transition: 'all 0.2s ease-in-out'
             }}
@@ -108,7 +110,7 @@ export default function ProductCard({
               left: '10px',
               backgroundColor: product.stockStatus === 'In Stock' ? '#DCFCE7' : '#FEF3C7',
               color: product.stockStatus === 'In Stock' ? '#15803D' : '#B45309',
-              padding: '0.15rem 0.45rem',
+              padding: '0.2rem 0.5rem',
               borderRadius: 'var(--radius-sm)',
               fontSize: '0.65rem',
               fontWeight: 700
@@ -138,8 +140,8 @@ export default function ProductCard({
         )}
 
         {/* Product Meta */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
-          <span className="font-mono" style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+          <span className="font-mono" style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
             {product.sku}
           </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -149,47 +151,48 @@ export default function ProductCard({
             {onEdit && (
               <button 
                 onClick={(e) => { e.stopPropagation(); onEdit(product); }}
-                style={{ fontSize: '0.7rem', color: 'var(--primary-purple)', cursor: 'pointer', background: 'none', border: 'none', fontWeight: 600 }}
+                style={{ fontSize: '0.75rem', color: 'var(--primary-purple)', cursor: 'pointer', background: 'none', border: 'none', fontWeight: 600 }}
                 title="Edit Product"
               >
-                ✏️ Edit
+                Edit
               </button>
             )}
             {onDelete && (
               <button 
                 onClick={(e) => { e.stopPropagation(); onDelete(product); }}
-                style={{ fontSize: '0.7rem', color: '#EF4444', cursor: 'pointer', background: 'none', border: 'none', fontWeight: 600 }}
+                style={{ fontSize: '0.75rem', color: '#EF4444', cursor: 'pointer', background: 'none', border: 'none', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}
                 title="Delete Product"
               >
-                🗑️
+                <Trash2 size={14} />
+                <span>Delete</span>
               </button>
             )}
           </div>
         </div>
 
-        <h3 className="font-heading" style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.35rem', lineHeight: '1.3' }}>
+        <h3 className="font-heading" style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.35rem', lineHeight: '1.35' }}>
           {product.title}
         </h3>
 
-        <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
+        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>
           Supplier: <strong style={{ color: 'var(--text-primary)' }}>{product.vendorName}</strong>
         </p>
       </div>
 
       {/* Pricing & Stock Details */}
-      <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem', marginTop: '0.5rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.5rem' }}>
-          <span className="font-mono" style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--primary-purple)' }}>
+      <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '0.85rem', marginTop: '0.5rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.65rem' }}>
+          <span className="font-mono" style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--text-primary)' }}>
             {product.priceDisplay}
           </span>
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>/ {product.unit}</span>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500 }}>/ {product.unit}</span>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', marginBottom: '0.85rem', fontSize: '0.7rem' }}>
-          <span className="font-mono" style={{ backgroundColor: 'var(--bg-main)', color: 'var(--text-secondary)', padding: '0.2rem 0.4rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
+        <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '1rem', fontSize: '0.725rem' }}>
+          <span className="font-mono" style={{ backgroundColor: 'var(--bg-main)', color: 'var(--text-secondary)', padding: '0.25rem 0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontWeight: 600 }}>
             📦 MOQ: {product.moq}
           </span>
-          <span className="font-mono" style={{ backgroundColor: '#E0F2FE', color: '#0369A1', padding: '0.2rem 0.4rem', borderRadius: 'var(--radius-sm)' }}>
+          <span className="font-mono" style={{ backgroundColor: '#E0F2FE', color: '#0369A1', padding: '0.25rem 0.5rem', borderRadius: 'var(--radius-sm)', fontWeight: 600 }}>
             ⚡ Lead: {product.leadTimeDisplay}
           </span>
         </div>
@@ -199,14 +202,14 @@ export default function ProductCard({
           <button 
             className="btn-purple-primary"
             onClick={() => onViewDetails && onViewDetails(product)}
-            style={{ minHeight: '36px', fontSize: '0.8rem', justifyContent: 'center' }}
+            style={{ minHeight: '40px', fontSize: '0.825rem', justifyContent: 'center' }}
           >
             Order Spec
           </button>
           <button 
             className={isSelected ? "btn-purple-primary" : "btn-outline-secondary"}
             onClick={() => onToggleSelect && onToggleSelect(product.id)}
-            style={{ minHeight: '36px', fontSize: '0.8rem', justifyContent: 'center' }}
+            style={{ minHeight: '40px', fontSize: '0.825rem', justifyContent: 'center' }}
           >
             {isSelected ? '✓ Selected' : '+ Bundle'}
           </button>

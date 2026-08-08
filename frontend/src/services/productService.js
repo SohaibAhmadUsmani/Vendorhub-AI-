@@ -1338,69 +1338,66 @@ export const INITIAL_PRODUCTS_DATA = [
   }
 ];
 
+function getLocalProductsStore() {
+  try {
+    const cached = localStorage.getItem('vendorhub_products_cache');
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {
+    console.error('Error reading products cache:', e);
+  }
+  return INITIAL_PRODUCTS_DATA;
+}
+
+function saveLocalProductsStore(list) {
+  try {
+    localStorage.setItem('vendorhub_products_cache', JSON.stringify(list));
+  } catch (e) {
+    console.error('Error saving products cache:', e);
+  }
+}
+
 export async function fetchProducts(filters = {}) {
   try {
     const queryParams = new URLSearchParams();
     if (filters.category && filters.category !== 'All') queryParams.append('category', filters.category);
     if (filters.searchQuery) queryParams.append('search', filters.searchQuery);
-    if (filters.minPrice) queryParams.append('minPrice', filters.minPrice);
-    if (filters.maxPrice) queryParams.append('maxPrice', filters.maxPrice);
-    queryParams.append('limit', filters.limit || '100');
+    if (filters.stockStatus && filters.stockStatus !== 'All') queryParams.append('stockStatus', filters.stockStatus);
+    if (filters.vendorId) queryParams.append('vendorId', filters.vendorId);
 
-
-    const res = await fetch(`${API_BASE_URL}?${queryParams.toString()}`);
-    if (!res.ok) throw new Error('Failed to fetch products from API');
-    const json = await res.json();
-
-    if (Array.isArray(json.data) && json.data.length > 0) {
-      let products = json.data.map(p => ({
-        id: p._id || p.id,
-        sku: p.sku || 'SKU-8841',
-        vendorId: p.vendorId?._id || p.vendorId,
-        vendorName: p.vendorName || 'Sialkot Sports Limited',
-        title: p.name,
-        category: p.category,
-        rating: 4.8,
-        priceMin: p.price,
-        priceMax: p.price,
-        priceDisplay: `$${Number(p.price || 0).toFixed(2)}`,
-        unit: p.unit || 'piece',
-        moq: p.moq || 100,
-        leadTimeDays: parseInt(p.leadTime) || 14,
-        leadTimeDisplay: p.leadTime || '14 days',
-        availableStock: p.stockQuantity || 5000,
-        stockStatus: p.inStock ? 'In Stock' : 'Out of Stock',
-        isVerified: true,
-        tags: ['Verified Supplier', 'ISO 9001'],
-        specifications: typeof p.specifications === 'object' 
-          ? Object.entries(p.specifications || {}).map(([k, v]) => `${k}: ${v}`).join(' • ')
-          : (p.specifications || p.description || 'Standard Specs'),
-        imageUrl: p.image || 'https://images.unsplash.com/photo-1614632537197-38a17061c2bd?w=800&auto=format&fit=crop&q=80',
-        multiImages: p.gallery?.length ? p.gallery : [p.image]
-      }));
-
-      if (filters.vendorId) {
-        const targetId = String(filters.vendorId).toLowerCase();
-        products = products.filter(p => {
-          const pVId = String(p.vendorId || '').toLowerCase();
-          const pVName = String(p.vendorName || '').toLowerCase();
-          if (pVId === targetId) return true;
-          if (targetId.includes('sialkot') && pVName.includes('sialkot')) return true;
-          if (targetId.includes('atlas') && pVName.includes('atlas')) return true;
-          if (targetId.includes('precision') && pVName.includes('precision')) return true;
-          if (targetId.includes('apex') && pVName.includes('apex')) return true;
-          if (targetId.includes('empire') && pVName.includes('empire')) return true;
-          if (targetId.includes('eurotech') && pVName.includes('eurotech')) return true;
-          return false;
-        });
+    const url = `${API_BASE_URL}?${queryParams.toString()}`;
+    const res = await fetch(url);
+    if (res.ok) {
+      const json = await res.json();
+      let products = (json.data || []).map(normalizeProduct);
+      if (products.length === 0) {
+        products = filterLocalProducts(getLocalProductsStore(), filters);
+      } else {
+        if (filters.vendorId) {
+          const targetId = String(filters.vendorId).toLowerCase();
+          products = products.filter(p => {
+            const pVId = String(p.vendorId || '').toLowerCase();
+            const pVName = String(p.vendorName || '').toLowerCase();
+            if (pVId === targetId) return true;
+            if (targetId.includes('sialkot') && pVName.includes('sialkot')) return true;
+            if (targetId.includes('atlas') && pVName.includes('atlas')) return true;
+            if (targetId.includes('precision') && pVName.includes('precision')) return true;
+            if (targetId.includes('apex') && pVName.includes('apex')) return true;
+            if (targetId.includes('empire') && pVName.includes('empire')) return true;
+            if (targetId.includes('eurotech') && pVName.includes('eurotech')) return true;
+            return false;
+          });
+        }
       }
       return products;
     }
 
-    return filterLocalProducts(INITIAL_PRODUCTS_DATA, filters);
+    return filterLocalProducts(getLocalProductsStore(), filters);
   } catch (error) {
-    console.warn('Backend API unavailable for products, serving full 60-product local catalog:', error);
-    return filterLocalProducts(INITIAL_PRODUCTS_DATA, filters);
+    console.warn('Backend API unavailable for products, serving full local catalog:', error);
+    return filterLocalProducts(getLocalProductsStore(), filters);
   }
 }
 
@@ -1424,15 +1421,15 @@ function filterLocalProducts(list, filters) {
   }
 
   if (filters.category && filters.category !== 'All') {
-    filtered = filtered.filter(p => p.category.toLowerCase() === filters.category.toLowerCase());
+    filtered = filtered.filter(p => p.category && p.category.toLowerCase() === filters.category.toLowerCase());
   }
 
   if (filters.searchQuery) {
     const q = filters.searchQuery.toLowerCase();
     filtered = filtered.filter(p => 
-      p.title.toLowerCase().includes(q) || 
-      p.sku.toLowerCase().includes(q) ||
-      p.category.toLowerCase().includes(q)
+      (p.title && p.title.toLowerCase().includes(q)) || 
+      (p.sku && p.sku.toLowerCase().includes(q)) ||
+      (p.category && p.category.toLowerCase().includes(q))
     );
   }
 
@@ -1488,16 +1485,19 @@ export async function addProduct(productData) {
         stockQuantity: Number(productData.availableStock || 1000),
         availableStock: Number(productData.availableStock || 1000),
         stockStatus: productData.stockStatus || 'In Stock',
-        vendorId: productData.vendorId,
-        vendorName: productData.vendorName,
         image: productData.imageUrl || productData.image,
         imageUrl: productData.imageUrl || productData.image,
-        specifications: productData.specifications
+        description: productData.specifications || ''
       })
     });
-    if (!res.ok) throw new Error('Failed to create product');
-    const json = await res.json();
-    return normalizeProduct(json.data);
+    if (res.ok) {
+      const json = await res.json();
+      const norm = normalizeProduct(json.data);
+      const currentList = getLocalProductsStore();
+      saveLocalProductsStore([norm, ...currentList]);
+      return norm;
+    }
+    throw new Error('API add failed');
   } catch (error) {
     console.warn('Backend API unavailable, adding to local product dataset:', error);
     const newProd = {
@@ -1520,14 +1520,36 @@ export async function addProduct(productData) {
       isVerified: true,
       tags: ['Custom Upload'],
       specifications: productData.specifications || '',
-      imageUrl: productData.imageUrl || 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800&auto=format&fit=crop&q=80'
+      imageUrl: productData.imageUrl || 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800&auto=format&fit=crop&q=80',
+      multiImages: productData.imageUrl ? [productData.imageUrl] : []
     };
-    INITIAL_PRODUCTS_DATA.unshift(newProd);
+    const currentList = getLocalProductsStore();
+    const updated = [newProd, ...currentList];
+    saveLocalProductsStore(updated);
     return newProd;
   }
 }
 
 export async function updateProduct(productId, updateData) {
+  const currentList = getLocalProductsStore();
+  const idx = currentList.findIndex(p => p.id === productId || p._id === productId);
+  
+  let updatedProductObj = null;
+  if (idx !== -1) {
+    const newImg = updateData.imageUrl || updateData.image || currentList[idx].imageUrl;
+    updatedProductObj = {
+      ...currentList[idx],
+      ...updateData,
+      title: updateData.title || currentList[idx].title,
+      priceMin: Number(updateData.priceMin || currentList[idx].priceMin),
+      priceDisplay: updateData.priceMin ? `$${updateData.priceMin}` : currentList[idx].priceDisplay,
+      imageUrl: newImg,
+      multiImages: updateData.multiImages && updateData.multiImages.length > 0 ? updateData.multiImages : [newImg]
+    };
+    currentList[idx] = updatedProductObj;
+    saveLocalProductsStore(currentList);
+  }
+
   try {
     const res = await fetch(`${API_BASE_URL}/${productId}`, {
       method: 'PUT',
@@ -1550,25 +1572,15 @@ export async function updateProduct(productId, updateData) {
         description: updateData.description || updateData.specifications
       })
     });
-    if (!res.ok) throw new Error('Failed to update product');
-    const json = await res.json();
-    return normalizeProduct(json.data);
-  } catch (error) {
-    console.warn('Backend API unavailable, updating local dataset:', error);
-    const idx = INITIAL_PRODUCTS_DATA.findIndex(p => p.id === productId || p._id === productId);
-    if (idx !== -1) {
-      INITIAL_PRODUCTS_DATA[idx] = {
-        ...INITIAL_PRODUCTS_DATA[idx],
-        ...updateData,
-        title: updateData.title || INITIAL_PRODUCTS_DATA[idx].title,
-        priceMin: Number(updateData.priceMin || INITIAL_PRODUCTS_DATA[idx].priceMin),
-        priceDisplay: updateData.priceMin ? `$${updateData.priceMin}` : INITIAL_PRODUCTS_DATA[idx].priceDisplay,
-        imageUrl: updateData.imageUrl || INITIAL_PRODUCTS_DATA[idx].imageUrl
-      };
-      return INITIAL_PRODUCTS_DATA[idx];
+    if (res.ok) {
+      const json = await res.json();
+      return normalizeProduct(json.data);
     }
-    return updateData;
+  } catch (error) {
+    console.warn('Backend API unavailable, updated local dataset:', error);
   }
+
+  return updatedProductObj || updateData;
 }
 
 export async function deleteProduct(productId) {
