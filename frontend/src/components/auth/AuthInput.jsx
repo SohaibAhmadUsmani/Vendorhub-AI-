@@ -1,34 +1,54 @@
-function AuthInput({ label, icon, type, name, value, placeholder, onChange, error, }) {
-    const Icon = icon;
-    return (
-        <>
-            <label className="mb-2 text-sm font-medium text-[var(--text-h)]">
-                {label}
-            </label>
-            <div className="relative">
+function AuthInput({
+  label,
+  type,
+  name,
+  value,
+  placeholder,
+  onChange,
+  error,
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      <label
+        htmlFor={name}
+        className="mt-1 text-sm font-medium text-[var(--text-h)]"
+      >
+        {label}
+      </label>
 
-                {Icon && (
-                    <Icon
-                        size={18}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                )}
+      <input
+        id={name}
+        type={type}
+        name={name}
+        value={value}
+        placeholder={placeholder}
+        onChange={onChange}
+        className="
+          h-11
+          w-full
+          rounded-xl
+          border
+          border-gray-200
+          bg-white
+          px-4
+          text-base
+          text-[var(--text-primary)]
+          outline-none
+          transition
+          placeholder:text-gray-400
+          focus:border-[var(--primary-purple)]
+          focus:ring-2
+          focus:ring-[var(--primary-purple)]/10
+        "
+      />
 
-
-                <input
-                    type={type}
-                    name={name}
-                    value={value}
-                    placeholder={placeholder}
-                    onChange={onChange}
-                    className="h-11 w-full rounded-xl border border-[var(--border)] pl-10 pr-3 outline-none transition-all duration-200 focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-bg)] focus:shadow-sm"
-                />
-            </div>
-            {error && (
-                <p className="mt-1 text-sm text-red-500">
-                    {error}
-                </p>
-            )}
-        </>
-    );
+      {error && (
+        <p className="text-sm text-red-600">
+          {error}
+        </p>
+      )}
+    </div>
+  );
 }
+
 export default AuthInput;

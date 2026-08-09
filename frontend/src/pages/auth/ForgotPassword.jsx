@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Mail, MailCheck } from "lucide-react";
-
-import AuthLayout from "../../components/auth/AuthLayout";
+import { forgotPassword } from "../../services/authService";
 import AuthInput from "../../components/auth/AuthInput";
+import { LeftPanel } from "../../components/auth/LeftPanel";
 
 function ForgotPassword() {
     const [emailSent, setEmailSent] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState({});
+    const [serverError, setServerError] = useState("");
 
     const [formData, setFormData] = useState({
         email: "",
@@ -36,104 +38,177 @@ function ForgotPassword() {
         return Object.keys(newErrors).length === 0;
     }
 
-    function handleSubmit() {
+    async function handleSubmit() {
         if (!validateForm()) return;
+        setServerError("");
+        setLoading(true);
 
-        setEmailSent(true);
+        try {
+
+            await forgotPassword({
+                email: formData.email
+            });
+
+            setEmailSent(true);
+
+        } catch (error) {
+
+            setServerError(error.message);
+
+        } finally {
+
+            setLoading(false);
+
+        }
     }
 
-    return (
-        <AuthLayout>
-            <div className="w-full max-w-md rounded-2xl border border-[var(--border)] bg-white p-8 shadow-lg animate-fade-in">
+   return (
+  <div className="grid min-h-screen grid-cols-1 md:grid-cols-2">
 
-                {!emailSent ? (
-                    <>
-                        {/* Heading */}
-                        <div className="mb-8 text-center">
-                            <h2 className="text-3xl font-bold text-[var(--text-h)]">
-                                Forgot Password
-                            </h2>
+    {/* LEFT SIDE */}
+    <LeftPanel
+      variant="welcome"
+      dotsIndex={0}
+    />
 
-                            <p className="mt-2 text-sm text-[var(--text)]">
-                                Enter your email and we'll send you a password reset link.
-                            </p>
-                        </div>
+    {/* RIGHT SIDE */}
+    <div className="flex min-h-screen items-center justify-center bg-white px-12 py-12 lg:px-20">
+      <div className="w-full max-w-[680px]">
 
-                        {/* Email */}
-                        <AuthInput
-                            label="Email Address"
-                            icon={Mail}
-                            type="email"
-                            name="email"
-                            value={formData.email}
-                            placeholder="Enter your email"
-                            onChange={handleChange}
-                            error={errors.email}
-                        />
+        {!emailSent ? (
+          <div className="animate-fade-in">
 
-                        {/* Submit */}
-                        <button
-                            type="button"
-                            onClick={handleSubmit}
-                            className="mt-8 h-11 w-full rounded-xl bg-[var(--accent)] font-medium text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:scale-95"
-                        >
-                            Send Reset Link
-                        </button>
+            {/* Heading */}
+            <div>
+              <h2 className="font-heading text-3xl font-bold tracking-tight text-[var(--text-primary)]">
+                Forgot Password
+              </h2>
 
-                        {/* Back */}
-                        <div className="mt-6 text-center">
-                            <Link
-                                to="/login"
-                                className="text-sm font-medium text-[var(--accent)] hover:underline"
-                            >
-                                Back to Login
-                            </Link>
-                        </div>
-                    </>
-                ) : (
-                    <>
-                        {/* Success */}
-                        <div className="flex flex-col items-center text-center">
-
-                            <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-                                <MailCheck
-                                    size={32}
-                                    className="text-green-600"
-                                />
-                            </div>
-
-                            <h2 className="text-3xl font-bold text-[var(--text-h)]">
-                                Check your email
-                            </h2>
-
-                            <p className="mt-3 text-sm leading-6 text-[var(--text)]">
-                                We've sent a password reset link to
-                            </p>
-
-                            <p className="mt-2 font-semibold text-[var(--text-h)]">
-                                {formData.email}
-                            </p>
-
-                            <button
-                                type="button"
-                                onClick={handleSubmit}
-                                className="mt-8 text-sm font-medium text-[var(--accent)] hover:underline"
-                            >
-                                Resend Email
-                            </button>
-
-                            <Link
-                                to="/login"
-                                className="mt-4 text-sm font-medium text-[var(--accent)] hover:underline"
-                            >
-                                Back to Login
-                            </Link>
-                        </div>
-                    </>
-                )}
+              <p className="mt-2 text-base text-[var(--text-secondary)]">
+                Enter your email and we'll send you a password reset link.
+              </p>
             </div>
-        </AuthLayout>
-    );
+
+            {/* Form */}
+            <div className="mt-8">
+
+              <AuthInput
+                label="Email Address"
+                type="email"
+                name="email"
+                value={formData.email}
+                placeholder="Enter your email"
+                onChange={handleChange}
+                error={errors.email}
+              />
+
+              {serverError && (
+                <p className="mt-3 text-sm text-red-500">
+                  {serverError}
+                </p>
+              )}
+
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={loading}
+                className="
+                  mt-8
+                  h-12
+                  w-full
+                  max-w-[280px]
+                  rounded-xl
+                  bg-[var(--primary-purple)]
+                  px-6
+                  font-heading
+                  text-base
+                  font-semibold
+                  text-white
+                  transition-all
+                  duration-200
+                  hover:-translate-y-0.5
+                  hover:bg-[var(--primary-purple-hover)]
+                  hover:shadow-lg
+                  active:translate-y-0
+                  active:scale-95
+                  disabled:cursor-not-allowed
+                  disabled:opacity-50
+                "
+              >
+                {loading ? "Sending..." : "Send Reset Link"}
+              </button>
+
+              {/* Back */}
+              <div className="mt-6">
+                <Link
+                  to="/login"
+                  className="text-sm font-semibold text-[var(--primary-purple)] hover:underline"
+                >
+                  Back to Login
+                </Link>
+              </div>
+
+            </div>
+          </div>
+        ) : (
+          <div className="animate-fade-in">
+
+            {/* Success icon */}
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+              <MailCheck
+                size={32}
+                className="text-green-600"
+              />
+            </div>
+
+            {/* Heading */}
+            <h2 className="mt-6 font-heading text-3xl font-bold tracking-tight text-[var(--text-primary)]">
+              Check your email
+            </h2>
+
+            <p className="mt-3 text-base leading-7 text-[var(--text-secondary)]">
+              We've sent a password reset link to
+            </p>
+
+            <p className="mt-2 break-all font-heading text-base font-semibold text-[var(--primary-purple)]">
+              {formData.email}
+            </p>
+
+            {/* Resend */}
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={loading}
+              className="
+                mt-8
+                text-sm
+                font-semibold
+                text-[var(--primary-purple)]
+                hover:underline
+                disabled:opacity-50
+              "
+            >
+              {loading ? "Sending..." : "Resend Email"}
+            </button>
+
+            {/* Back */}
+            <div className="mt-4">
+              <Link
+                to="/login"
+                className="text-sm font-semibold text-[var(--primary-purple)] hover:underline"
+              >
+                Back to Login
+              </Link>
+            </div>
+
+          </div>
+        )}
+
+      </div>
+    </div>
+
+  </div>
+);
 }
 
 export default ForgotPassword;

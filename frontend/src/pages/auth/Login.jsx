@@ -1,7 +1,6 @@
-import AuthLayout from "../../components/auth/AuthLayout";
 import { useState } from "react";
-import { Mail, ShieldCheck } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { ShieldCheck } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 import { FaLinkedin } from "react-icons/fa";
 import { RiMicrosoftFill } from "react-icons/ri";
@@ -9,247 +8,276 @@ import SocialButton from "../../components/auth/SocialButton";
 import Divider from "../../components/auth/Divider";
 import AuthInput from "../../components/auth/AuthInput";
 import PasswordInput from "../../components/auth/PasswordInput";
+import { login, verify2FA } from "../../services/authService";
+import { useAuthForm } from "../hooks/useAuthForm";
+import { LeftPanel } from "../../components/auth/LeftPanel";
+import { getDashboardRoute } from "../../utils/authRedirect";
+
+const STEP = {
+  LOGIN: "login",
+  TWO_FACTOR: "2fa",
+};
+
+const LOGIN_FIELDS = ["email", "password"];
+
+function persistSession({ token, user }) {
+  localStorage.setItem("token", token);
+  localStorage.setItem("user", JSON.stringify(user));
+}
 
 function Login() {
-    const [otp, setOtp] = useState("");
-    const [errors, setErrors] = useState({});
-    const [otpError, setOtpError] = useState("");
-    const [step, setStep] = useState("login");
-    const [formData, setFormData] = useState(
-        {
-            email: "",
-            password: "",
-        })
-    function handleChange(e) {
-        const { name, value } = e.target;
+  const navigate = useNavigate();
+  const { formData, errors, handleChange, validate } = useAuthForm(LOGIN_FIELDS);
 
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value,
-        }))
+  const [step, setStep] = useState(STEP.LOGIN);
+  const [loading, setLoading] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [otpError, setOtpError] = useState("");
+
+  async function handleLoginSubmit() {
+    if (!validate()) return;
+
+    setLoading(true);
+
+    try {
+      const response = await login({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (response.requires2FA) {
+        setStep(STEP.TWO_FACTOR);
+        return;
+      }
+
+      persistSession(response);
+      navigate(getDashboardRoute(response.user.role));
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setLoading(false);
     }
-    const emailPattern = /^[^\s]+@[^\s]+\.[^\s]+$/;
-    function validateForm() {
-        const newErrors = {};
-        if (!formData.email.trim() || !emailPattern.test(formData.email)) {
-            newErrors.email = "Valid email is required";
-        }
-        if (!formData.password.trim() || formData.password.length < 8) {
-            newErrors.password = "Password must be at least 8 characters";
-        }
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
+  }
+
+  async function handleTwoFactorSubmit() {
+    const otpPattern = /^\d{6}$/;
+    if (!otpPattern.test(otp)) {
+      setOtpError("Please enter a valid 6-digit code.");
+      return;
     }
-    
-        function handleSubmit() {
-            if (step === "login") {
 
-                if (!validateForm()) return;
+    setLoading(true);
 
-                // TODO: Login API
+    try {
+      const response = await verify2FA({ email: formData.email, otp });
 
-                setStep("2fa");
-
-            } else if (step === "2fa") {
-               const otpPattern = /^\d{6}$/;
-                if (!otpPattern.test(otp)) {
-                    setOtpError("Please enter a valid 6-digit code.");
-                    return;
-                }
-
-                // TODO: Verify OTP API
-
-                // Navigate to dashboard
-            }
-        
+      persistSession(response);
+      navigate(getDashboardRoute(response.user.role));
+    } catch (error) {
+      setOtpError(error.message);
+    } finally {
+      setLoading(false);
     }
-    return (
-        <AuthLayout>
-            <div className="w-full max-w-md rounded-2xl border border-[var(--border)] bg-white p-8 shadow-lg animate-fade-in">
+  }
 
-                {/* Heading */}
-                <div className="mb-8 text-center">
-                    {step === "login" ? (
-                        <>
-                            <h2 className="text-3xl font-bold text-[var(--text-h)]">
-                                Welcome Back
-                            </h2>
-                            <p className="mt-2 text-sm text-[var(--text)]">
-                                Login to your VendorHub AI account
-                            </p>
-                        </>
-                    ) : (
-                        <>
-                            <h2 className="text-3xl font-bold text-[var(--text-h)]">
-                                Two-Factor Authentication
-                            </h2>
+  function handleSubmit() {
+    if (step === STEP.LOGIN) return handleLoginSubmit();
+    if (step === STEP.TWO_FACTOR) return handleTwoFactorSubmit();
+  }
 
-                            <p className="mt-2 text-sm text-[var(--text)]">
-                                Enter the verification code sent to your email.
-                            </p>
-                        </>
-                    )}
+  function handleOtpChange(e) {
+    setOtp(e.target.value);
+    setOtpError("");
+  }
+
+  return (
+    <div className="grid min-h-screen md:grid-cols-2">
+
+      {/* LEFT SIDE  */}
+      <LeftPanel
+        variant="welcome"
+        dotsIndex={step === STEP.LOGIN ? 0 : 1}
+      />
+
+      {/* RIGHT SIDE */}
+      <div className="flex min-h-screen items-center justify-center bg-white px-12 py-12 lg:px-20">
+        <div className="w-full max-w-[680px]">
+
+          {step === STEP.LOGIN ? (
+            <div className="flex w-full flex-col">
+
+              {/* Heading */}
+              <div>
+                <h2 className=" flex justify-center font-heading text-3xl font-bold tracking-tight text-[var(--text-primary)]">
+                  Welcome Back
+                </h2>
+
+                <p className=" flex justify-center mt-2 text-base text-[var(--text-secondary)]">
+                  Login to your VendorHub AI account
+                </p>
+              </div>
+
+              {/* Login Form */}
+              <div className="mt-8 flex flex-col">
+
+                <AuthInput
+                  label="Email Address"
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  placeholder="Enter your email"
+                  onChange={handleChange}
+                  error={errors.email}
+                />
+
+                <div className="mb-2 mt-5 flex items-center justify-between">
+                  <label className="text-sm font-medium text-[var(--text-h)]">
+                    Password
+                  </label>
+
+                  <Link
+                    to="/forgot-password"
+                    className="text-sm text-[var(--accent)] hover:underline"
+                  >
+                    Forgot Password?
+                  </Link>
                 </div>
 
-                {step === "login" ? (
-                    <div className="flex flex-col">
+                <PasswordInput
+                  name="password"
+                  value={formData.password}
+                  placeholder="Enter your password"
+                  onChange={handleChange}
+                  error={errors.password}
+                />
+                <div className="flex justify-center">
+                  <button
+                    type="button"
+                    onClick={handleSubmit}
+                    disabled={loading}
+                    className="mt-8 h-12 w-full max-w-[280px] rounded-xl bg-[var(--accent)] px-6 font-heading text-base font-semibold text-white transition hover:bg-[var(--primary-purple-hover)] disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    {loading ? "Signing In..." : "Sign In"}
+                  </button>
+                </div>
 
+                <Divider text="OR CONTINUE WITH" />
 
-                        <AuthInput label="Email Address" icon={Mail} type="email"
-                            name="email"
-                            value={formData.email}
-                            placeholder="Enter your email"
-                            onChange={handleChange}
-                            error={errors.email}
-                        />
-                        {/* Password Header */}
-                        <div className="mb-2 mt-5 flex items-center justify-between">
-                            <label className="text-sm font-medium text-[var(--text-h)]">
-                                Password
-                            </label>
+                <div className="flex flex-col gap-3">
+                  <SocialButton
+                    icon={<FcGoogle size={22} />}
+                    text="Continue with Google"
+                  />
 
-                            <Link
-                                to="/forgot-password"
-                                className="text-sm text-[var(--accent)] hover:underline"
-                            >
-                                Forgot Password?
-                            </Link>
-                        </div>
+                  <SocialButton
+                    icon={<RiMicrosoftFill size={20} />}
+                    text="Continue with Microsoft"
+                  />
 
-                        {/* Password Input */}
-                        <PasswordInput
-                            name="password"
-                            value={formData.password}
-                            placeholder="Enter your password"
-                            onChange={handleChange}
-                            error={errors.password}
-                        />
+                  <SocialButton
+                    icon={<FaLinkedin size={20} />}
+                    text="Continue with LinkedIn"
+                  />
+                </div>
 
+                {/* Signup link */}
+                <div className="mt-8 flex items-center gap-1 text-base">
+                  <p className="text-[var(--text-secondary)]">
+                    Don't have an account?
+                  </p>
 
+                  <Link
+                    to="/signup"
+                    className="font-semibold text-[var(--accent)] hover:underline"
+                  >
+                    Create one
+                  </Link>
+                </div>
 
-                        {/* Sign In */}
-                        <button
-                            type="button"
-                            onClick={handleSubmit}
-                            className="mt-8 h-11 w-full rounded-xl bg-[var(--accent)] font-medium text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:scale-95"
-                        >
-                            Sign In
-                        </button>
+                <p className="mt-6 text-xs text-gray-400">
+                  Protected by VendorHub AI
+                </p>
+              </div>
+            </div>
 
-                        {/* Divider */}
-                        <Divider text="OR CONTINUE WITH" />
+          ) : (
 
-                        {/* Social Login */}
-                        <div className="space-y-3">
+            /* ================= 2FA ================= */
 
-                            <SocialButton
-                                icon={<FcGoogle size={22} />}
-                                text="Continue with Google"
-                            />
+            <div className="flex w-full max-w-[500px] flex-col animate-fade-in">
 
-                            <SocialButton
-                                icon={<RiMicrosoftFill size={20} />}
-                                text="Continue with Microsoft"
-                            />
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--accent-bg)]">
+                <ShieldCheck
+                  size={32}
+                  className="text-[var(--accent)]"
+                />
+              </div>
 
-                            <SocialButton
-                                icon={<FaLinkedin size={20} />}
-                                text="Continue with LinkedIn"
-                            />
-                        </div>
+              <h2 className="mt-6 font-heading text-3xl font-bold tracking-tight text-[var(--text-primary)]">
+                Two-Factor Authentication
+              </h2>
 
-                        {/* Footer */}
-                        <div className="mt-8 text-center text-sm">
-                            <span className="text-[var(--text)]">
-                                Don't have an account?
-                            </span>
+              <p className="mt-2 text-base text-[var(--text-secondary)]">
+                Enter the verification code sent to your email.
+              </p>
 
-                            <Link
-                                to="/signup"
-                                className="ml-1 font-semibold text-[var(--accent)] hover:underline"
-                            >
-                                Create one
-                            </Link>
-                        </div>
+              <div className="mt-8">
 
-                        <p className="mt-8 text-center text-xs text-gray-400">
-                            Protected by VendorHub AI
-                        </p>
+                <p className="text-sm text-[var(--text-secondary)]">
+                  Enter the 6-digit verification code sent to
+                </p>
 
-                    </div>
-                ) : (
-                    <div className="mt-6 flex w-full max-w-md flex-col items-center text-center animate-fade-in">
+                <p className="mt-2 break-all text-lg font-semibold text-[var(--text-primary)]">
+                  {formData.email}
+                </p>
 
-                        {/* Icon */}
-                        <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-[var(--accent-bg)]">
-                            <ShieldCheck
-                                size={40}
-                                className="text-[var(--accent)]"
-                            />
-                        </div>
+                <input
+                  type="text"
+                  maxLength={6}
+                  value={otp}
+                  onChange={handleOtpChange}
+                  placeholder="123456"
+                  className="mt-6 h-14 w-full rounded-xl border border-[var(--border)] bg-white text-center text-2xl font-semibold tracking-[0.6em] outline-none transition focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-bg)]"
+                />
 
-                        {/* Badge */}
-                        <span className="rounded-full bg-[var(--accent-bg)] px-4 py-1 text-xs font-semibold uppercase tracking-wider text-[var(--accent)]">
-                            Two-Factor Authentication
-                        </span>
-
-                        {/* Message */}
-                        <p className="mt-6 text-sm leading-6 text-[var(--text)]">
-                            Enter the 6-digit verification code sent to
-                        </p>
-
-                        <p className="mt-2 text-lg font-semibold text-[var(--text-h)] break-all">
-                            {formData.email}
-                        </p>
-
-                        {/* OTP */}
-                        <input
-                            type="text"
-                            maxLength={6}
-                            value={otp}
-                            onChange={(e) =>{ setOtp(e.target.value); setOtpError("");}}
-                            placeholder="123456"
-                            className="mt-8 h-14 w-full rounded-xl border border-[var(--border)] text-center text-2xl font-semibold tracking-[0.6em] outline-none transition-all duration-200 focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-bg)]"
-                        />
-
-                        {otpError && (
-                            <p className="mt-2 text-sm text-red-500">
-                                {error}
-                            </p>
-                        )}
-
-                        {/* Verify */}
-                        <button
-                            type="button"
-                            onClick={handleSubmit}
-                            className="mt-8 h-11 w-full rounded-xl bg-[var(--accent)] font-medium text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:scale-95"
-                        >
-                            Verify Code
-                        </button>
-
-                        {/* Resend */}
-                        <button
-                            type="button"
-                            className="mt-5 text-sm font-medium text-[var(--accent)] hover:underline"
-                        >
-                            Resend Code
-                        </button>
-
-                        {/* Back */}
-                        <button
-                            type="button"
-                            onClick={() => setStep("login")}
-                            className="mt-3 text-sm text-[var(--text)] hover:text-[var(--accent)]"
-                        >
-                            ← Back to Login
-                        </button>
-                    </div>
+                {otpError && (
+                  <p className="mt-2 text-sm text-red-500">
+                    {otpError}
+                  </p>
                 )}
 
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  disabled={loading}
+                  className="mt-6 h-12 w-full max-w-[280px] rounded-xl bg-[var(--accent)] px-6 font-heading text-base font-semibold text-white transition hover:bg-[var(--primary-purple-hover)] disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  {loading ? "Verifying..." : "Verify Code"}
+                </button>
 
+                <button
+                  type="button"
+                  className="mt-5 block text-sm font-medium text-[var(--accent)] hover:underline"
+                >
+                  Resend Code
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setStep(STEP.LOGIN)}
+                  className="mt-3 block text-sm text-[var(--text-secondary)] hover:text-[var(--accent)]"
+                >
+                  ← Back to Login
+                </button>
+
+              </div>
             </div>
-        </AuthLayout>
-    );
+          )}
+
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default Login;

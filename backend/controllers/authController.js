@@ -43,7 +43,7 @@ const signup = async (req, res) => {
     });
     await user.save();
 
-    await sendVerificationEmail(user.name, user.email, token);
+    // await sendVerificationEmail(user.name, user.email, token);
 
     return res.status(201).json({
         success: true,
@@ -191,7 +191,7 @@ const resendVerification = async (req, res) => {
     user.verificationTokenExpires = new Date(Date.now() + 60 * 60 * 1000);
     await user.save();
 
-    await sendVerificationEmail(user.name, user.email, token);
+    // await sendVerificationEmail(user.name, user.email, token);
 
     return res.status(200).json({
         success: true,

@@ -1,4 +1,4 @@
-import { Eye, EyeOff , Lock } from "lucide-react";
+import { Eye, EyeOff  } from "lucide-react";
 import { useState } from "react";
 
 
@@ -7,33 +7,51 @@ function PasswordInput({ label, name, value, placeholder, onChange, error, disab
     
     return (
         <>
-            <label className="mb-2 text-sm font-medium text-[var(--text-h)]">
+            <label className="mt-1 mb-2 text-sm font-medium text-[var(--text-h)]">
                 {label}
             </label>
             <div className="relative">
-                
-                    <Lock
-                        size={18}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                
-                <input
-                    type={showPassword ? "text" : "password"}
-                    name={name}
-                    value={value}
-                    onChange={onChange}
-                    placeholder={placeholder}
-                    disabled={disabled}
-                    className="h-11 w-full rounded-xl border border-[var(--border)] pl-10 pr-10 outline-none transition-all duration-200 focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-bg)] focus:shadow-sm"
-                />
 
-                <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 transition hover:text-[var(--accent)]"
-                >
-                    {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
-                </button>
-            </div>
+  <input
+    type={showPassword ? "text" : "password"}
+    name={name}
+    value={value}
+    placeholder={placeholder}
+    onChange={onChange}
+    className="
+      h-11
+      w-full
+      rounded-xl
+      border
+      border-gray-200
+      bg-white
+      px-4
+      pr-12
+      text-base
+      outline-none
+      placeholder:text-gray-400
+      focus:border-[var(--primary-purple)]
+      focus:ring-2
+      focus:ring-[var(--primary-purple)]/10
+    "
+  />
+
+  {/* Right eye */}
+  <button
+    type="button"
+    onClick={() => setShowPassword(!showPassword)}
+    className="
+      absolute
+      right-4
+      top-1/2
+      -translate-y-1/2
+      text-gray-400
+      hover:text-[var(--primary-purple)]
+    "
+  >
+    {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+  </button>
+</div>
 
             {error && (
                 <p className="mt-1 text-sm text-red-500">
