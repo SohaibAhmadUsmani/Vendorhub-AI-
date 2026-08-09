@@ -43,8 +43,6 @@ const signup = async (req, res) => {
         verificationTokenExpires: new Date(Date.now() + 60 * 60 * 1000)
     });
     await user.save();
-
-
     await sendVerificationEmail(user.name, user.email, token);
 
     return res.status(201).json({
