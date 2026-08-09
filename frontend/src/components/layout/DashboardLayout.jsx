@@ -1,55 +1,78 @@
-import { useState, useEffect } from "react";
-import { Outlet, useLocation } from "react-router-dom";
-import Sidebar from "./Sidebar";
-import Header from "./Header";
+import { useEffect, useState } from "react";
+import { Outlet } from "react-router-dom";
+import DashboardSidebar from "./DashboardSidebar";
+import DashboardNavbar from "./DashboardNavbar";
+import DashboardContent from "./DashboardContent";
 
-function DashboardLayout() {
-    const [collapsed, setCollapsed] = useState(() => window.innerWidth < 768);
-    const location = useLocation();
+/* --------------------------------------------------------------------------
+   DashboardLayout — global application shell.
+   Desktop: fixed left sidebar (expanded ↔ icon rail) + sticky navbar +
+   scrollable content column. Tablet/mobile (<1024px): the sidebar becomes an
+   off-canvas drawer toggled by the navbar hamburger, with a blurred backdrop.
+   Body scroll is locked while the drawer is open so background content stays
+   put. Routing stays untouched — pages render through <Outlet />.
+   -------------------------------------------------------------------------- */
 
-    // Auto-close sidebar on route change on mobile
-    useEffect(() => {
-        if (window.innerWidth < 768) {
-            setCollapsed(true);
-        }
-    }, [location.pathname]);
+const MOBILE_QUERY = "(max-width: 1023px)";
 
-    // Handle window resize
-    useEffect(() => {
-        const handleResize = () => {
-            if (window.innerWidth < 768) {
-                setCollapsed(true);
-            }
-        };
-        window.addEventListener("resize", handleResize);
-        return () => window.removeEventListener("resize", handleResize);
-    }, []);
+export default function DashboardLayout() {
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== "undefined" ? window.matchMedia(MOBILE_QUERY).matches : false,
+  );
+  const [collapsed, setCollapsed] = useState(false); // desktop icon rail
+  const [mobileOpen, setMobileOpen] = useState(false); // <1024px drawer
 
-    const toggleSidebar = () => {
-        setCollapsed((prev) => !prev);
+  useEffect(() => {
+    const mql = window.matchMedia(MOBILE_QUERY);
+    const onChange = (e) => {
+      setIsMobile(e.matches);
+      if (!e.matches) setMobileOpen(false);
     };
+    mql.addEventListener("change", onChange);
+    return () => mql.removeEventListener("change", onChange);
+  }, []);
 
-    return (
-        <div className="flex h-screen w-screen overflow-hidden bg-[var(--bg)] relative">
-            {/* Mobile Backdrop Overlay */}
-            {!collapsed && (
-                <div 
-                    className="md:hidden fixed inset-0 bg-[#0B1021]/80 backdrop-blur-xs z-40 animate-fadeIn"
-                    onClick={() => setCollapsed(true)}
-                />
-            )}
+  useEffect(() => {
+    if (mobileOpen) {
+      const previous = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = previous;
+      };
+    }
+    return undefined;
+  }, [mobileOpen]);
 
-            <Sidebar collapsed={collapsed} toggleSidebar={toggleSidebar} onClose={() => setCollapsed(true)} />
+  /* Close the mobile drawer with the Escape key (keyboard operability). */
+  useEffect(() => {
+    if (!mobileOpen) return undefined;
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") setMobileOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [mobileOpen]);
 
-            <div className="flex h-screen min-w-0 flex-1 flex-col overflow-y-auto transition-all duration-300">
-                <Header toggleSidebar={toggleSidebar} />
+  const handleToggleSidebar = () => {
+    if (isMobile) setMobileOpen((v) => !v);
+    else setCollapsed((v) => !v);
+  };
 
-                <main className="main-content flex-1 p-6">
-                    <Outlet />
-                </main>
-            </div>
-        </div>
-    );
+  return (
+    <div className="flex min-h-screen bg-[var(--bg-primary)]">
+      <DashboardSidebar
+        collapsed={collapsed}
+        mobileOpen={mobileOpen}
+        isMobile={isMobile}
+        onCloseMobile={() => setMobileOpen(false)}
+      />
+
+      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
+        <DashboardNavbar onToggleSidebar={handleToggleSidebar} />
+        <DashboardContent>
+          <Outlet />
+        </DashboardContent>
+      </div>
+    </div>
+  );
 }
-
-export default DashboardLayout;

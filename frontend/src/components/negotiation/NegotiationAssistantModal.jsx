@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { generateNegotiationDraft } from 'd:/Web Dev Internship/maira-module-files/frontend/src/services/negotiationService';
+import { generateNegotiationDraft } from '../../services/negotiationService';
 
 const TYPES = [
   { key: 'counter_offer', label: 'Counter Offer', needsPrice: true },

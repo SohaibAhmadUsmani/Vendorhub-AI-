@@ -10,6 +10,8 @@ const vendorRoutes = require('./routes/vendorRoutes');
 const productRoutes = require('./routes/productRoutes');
 const matchRoutes = require('./routes/matchRoutes');
 const rfqRoutes = require('./routes/rfqRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
+const vendorDashboardRoutes = require('./routes/vendorDashboardRoutes');
 const quoteRoutes = require('./routes/quoteRoutes');
 const negotiationRoutes = require('./routes/negotiationRoutes');
 const messageRoutes = require('./routes/messageRoutes');
@@ -23,7 +25,9 @@ const io = new Server(server, { cors: { origin: '*', methods: ['GET', 'POST'] } 
 
 connectDB();
 
-app.use(cors());
+// Expose Content-Disposition so the dashboard's CSV downloads can read the
+// backend-generated filename from the response headers.
+app.use(cors({ exposedHeaders: ['Content-Disposition'] }));
 app.use(express.json());
 app.use(morgan('dev'));
 
@@ -35,6 +39,9 @@ app.use('/api/vendors', vendorRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/match', matchRoutes);
 app.use('/api/rfq', rfqRoutes);
+app.use('/api/vendor/dashboard', dashboardRoutes);
+app.use('/api/vendor', vendorDashboardRoutes);
+app.use('/api/dashboard', dashboardRoutes.overviewRouter);
 app.use('/api/quotes', quoteRoutes);
 app.use('/api/negotiation', negotiationRoutes);
 app.use('/api/messages', messageRoutes);
