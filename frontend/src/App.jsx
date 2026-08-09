@@ -5,6 +5,7 @@ import Dashboard from "./pages/dashboard";
 import VendorProfileView from "./components/vendor/VendorProfileView";
 import ProductCatalogView from "./components/catalog/ProductCatalogView";
 import AnalyticsPage from "./pages/AnalyticsPage";
+import AIInsightsPage from "./pages/AIInsightsPage";
 import QuotesPage from "./pages/QuotesPage";
 import MessagesPage from "./pages/MessagesPage";
 import NotificationsPage from "./pages/NotificationsPage";
@@ -18,7 +19,7 @@ function App() {
         <Route path="/" element={<Navigate to="/buyer/dashboard" replace />} />
         <Route path="/buyer" element={<DashboardLayout />}>
           <Route path="dashboard" element={<Dashboard />} />
-          <Route path="ai-search" element={<TeammateModulePlaceholder pageTitle="AI Search" />} />
+          <Route path="ai-search" element={<AIInsightsPage />} />
           <Route path="rfqs" element={<TeammateModulePlaceholder pageTitle="RFQs" />} />
           <Route path="quotes" element={<QuotesPage />} />
           <Route path="orders" element={<TeammateModulePlaceholder pageTitle="Orders" />} />
@@ -33,7 +34,7 @@ function App() {
           <Route path="contracts" element={<TeammateModulePlaceholder pageTitle="Contracts" />} />
           <Route path="documents" element={<TeammateModulePlaceholder pageTitle="Documents" />} />
           <Route path="analytics" element={<AnalyticsPage />} />
-          <Route path="ai-insights" element={<TeammateModulePlaceholder pageTitle="AI Insights" />} />
+          <Route path="ai-insights" element={<AIInsightsPage />} />
           <Route path="notifications" element={<TeammateModulePlaceholder pageTitle="Notifications" />} />
           <Route path="vendor-analytics" element={<TeammateModulePlaceholder pageTitle="Vendor Analytics" />} />
           <Route path="spend-summary" element={<TeammateModulePlaceholder pageTitle="Spend Summary" />} />
