@@ -115,7 +115,18 @@ export default function VendorProfilePage() {
             <h2 className="font-heading" style={{ fontSize: '1.25rem', fontWeight: 700 }}>
               Available Products ({vendorProducts.length})
             </h2>
-            <button className="btn-outline-secondary">Download Catalog PDF</button>
+            <button 
+              className="btn-outline-secondary"
+              onClick={async () => {
+                const { exportVendorCatalogPDF } = await import('../services/pdfExportService');
+                exportVendorCatalogPDF(
+                  { name: "Industrial Dynamics Corp.", location: "Frankfurt, Germany", founded: "2008", overview: "OEM & ODM manufacturer of industrial piping and valves." },
+                  vendorProducts
+                );
+              }}
+            >
+              📄 Download Catalog PDF
+            </button>
           </div>
 
           <div style={{

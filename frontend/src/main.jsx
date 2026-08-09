@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { store } from './redux/store'
 import './index.css'
 import App from './App.jsx'
+import { NotificationProvider } from './contexts/NotificationContext'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -20,7 +21,9 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <Provider store={store}>
-        <App />
+        <NotificationProvider>
+          <App />
+        </NotificationProvider>
       </Provider>
     </QueryClientProvider>
   </StrictMode>,

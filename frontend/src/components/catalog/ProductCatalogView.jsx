@@ -1,30 +1,34 @@
 import React, { useState, useEffect } from 'react';
-import { SlidersHorizontal, RotateCcw } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { SlidersHorizontal, RotateCcw, Plus, X } from 'lucide-react';
 import ProductCard from './ProductCard';
 import ProductListView from './ProductListView';
 import ProductSpecModal from './ProductSpecModal';
 import ProductForm from './ProductForm';
+import ProductEditModal from './ProductEditModal';
+import ConfirmDeleteModal from '../shared/ConfirmDeleteModal';
 import RFQBasketDrawer from './RFQBasketDrawer';
-import { fetchProducts, addProduct } from '../../services/productService';
+import { fetchProducts, addProduct, updateProduct, deleteProduct } from '../../services/productService';
 
 /**
  * ProductCatalogView — Module 6 (Product Catalog) 100% Completion View
  * Redesigned Filter Header, Sliders Icon, Spacious Layout & Working Reset Button
  */
 export default function ProductCatalogView({ vendorIdFilter = null }) {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
   
-  // Filter States
-  const [activeCategory, setActiveCategory] = useState('All');
+  // Filter States initialized from URL params if present
+  const [activeCategory, setActiveCategory] = useState(searchParams.get('category') || 'All');
   const [moqMax, setMoqMax] = useState(1000);
   const [maxLeadTime, setMaxLeadTime] = useState(60);
   const [stockStatusFilter, setStockStatusFilter] = useState('All');
   const [minPriceInput, setMinPriceInput] = useState('');
   const [maxPriceInput, setMaxPriceInput] = useState('');
   const [verifiedOnly, setVerifiedOnly] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const [activePage, setActivePage] = useState(1);
 
   // Multi-Product Selection Basket State
@@ -33,7 +37,11 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
   // Modals
   const [selectedProductForSpec, setSelectedProductForSpec] = useState(null);
   const [showAddProductModal, setShowAddProductModal] = useState(false);
+  const [productToEdit, setProductToEdit] = useState(null);
+  const [productToDelete, setProductToDelete] = useState(null);
   const [bulkRfqSuccessMsg, setBulkRfqSuccessMsg] = useState(false);
+
+  const effectiveVendorFilter = vendorIdFilter || searchParams.get('vendor');
 
   useEffect(() => {
     async function loadCatalog() {
@@ -47,13 +55,13 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
         maxPrice: maxPriceInput,
         verifiedOnly: verifiedOnly,
         searchQuery: searchQuery,
-        vendorId: vendorIdFilter
+        vendorId: effectiveVendorFilter
       });
       setProducts(data);
       setLoading(false);
     }
     loadCatalog();
-  }, [activeCategory, moqMax, maxLeadTime, stockStatusFilter, minPriceInput, maxPriceInput, verifiedOnly, searchQuery, vendorIdFilter]);
+  }, [activeCategory, moqMax, maxLeadTime, stockStatusFilter, minPriceInput, maxPriceInput, verifiedOnly, searchQuery, effectiveVendorFilter]);
 
   const handleResetFilters = () => {
     setActiveCategory('All');
@@ -64,6 +72,7 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
     setMaxPriceInput('');
     setVerifiedOnly(true);
     setSearchQuery('');
+    setSearchParams({});
   };
 
   const activeFilterCount = (activeCategory !== 'All' ? 1 : 0) + 
@@ -84,10 +93,27 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
     const refreshed = await fetchProducts({
       category: activeCategory,
       verifiedOnly: verifiedOnly,
-      vendorId: vendorIdFilter
+      vendorId: effectiveVendorFilter
     });
     setProducts(refreshed);
   };
+
+  const handleSaveEditedProduct = async (editedData) => {
+    await updateProduct(editedData.id, editedData);
+    setProducts(prev => prev.map(p => (p.id === editedData.id || p._id === editedData.id) ? { ...p, ...editedData, title: editedData.title, priceDisplay: `$${editedData.priceMin}` } : p));
+  };
+
+  const handleDeleteProduct = (prod) => {
+    setProductToDelete(prod);
+  };
+
+  const confirmDeleteProduct = async () => {
+    if (!productToDelete) return;
+    await deleteProduct(productToDelete.id || productToDelete._id);
+    setProducts(prev => prev.filter(p => p.id !== productToDelete.id && p._id !== productToDelete.id));
+    setProductToDelete(null);
+  };
+
 
   const handleSubmitBulkRfq = (selectedProds) => {
     setBulkRfqSuccessMsg(true);
@@ -129,16 +155,25 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
   };
 
   const paginationRange = getPaginationRange(activePage, totalPages);
+  const [showMobileFilter, setShowMobileFilter] = useState(false);
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '270px 1fr', gap: '1.5rem', padding: '1rem', maxWidth: '1440px', margin: '0 auto', position: 'relative' }}>
+    <div className="catalog-layout" style={{ display: 'grid', gridTemplateColumns: '270px 1fr', gap: '1.5rem', padding: '1rem', maxWidth: '1440px', margin: '0 auto', position: 'relative' }}>
       
+      {/* Mobile Backdrop Overlay for Filter Sidebar */}
+      {showMobileFilter && (
+        <div 
+          className="md:hidden fixed inset-0 bg-[#0B1021]/80 backdrop-blur-xs z-40 animate-fadeIn"
+          onClick={() => setShowMobileFilter(false)}
+        />
+      )}
+
       {/* LEFT FILTER SIDEBAR WITH ELEGANT ENTERPRISE HEADER */}
-      <aside className="card-surface" style={{ padding: '1.25rem' }}>
+      <aside className={`catalog-sidebar card-surface ${showMobileFilter ? 'mobile-open' : ''}`} style={{ padding: '1.25rem' }}>
         
         {/* Spacious, Enterprise Grade Filter & Specs Header */}
-        <div className="flex items-center justify-between gap-2 mb-4 pb-3 border-b border-[var(--border-color)]">
-          <div className="flex items-center gap-2 min-w-0">
+        <div className="flex items-center justify-between gap-2 mb-5 pb-3.5 border-b border-[var(--border-color)]">
+          <div className="flex items-center gap-2.5 min-w-0">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#6C5CE7]/10 text-[#6C5CE7] shrink-0">
               <SlidersHorizontal size={16} />
             </div>
@@ -146,21 +181,31 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
               Filter & Specs
             </h3>
             {activeFilterCount > 0 && (
-              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#6C5CE7] text-[10px] font-bold text-white shrink-0">
+              <span className="flex h-4.5 w-4.5 items-center justify-center rounded-full bg-[#6C5CE7] text-[10px] font-bold text-white shrink-0">
                 {activeFilterCount}
               </span>
             )}
           </div>
 
-          <button 
-            type="button"
-            onClick={handleResetFilters}
-            className="inline-flex items-center gap-1 text-xs font-semibold text-[#6C5CE7] hover:text-[#5A4AD1] hover:underline transition-colors shrink-0 cursor-pointer"
-            title="Reset all filters"
-          >
-            <RotateCcw size={12} />
-            Reset
-          </button>
+          <div className="flex items-center gap-2">
+            <button 
+              type="button"
+              onClick={handleResetFilters}
+              className="inline-flex items-center gap-1 text-xs font-semibold text-[#6C5CE7] hover:text-[#5A4AD1] hover:underline transition-colors shrink-0 cursor-pointer"
+              title="Reset all filters"
+            >
+              <RotateCcw size={12} />
+              Reset
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowMobileFilter(false)}
+              className="md:hidden p-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] rounded-lg transition-colors cursor-pointer"
+              aria-label="Close filters"
+            >
+              <X size={18} />
+            </button>
+          </div>
         </div>
 
         {/* Natural Language Live Search with Inspira AI Border */}
@@ -316,7 +361,7 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
         )}
 
         {/* Top View Bar Header */}
-        <div className="card-surface" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.25rem', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
+        <div className="card-surface" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
             <h2 className="font-heading" style={{ fontSize: '1.2rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
               Product Catalog <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 400 }}>({totalItems} SKUs Total • Showing {startItemNum}-{endItemNum})</span>
@@ -328,8 +373,19 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
             
+            {/* Mobile Filter Toggle Trigger */}
+            <button
+              type="button"
+              onClick={() => setShowMobileFilter(true)}
+              className="catalog-mobile-filter-btn btn-outline-secondary"
+              style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', display: 'none' }}
+            >
+              <SlidersHorizontal size={14} />
+              <span>Filters {activeFilterCount > 0 && `(${activeFilterCount})`}</span>
+            </button>
+
             {/* View Mode Toggle Switcher */}
             <div style={{ display: 'flex', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
               <button
@@ -362,52 +418,72 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
               </button>
             </div>
 
-            <button 
-              className="btn-purple-primary" 
-              style={{ minHeight: '38px', padding: '0.4rem 1rem' }}
-              onClick={() => setShowAddProductModal(true)}
-            >
-              ➕ Add Product
-            </button>
+            <div style={{ display: 'flex', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
+              <button 
+                type="button"
+                onClick={() => setShowAddProductModal(true)}
+                style={{
+                  padding: '0.35rem 0.85rem',
+                  backgroundColor: 'var(--primary-purple)',
+                  color: '#fff',
+                  border: 'none',
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  boxSizing: 'border-box'
+                }}
+                className="hover:opacity-95 active:scale-95 transition-all"
+              >
+                <Plus size={14} strokeWidth={2.5} />
+                <span>Add Product</span>
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Product Cards Grid OR List View (Strictly 6 Items Per Page) */}
-        {loading ? (
-          <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-            <div className="font-mono" style={{ fontSize: '1rem', fontWeight: 700 }}>⚡ Fetching Catalog Products...</div>
-          </div>
-        ) : products.length === 0 ? (
-          <div className="card-surface" style={{ padding: '3rem', textAlign: 'center' }}>
-            <h3 className="font-heading">No Products Found</h3>
-            <p style={{ color: 'var(--text-muted)' }}>Try resetting your filter parameters.</p>
-            <button className="btn-outline-secondary" style={{ marginTop: '1rem' }} onClick={handleResetFilters}>Reset Filters</button>
-          </div>
-        ) : viewMode === 'grid' ? (
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-            gap: '1.25rem',
-            marginBottom: '2rem'
-          }}>
-            {paginatedProducts.map(prod => (
-              <ProductCard 
-                key={prod.id}
-                product={prod}
-                onViewDetails={(p) => setSelectedProductForSpec(p)}
-                isSelected={selectedProductIds.includes(prod.id)}
-                onToggleSelect={handleToggleSelectProduct}
-              />
-            ))}
-          </div>
-        ) : (
-          <ProductListView 
-            products={paginatedProducts}
-            selectedProductIds={selectedProductIds}
-            onToggleSelectProduct={handleToggleSelectProduct}
-            onSelectProductForSpec={(p) => setSelectedProductForSpec(p)}
-          />
-        )}
+        {/* Product Cards Grid OR List View (Strictly 6 Items Per Page) with Smooth View Switch Animation */}
+        <div key={viewMode} className="animate-view-switch">
+          {loading ? (
+            <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+              <div className="font-mono" style={{ fontSize: '1rem', fontWeight: 700 }}>⚡ Fetching Catalog Products...</div>
+            </div>
+          ) : products.length === 0 ? (
+            <div className="card-surface" style={{ padding: '3rem', textAlign: 'center' }}>
+              <h3 className="font-heading">No Products Found</h3>
+              <p style={{ color: 'var(--text-muted)' }}>Try resetting your filter parameters.</p>
+              <button className="btn-outline-secondary" style={{ marginTop: '1rem' }} onClick={handleResetFilters}>Reset Filters</button>
+            </div>
+          ) : viewMode === 'grid' ? (
+            <div className="catalog-product-grid" style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+              gap: '1.25rem',
+              marginBottom: '2rem'
+            }}>
+              {paginatedProducts.map(prod => (
+                <ProductCard 
+                  key={prod.id}
+                  product={prod}
+                  onViewDetails={(p) => setSelectedProductForSpec(p)}
+                  isSelected={selectedProductIds.includes(prod.id)}
+                  onToggleSelect={handleToggleSelectProduct}
+                  onEdit={(p) => setProductToEdit(p)}
+                  onDelete={(p) => handleDeleteProduct(p)}
+                />
+              ))}
+            </div>
+          ) : (
+            <ProductListView 
+              products={paginatedProducts}
+              selectedProductIds={selectedProductIds}
+              onToggleSelectProduct={handleToggleSelectProduct}
+              onSelectProductForSpec={(p) => setSelectedProductForSpec(p)}
+            />
+          )}
+        </div>
 
         {/* Smart Ellipsis Footer Pagination Bar */}
         <div className="card-surface" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
@@ -423,30 +499,21 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
               disabled={activePage === 1}
               onClick={() => setActivePage(prev => Math.max(prev - 1, 1))}
             >
-              Previous
+              Prev
             </button>
             
-            {paginationRange.map((num, idx) => (
-              typeof num === 'number' ? (
-                <button 
-                  key={num}
-                  onClick={() => setActivePage(num)}
-                  style={{
-                    minHeight: '32px',
-                    width: '32px',
-                    borderRadius: 'var(--radius-sm)',
-                    border: activePage === num ? 'none' : '1px solid var(--border-color)',
-                    backgroundColor: activePage === num ? 'var(--primary-purple)' : 'transparent',
-                    color: activePage === num ? '#fff' : 'var(--text-primary)',
-                    fontWeight: 700,
-                    fontSize: '0.8rem',
-                    cursor: 'pointer'
-                  }}
+            {paginationRange.map((page, i) => (
+              typeof page === 'number' ? (
+                <button
+                  key={i}
+                  className={activePage === page ? "btn-purple-primary" : "btn-outline-secondary"}
+                  style={{ minHeight: '32px', minWidth: '32px', padding: '0 0.5rem', fontSize: '0.8rem', justifyContent: 'center' }}
+                  onClick={() => setActivePage(page)}
                 >
-                  {num}
+                  {page}
                 </button>
               ) : (
-                <span key={`ellipsis-${idx}`} style={{ padding: '0 0.25rem', color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 700 }}>
+                <span key={i} style={{ padding: '0 0.25rem', color: 'var(--text-muted)' }}>
                   ...
                 </span>
               )
@@ -486,6 +553,22 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
           onSaveProduct={handleSaveNewProduct}
         />
       )}
+
+      {productToEdit && (
+        <ProductEditModal
+          product={productToEdit}
+          isOpen={Boolean(productToEdit)}
+          onClose={() => setProductToEdit(null)}
+          onSave={handleSaveEditedProduct}
+        />
+      )}
+
+      <ConfirmDeleteModal
+        isOpen={Boolean(productToDelete)}
+        itemName={productToDelete?.title || productToDelete?.name || 'this product'}
+        onConfirm={confirmDeleteProduct}
+        onCancel={() => setProductToDelete(null)}
+      />
 
     </div>
   );

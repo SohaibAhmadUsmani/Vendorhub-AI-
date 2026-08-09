@@ -4,7 +4,7 @@ import React from 'react';
  * VendorTeamCard — Displays Vendor Executive Contacts & Direct Communication Triggers
  * Conforms strictly to design_system.md tokens
  */
-export default function VendorTeamCard({ teamMembers = [], contactDetails = {} }) {
+export default function VendorTeamCard({ teamMembers = [], contactDetails = {}, onContactMember }) {
   if (!teamMembers || teamMembers.length === 0) return null;
 
   return (
@@ -19,14 +19,15 @@ export default function VendorTeamCard({ teamMembers = [], contactDetails = {} }
           </p>
         </div>
         <span className="badge badge-active" style={{ fontSize: '0.75rem' }}>
-          2 Key Contacts Listed
+          {teamMembers.length} Key Contacts Listed
         </span>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.25rem' }}>
+      <div className="team-card-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.25rem' }}>
         {teamMembers.map((member) => (
           <div 
-            key={member.id}
+            key={member.id || member._id || member.name}
+            className="team-member-card"
             style={{
               padding: '1.25rem',
               backgroundColor: 'var(--bg-main)',
@@ -34,11 +35,12 @@ export default function VendorTeamCard({ teamMembers = [], contactDetails = {} }
               border: '1px solid var(--border-color)',
               display: 'flex',
               gap: '1rem',
-              alignItems: 'center'
+              alignItems: 'center',
+              transition: 'all 0.2s ease'
             }}
           >
             <img 
-              src={member.photo} 
+              src={member.photo || member.avatar || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80"} 
               alt={member.name} 
               style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--primary-purple)' }}
             />
@@ -50,24 +52,25 @@ export default function VendorTeamCard({ teamMembers = [], contactDetails = {} }
                 {member.role}
               </span>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
-                <span>✉️ {member.email}</span>
-                <span>📞 {member.phone}</span>
-                <span>🗣 {member.languages}</span>
+                <span>✉️ {member.email || 'direct@vendor.com'}</span>
+                <span>📞 {member.phone || '+92 300 1234567'}</span>
+                {member.languages && <span>🗣 {member.languages}</span>}
               </div>
-              <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem' }}>
-                <a 
-                  href={`mailto:${member.email}`}
+              <div className="team-member-actions" style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <button 
+                  type="button"
+                  onClick={() => onContactMember && onContactMember(member)}
                   className="btn-purple-primary" 
-                  style={{ minHeight: '30px', padding: '0.25rem 0.6rem', fontSize: '0.75rem', textDecoration: 'none' }}
+                  style={{ minHeight: '32px', padding: '0.3rem 0.75rem', fontSize: '0.75rem', border: 'none', cursor: 'pointer' }}
                 >
-                  Email
-                </a>
+                  ✉️ Quick Email
+                </button>
                 <a 
-                  href={`https://wa.me/${contactDetails.whatsApp?.replace(/[^0-9]/g, '')}`}
+                  href={`https://wa.me/${(member.phone || contactDetails.whatsApp || '').replace(/[^0-9]/g, '')}`}
                   target="_blank"
                   rel="noreferrer"
                   className="btn-outline-secondary" 
-                  style={{ minHeight: '30px', padding: '0.25rem 0.6rem', fontSize: '0.75rem', textDecoration: 'none' }}
+                  style={{ minHeight: '32px', padding: '0.3rem 0.75rem', fontSize: '0.75rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
                 >
                   WhatsApp
                 </a>
@@ -79,3 +82,4 @@ export default function VendorTeamCard({ teamMembers = [], contactDetails = {} }
     </div>
   );
 }
+

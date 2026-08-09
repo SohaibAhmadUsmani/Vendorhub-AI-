@@ -8,7 +8,9 @@ export default function ProductCard({
   product, 
   onViewDetails, 
   isSelected = false, 
-  onToggleSelect 
+  onToggleSelect,
+  onEdit,
+  onDelete
 }) {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
 
@@ -140,9 +142,29 @@ export default function ProductCard({
           <span className="font-mono" style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
             {product.sku}
           </span>
-          <span style={{ fontSize: '0.75rem', color: '#F59E0B', fontWeight: 600 }}>
-            ★ {product.rating}
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ fontSize: '0.75rem', color: '#F59E0B', fontWeight: 600 }}>
+              ★ {product.rating}
+            </span>
+            {onEdit && (
+              <button 
+                onClick={(e) => { e.stopPropagation(); onEdit(product); }}
+                style={{ fontSize: '0.7rem', color: 'var(--primary-purple)', cursor: 'pointer', background: 'none', border: 'none', fontWeight: 600 }}
+                title="Edit Product"
+              >
+                ✏️ Edit
+              </button>
+            )}
+            {onDelete && (
+              <button 
+                onClick={(e) => { e.stopPropagation(); onDelete(product); }}
+                style={{ fontSize: '0.7rem', color: '#EF4444', cursor: 'pointer', background: 'none', border: 'none', fontWeight: 600 }}
+                title="Delete Product"
+              >
+                🗑️
+              </button>
+            )}
+          </div>
         </div>
 
         <h3 className="font-heading" style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.35rem', lineHeight: '1.3' }}>
@@ -193,3 +215,4 @@ export default function ProductCard({
     </div>
   );
 }
+
