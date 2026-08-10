@@ -1,4 +1,5 @@
 const dashboardService = require('../services/dashboardService');
+const aiInsightService = require('../services/aiInsightService');
 
 /**
  * Vendor Dashboard controller (Module 3).
@@ -114,6 +115,143 @@ const getTasks = async (req, res) => {
   }
 };
 
+/**
+ * Map Groq's structured output onto the payload shapes the dashboard UI
+ * renders. Each AI item gets a stable id, a priority (from impact), a Lucide
+ * icon key and a timestamp, mirroring the deterministic builders.
+ */
+
+const AI_CATEGORY_ICON = {
+  Demand: 'rfq',
+  Revenue: 'revenue',
+  Performance: 'category',
+  Inventory: 'inventory',
+  Market: 'globe',
+  'Response Time': 'clock',
+  Engagement: 'message',
+};
+
+const AI_REC_TYPE = {
+  pricing: 'warning',
+  'product descriptions': 'warning',
+  'product images': 'warning',
+  'product availability': 'inventory',
+  'response time': 'warning',
+  certifications: 'cert',
+  'category expansion': 'warning',
+  'international market': 'globe',
+  'RFQ conversion': 'quote',
+  'customer engagement': 'message',
+};
+
+function money(label) {
+  return `$${Number(label || 0).toLocaleString('en-US')}`;
+}
+
+function mapAIInsights(items, generatedAt) {
+  return (items || []).map((item, index) => ({
+    id: `ai-${index}-${item.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 24)}`,
+    title: item.title,
+    description: item.description ?? item.supportingMetric ?? '',
+    category: item.category ?? 'Performance',
+    priority: item.impact ?? 'medium',
+    icon: AI_CATEGORY_ICON[item.category] ?? 'trend',
+    timestamp: generatedAt,
+  }));
+}
+
+function mapAIOpportunities(items, generatedAt) {
+  return (items || []).map((item, index) => ({
+    id: `ai-opp-${index}`,
+    name: item.title,
+    description: item.explanation ?? '',
+    country: null,
+    quantity: null,
+    priority: item.impact ?? 'medium',
+    impact: item.impact ?? 'medium',
+    potentialValue: item.estimatedRevenue,
+    potentialLabel: item.estimatedRevenue != null ? money(item.estimatedRevenue) : null,
+    ctaLabel: 'Review',
+    timestamp: generatedAt,
+  }));
+}
+
+function mapAIRecommendations(items, generatedAt) {
+  return (items || []).map((item, index) => ({
+    id: `ai-rec-${index}-${item.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 24)}`,
+    type: AI_REC_TYPE[item.category] ?? 'warning',
+    title: item.title,
+    description: item.description ?? '',
+    impact: item.impact ?? 'medium',
+    ctaLabel: item.actionLabel ?? 'Take action',
+    timestamp: generatedAt,
+  }));
+}
+
+/**
+ * GET /api/vendor/dashboard/ai-insights — full AI Insights page payload.
+ *
+ * Pipeline: resolve the authenticated vendor → compute deterministic
+ * analytics from the database → feed a structured, non-sensitive dataset to
+ * Groq for the AI summary/insights/opportunities/recommendations → validate
+ * + cache the AI output → merge over the deterministic fallbacks. If the AI
+ * layer is unavailable the page still renders every deterministic value.
+ */
+const getAISummary = async (req, res) => {
+  try {
+    const vendor = await dashboardService.resolveVendorForRequest(req);
+    const data = await dashboardService.buildAISummary(vendor, req.query.range);
+
+    if (data.kpis) {
+      const refresh = req.query.refresh === '1' || req.query.refresh === 'true';
+      const ai = await aiInsightService.generateAIInsights(
+        vendor,
+        data.range,
+        data._aiContext,
+        { refresh },
+      );
+
+      if (ai.available) {
+        if (typeof ai.payload.summary === 'string' && ai.payload.summary.trim()) {
+          data.summary.text = ai.payload.summary;
+        }
+        if (Array.isArray(ai.payload.keyInsights) && ai.payload.keyInsights.length) {
+          data.observations = mapAIInsights(ai.payload.keyInsights, ai.generatedAt);
+        }
+        if (Array.isArray(ai.payload.opportunities) && ai.payload.opportunities.length) {
+          data.opportunities = mapAIOpportunities(ai.payload.opportunities, ai.generatedAt);
+        }
+        if (Array.isArray(ai.payload.recommendations) && ai.payload.recommendations.length) {
+          data.recommendations = mapAIRecommendations(ai.payload.recommendations, ai.generatedAt);
+        }
+        data.generatedAt = ai.generatedAt;
+      }
+
+      /* Keep the KPI + segmented counts consistent with what is displayed. */
+      const byPriority = (p) => data.observations.filter((o) => o.priority === p).length;
+      data.kpis.totalInsights = data.observations.length;
+      data.kpis.highImpact = byPriority('high');
+      data.trend.counts = {
+        total: data.observations.length,
+        high: byPriority('high'),
+        medium: byPriority('medium'),
+        low: byPriority('low'),
+      };
+
+      data.ai = {
+        available: ai.available,
+        reason: ai.reason ?? null,
+        cached: Boolean(ai.cached),
+        generatedAt: ai.generatedAt ?? data.generatedAt,
+      };
+    }
+
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 /** GET /api/vendor/dashboard/metric-details/:key — live detail payload for one metric. */
 const getMetricDetails = async (req, res) => {
   try {
@@ -156,6 +294,7 @@ module.exports = {
   getInsights,
   getVendorHealth,
   getTasks,
+  getAISummary,
   getMetricDetails,
   getMetricExport,
 };

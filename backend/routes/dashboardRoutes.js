@@ -15,6 +15,7 @@ const {
   getTasks,
   getMetricDetails,
   getMetricExport,
+  getAISummary,
 } = require('../controllers/dashboardController');
 
 // Module 3 — Vendor Dashboard routes
@@ -29,6 +30,7 @@ router.get('/recent-activity', getRecentActivity);
 router.get('/insights', getInsights);
 router.get('/vendor-health', getVendorHealth);
 router.get('/tasks', getTasks);
+router.get('/ai-insights', getAISummary);
 router.get('/metric-details/:key', getMetricDetails);
 router.get('/metric-export/:key', getMetricExport);
 
