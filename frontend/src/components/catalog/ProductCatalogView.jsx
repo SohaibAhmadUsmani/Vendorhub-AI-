@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useParams, useNavigate } from 'react-router-dom';
 import { SlidersHorizontal, RotateCcw, Plus, X } from 'lucide-react';
 import ProductCard from './ProductCard';
 import ProductListView from './ProductListView';
@@ -18,6 +18,7 @@ import { fetchProducts, addProduct, updateProduct, deleteProduct } from '../../s
  */
 export default function ProductCatalogView({ vendorIdFilter = null }) {
   const [searchParams, setSearchParams] = useSearchParams();
+  const routeParams = useParams();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
@@ -43,7 +44,7 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
   const [productToDelete, setProductToDelete] = useState(null);
   const [bulkRfqSuccessMsg, setBulkRfqSuccessMsg] = useState(false);
 
-  const effectiveVendorFilter = vendorIdFilter || searchParams.get('vendor');
+  const effectiveVendorFilter = vendorIdFilter || routeParams.id || searchParams.get('vendor');
 
   useEffect(() => {
     async function loadCatalog() {
@@ -117,12 +118,15 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
   };
 
 
+  const navigate = useNavigate();
+
   const handleSubmitBulkRfq = (selectedProds) => {
     setBulkRfqSuccessMsg(true);
     setTimeout(() => {
       setBulkRfqSuccessMsg(false);
       setSelectedProductIds([]);
-    }, 2500);
+      navigate('/buyer/rfqs', { state: { selectedProducts: selectedProds } });
+    }, 1200);
   };
 
   const selectedProductsObjects = products.filter(p => selectedProductIds.includes(p.id));

@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * VendorHeaderCard — Foundational component for Module 5 (Vendor Profiles)
  * Conforms 100% to design_system.md and SRS Page 6
  */
 export default function VendorHeaderCard({ vendor }) {
+  const navigate = useNavigate();
   const [isSaved, setIsSaved] = useState(vendor?.isSaved || false);
 
   const defaultVendor = {
@@ -111,10 +113,18 @@ export default function VendorHeaderCard({ vendor }) {
             >
               {isSaved ? '♥ Saved' : '♡ Save Vendor'}
             </button>
-            <button className="btn-cyan-accent" style={{ minHeight: '48px', padding: '0 1.25rem', borderRadius: '12px' }}>
+            <button 
+              className="btn-cyan-accent" 
+              onClick={() => navigate('/buyer/messages', { state: { vendorName: data.name, vendorId: data.id } })}
+              style={{ minHeight: '48px', padding: '0 1.25rem', borderRadius: '12px' }}
+            >
               💬 Contact Vendor
             </button>
-            <button className="btn-purple-primary" style={{ minHeight: '48px', padding: '0 1.25rem', borderRadius: '12px' }}>
+            <button 
+              className="btn-purple-primary" 
+              onClick={() => navigate('/buyer/rfqs', { state: { vendorName: data.name, vendorId: data.id } })}
+              style={{ minHeight: '48px', padding: '0 1.25rem', borderRadius: '12px' }}
+            >
               📝 Request RFQ
             </button>
           </div>

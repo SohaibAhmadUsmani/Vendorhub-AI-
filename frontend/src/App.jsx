@@ -27,7 +27,9 @@ function App() {
           
           {/* Muzammil's Module 5 & Module 6 Views */}
           <Route path="vendors" element={<VendorProfileView />} />
+          <Route path="vendors/:id" element={<VendorProfileView />} />
           <Route path="product-catalog" element={<ProductCatalogView />} />
+          <Route path="product-catalog/:id" element={<ProductCatalogView />} />
           
           <Route path="saved-vendors" element={<TeammateModulePlaceholder pageTitle="Saved Vendors" />} />
           <Route path="messages" element={<MessagesPage />} />

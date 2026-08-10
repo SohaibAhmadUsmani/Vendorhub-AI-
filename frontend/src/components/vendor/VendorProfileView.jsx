@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useParams } from 'react-router-dom';
 import ProductCatalogView from '../catalog/ProductCatalogView';
 import VendorProfileForm from './VendorProfileForm';
 import VendorTeamCard from './VendorTeamCard';
@@ -10,14 +10,14 @@ import FactoryVideoModal from './FactoryVideoModal';
 import CertificationViewerModal from './CertificationViewerModal';
 import { fetchVendorProfile, fetchAllVendorProfiles, updateVendorProfile, submitVendorReview, toggleSaveVendor } from '../../services/vendorService';
 
-
 /**
  * VendorProfileView — Module 5 (Vendor Profiles) 100% Completion View
  * Interactive 6-Vendor Switcher Dropdown, Centered Glassmorphic Edit Modal, 6 Tabs
  */
 export default function VendorProfileView({ initialVendorId = "v-sialkot-101" }) {
   const [searchParams, setSearchParams] = useSearchParams();
-  const queryVendorId = searchParams.get('id');
+  const routeParams = useParams();
+  const queryVendorId = routeParams.id || searchParams.get('id');
 
   const [selectedVendorId, setSelectedVendorId] = useState(queryVendorId || initialVendorId);
   const [allVendors, setAllVendors] = useState([]);
