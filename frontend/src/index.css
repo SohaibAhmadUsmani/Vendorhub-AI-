@@ -16,6 +16,34 @@
 }
 
 /* ==========================================================================
+   AI EXECUTIVE SUMMARY MASCOT — subtle friendly idle shake.
+   The mascot gently sways a few pixels left/right with a tiny rotation so it
+   feels alive without being distracting. Transform-only animation (no layout
+   shifts), and it is disabled entirely for users who prefer reduced motion.
+   ========================================================================== */
+
+@keyframes ai-mascot-idle {
+  0%,
+  100% {
+    transform: translateX(-3px) rotate(-1.5deg);
+  }
+  50% {
+    transform: translateX(3px) rotate(1.5deg);
+  }
+}
+
+.ai-mascot-idle {
+  animation: ai-mascot-idle 3.8s ease-in-out infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-mascot-idle {
+    animation: none;
+  }
+}
+
+/* ==========================================================================
    VENDORHUB AI GLOBAL CSS CUSTOM PROPERTIES & DESIGN SYSTEM TOKENS
    Author: Muzammil Tanveer (Frontend Lead) & Khadija (Auth/Dashboard)
    ========================================================================== */
