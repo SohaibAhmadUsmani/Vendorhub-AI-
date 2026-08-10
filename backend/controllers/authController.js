@@ -7,7 +7,7 @@ const {
     sendVerificationEmail,
     generateOtp
 } = require("../services/emailService");
-const generateJwt = require("../services/jwtService");
+const {generateJwt} = require("../services/jwtService");
 
 /**
  * Register a new user and send an email verification link.
