@@ -640,3 +640,46 @@ All team members should reference these two components as the **gold-standard** 
    - Reviewer info fields with emoji-labeled `font-mono` labels
    - Character counter on feedback textarea
    - Vendor name highlighted in purple in header
+
+3. **`frontend/src/components/layout/Header.jsx` (Notification Popover)** — Demonstrates:
+   - Dark gradient header banner with dot-grid texture overlay
+   - Live purple pulse indicator dot and category color rails
+   - Unread pulse dot, high-contrast text hierarchy, hover elevation
+   - Click-outside-to-close via `useRef` + `useEffect`
+
+---
+
+## 12. Popover & Dropdown Component Standards
+
+> All popover overlays and floating panels must follow these specs.
+
+### Popover Container
+`border-radius: 20px`, `box-shadow: 0 25px 60px -12px rgba(0,0,0,0.4)`, `animation: popoverSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)`. Max-width: Notifications `420px`, Search `480px`, Menus `240px`.
+
+### Popover Header (Dark Gradient Banner)
+Same as modal headers: `linear-gradient(135deg, #1A1838, #151D30, #0B1021)` with dot-grid texture. Title: `font-heading 0.95rem 800 #F8FAFC`. Live pulse dot. Ghost action button.
+
+### Popover Item Cards
+Category color rail (`3.5px` left strip), icon (`36×36`), title (`#0F172A 700`), description (`#334155 500`), time (`font-mono #64748B`), unread pulse dot, hover elevation.
+
+### Required: Click-Outside-to-Close
+All popovers must use `useRef` + `useEffect` + `mousedown` listener.
+
+---
+
+## 13. CSS Variable Registration Protocol
+
+All components must use variables from `index.css`. New tokens: define in `:root` → add dark mode override → document here.
+
+| Category | Variables |
+|---|---|
+| **Brand** | `--primary-purple`, `--primary-purple-hover`, `--primary-purple-light` |
+| **Notifications** | `--plum/tint/ink`, `--rust/tint/ink`, `--ochre/tint/ink`, `--moss/tint/ink` |
+| **Aliases** | `--bg`, `--card`, `--line`, `--ink-soft`, `--ink-faint` |
+
+---
+
+## 14. Checklist Additions
+
+16. **Popovers**: Dark gradient header, color rails, unread dots, hover elevation, click-outside-to-close. See Section 12.
+17. **CSS Variables**: Use registered tokens only. New tokens → add to `index.css` `:root` AND this document.

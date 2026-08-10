@@ -13,7 +13,7 @@ const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
  */
 async function groqChat(messages, options = {}) {
   const body = {
-    model: options.model || 'openai/gpt-oss-120b',
+    model: options.model || 'llama-3.3-70b-versatile',
     messages,
     temperature: options.temperature ?? 0.7,
     max_tokens: options.max_tokens,

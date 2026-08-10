@@ -137,7 +137,7 @@ const deleteVendor = async (req, res) => {
 const addVendorReview = async (req, res) => {
   try {
     const { id } = req.params;
-    const { reviewerName, reviewerCompany, rating, comment } = req.body;
+    const { reviewerName, reviewerCompany, rating, comment, categories } = req.body;
 
     let vendor = mongoose.Types.ObjectId.isValid(id)
       ? await Vendor.findById(id)
@@ -151,6 +151,12 @@ const addVendorReview = async (req, res) => {
       reviewerName: reviewerName || 'Verified Buyer',
       reviewerCompany: reviewerCompany || 'Enterprise Client',
       rating: Number(rating) || 5,
+      categories: categories || {
+        productQuality: 5,
+        communication: 5,
+        deliverySpeed: 5,
+        valueForMoney: 5
+      },
       comment: comment || 'Great service and quality products.',
       date: new Date()
     };

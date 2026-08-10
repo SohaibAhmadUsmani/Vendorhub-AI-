@@ -13,24 +13,29 @@ export default function FactoryVideoModal({ isOpen, onClose, videoUrl, videoTitl
   }, []);
 
   useEffect(() => {
-    if (!isOpen || !videoUrl) {
+    if (!isOpen) {
       setIframeSrc(null);
       return;
     }
 
-    let src = videoUrl;
+    const effectiveUrl = videoUrl || 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+    let src = effectiveUrl;
     let native = false;
 
-    if (videoUrl.includes('youtube.com/watch?v=')) {
-      const videoId = new URL(videoUrl).searchParams.get('v');
+    if (effectiveUrl.includes('youtube.com/watch?v=')) {
+      try {
+        const videoId = new URL(effectiveUrl).searchParams.get('v');
+        src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+      } catch (err) {
+        src = effectiveUrl;
+      }
+    } else if (effectiveUrl.includes('youtu.be/')) {
+      const videoId = effectiveUrl.split('youtu.be/')[1].split('?')[0];
       src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
-    } else if (videoUrl.includes('youtu.be/')) {
-      const videoId = videoUrl.split('youtu.be/')[1].split('?')[0];
-      src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
-    } else if (videoUrl.includes('vimeo.com/')) {
-      const videoId = videoUrl.split('vimeo.com/')[1].split('?')[0];
+    } else if (effectiveUrl.includes('vimeo.com/')) {
+      const videoId = effectiveUrl.split('vimeo.com/')[1].split('?')[0];
       src = `https://player.vimeo.com/video/${videoId}?autoplay=1`;
-    } else if (videoUrl.match(/\.(mp4|webm|ogg)$/i)) {
+    } else if (effectiveUrl.match(/\.(mp4|webm|ogg)$/i) || effectiveUrl.includes('googleapis.com')) {
       native = true;
     }
 
