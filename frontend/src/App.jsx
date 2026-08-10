@@ -35,6 +35,9 @@ function App() {
           <Route path="contracts" element={<TeammateModulePlaceholder pageTitle="Contracts" />} />
           <Route path="documents" element={<TeammateModulePlaceholder pageTitle="Documents" />} />
           <Route path="analytics" element={<AnalyticsPage />} />
+          <Route path="ai-insights" element={<TeammateModulePlaceholder pageTitle="AI Insights" />} />
+          <Route path="notifications" element={<TeammateModulePlaceholder pageTitle="Notifications" />} />
+          <Route path="vendor-analytics" element={<TeammateModulePlaceholder pageTitle="Vendor Analytics" />} />
           <Route path="spend-summary" element={<TeammateModulePlaceholder pageTitle="Spend Summary" />} />
           <Route path="settings" element={<TeammateModulePlaceholder pageTitle="Settings" />} />
         </Route>

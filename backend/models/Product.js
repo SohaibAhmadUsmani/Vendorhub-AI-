@@ -22,6 +22,7 @@ const productSchema = new mongoose.Schema({
   inStock: { type: Boolean, default: true },
   availableStock: { type: Number, default: 5000 },
   stockQuantity: { type: Number, default: 5000 },
+views: { type: Number, default: 0 },
   stockStatus: { type: String, enum: ['In Stock', 'Low Stock', 'Made to Order', 'Out of Stock'], default: 'In Stock' },
   image: { type: String },
   imageUrl: { type: String },
