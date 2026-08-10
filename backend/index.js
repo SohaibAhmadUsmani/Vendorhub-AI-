@@ -10,6 +10,7 @@ const vendorRoutes = require('./routes/vendorRoutes');
 const productRoutes = require('./routes/productRoutes');
 const matchRoutes = require('./routes/matchRoutes');
 const rfqRoutes = require('./routes/rfqRoutes');
+
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const vendorDashboardRoutes = require('./routes/vendorDashboardRoutes');
 const quoteRoutes = require('./routes/quoteRoutes');
@@ -19,6 +20,7 @@ const uploadRoutes = require('./routes/uploadRoutes');
 const Message = require('./models/Message');
 const Conversation = require('./models/Conversation');
 const analyticsRoutes = require('./routes/analyticsRoutes');
+const authRoutes = require('./routes/authRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -36,10 +38,12 @@ app.use(morgan('dev'));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // API Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/vendors', vendorRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/match', matchRoutes);
 app.use('/api/rfq', rfqRoutes);
+
 app.use('/api/vendor/dashboard', dashboardRoutes);
 app.use('/api/vendor', vendorDashboardRoutes);
 app.use('/api/dashboard', dashboardRoutes.overviewRouter);
@@ -48,6 +52,11 @@ app.use('/api/negotiation', negotiationRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/analytics', analyticsRoutes);
+
+app.use('/api/auth', authRoutes);
+
+app.use('/api/auth', authRoutes);
+
 
 // Module 11 — Real-time Messaging (Socket.io)
 io.on('connection', (socket) => {
