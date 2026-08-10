@@ -8,7 +8,10 @@ const {
     generateOtp
 } = require("../services/emailService");
 const {generateJwt} = require("../services/jwtService");
+<<<<<<< HEAD
 
+=======
+>>>>>>> 2108ec3 (feat: complete role-based authentication and routing)
 
 /**
  * Register a new user and send an email verification link.
