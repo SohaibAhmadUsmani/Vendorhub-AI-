@@ -25,7 +25,7 @@ const calculateMatch = async (req, res) => {
 
     // Fetch real vendors from MongoDB Atlas
     const realVendors = await Vendor.find({});
-    
+
     if (!realVendors || realVendors.length === 0) {
       return res.status(200).json({ success: true, results: [] });
     }
@@ -42,7 +42,7 @@ const calculateMatch = async (req, res) => {
       const qualityFactor = Math.min(10, Math.round((v.rating || 4.5) * 2));
       const reviewsFactor = Math.min(10, Math.round((v.rating || 4.5) * 2));
       const certsFactor = Math.min(10, (v.certifications?.length || 1) * 3);
-      
+
       const score = (
         priceFactor * weights.price +
         qualityFactor * weights.quality +
@@ -53,19 +53,25 @@ const calculateMatch = async (req, res) => {
         certsFactor * weights.certifications +
         8 * weights.pastPerformance
       );
-      
+
       return {
         ...vendorObj,
         matchScore: Math.min(99, Math.max(70, Math.round(score * 10)))
       };
     }).sort((a, b) => b.matchScore - a.matchScore);
 
-    try {
-      const explanation = await explainMatch(scored[0], requirement || 'general sourcing need');
-      scored[0].explanation = explanation;
-    } catch (err) {
-      scored[0].explanation = 'AI explanation unavailable (GROQ key not configured yet).';
-    }
+    // Generate an AI explanation for every vendor, in parallel.
+    // Each call is isolated so one failure doesn't block the others.
+    await Promise.all(
+      scored.map(async (vendor) => {
+        try {
+          vendor.explanation = await explainMatch(vendor, requirement || 'general sourcing need');
+        } catch (err) {
+          console.error(`GROQ explanation failed for ${vendor.name}:`, err.message);
+          vendor.explanation = 'AI explanation unavailable right now.';
+        }
+      })
+    );
 
     res.status(200).json({ success: true, results: scored });
   } catch (error) {

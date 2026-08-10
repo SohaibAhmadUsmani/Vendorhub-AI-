@@ -21,7 +21,9 @@ const getRfqTest = (req, res) => {
  */
 const createRFQ = async (req, res) => {
   try {
-    const rfq = await RFQ.create(req.body);
+    // NOTE: confirm with Sohaib whether the JWT payload uses `id` or `_id` —
+    // adjust req.user.id below to req.user._id if needed.
+    const rfq = await RFQ.create({ ...req.body, buyer: req.user.id });
     res.status(201).json({ success: true, rfq });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });

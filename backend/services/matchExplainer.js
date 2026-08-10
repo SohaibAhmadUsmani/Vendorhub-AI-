@@ -10,7 +10,7 @@ Write a 2-sentence explanation of why this vendor is a good/weak match, in plain
 
   const explanation = await groqChat(
     [{ role: 'user', content: prompt }],
-    { model: 'llama3-70b-8192', temperature: 0.7 }
+    { model: 'llama-3.3-70b-versatile', temperature: 0.7 }
   );
 
   return explanation;

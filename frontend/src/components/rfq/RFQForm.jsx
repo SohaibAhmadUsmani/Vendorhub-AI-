@@ -51,9 +51,15 @@ export default function RFQForm() {
         shippingMethod: form.shippingMethod,
       }
 
+      // NOTE: change 'token' below if your login stores it under a different key
+      const token = localStorage.getItem('token')
+
       const res = await fetch('/api/rfq', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify(payload),
       })
 

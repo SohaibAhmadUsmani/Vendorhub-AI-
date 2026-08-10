@@ -4,15 +4,15 @@ export default function MatchScoreCard({ vendor }) {
     { label: 'Quality', value: vendor.quality },
     { label: 'Delivery', value: vendor.deliveryTime },
     { label: 'Reviews', value: vendor.reviews },
-    { label: 'Location', value: vendor.location },
     { label: 'Capacity', value: vendor.capacity },
-    { label: 'Certifications', value: vendor.certifications },
     { label: 'Past Performance', value: vendor.pastPerformance },
   ]
 
+  const certifications = Array.isArray(vendor.certifications) ? vendor.certifications : []
+
   return (
     <div className="bg-white border border-slate-200/80 rounded-2xl p-4 sm:p-6 shadow-card hover:shadow-hover hover:-translate-y-1 transition-all duration-200">
-      <div className="flex justify-between items-center mb-3">
+      <div className="flex justify-between items-center mb-1">
         <h3 className="font-sans text-base sm:text-lg font-bold text-slate-900">
           {vendor.name}
         </h3>
@@ -21,13 +21,17 @@ export default function MatchScoreCard({ vendor }) {
         </span>
       </div>
 
+      {vendor.location && (
+        <p className="text-xs text-slate-400 mb-3">{vendor.location}</p>
+      )}
+
       {vendor.explanation && (
         <p className="text-sm text-slate-600 italic mb-4">
           {vendor.explanation}
         </p>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 mb-4">
         {factors.map((f) => (
           <div key={f.label}>
             <div className="flex justify-between text-xs text-slate-500 mb-1">
@@ -43,6 +47,28 @@ export default function MatchScoreCard({ vendor }) {
           </div>
         ))}
       </div>
+
+      {certifications.length > 0 && (
+        <div>
+          <p className="text-xs text-slate-500 mb-1.5">Certifications</p>
+          <div className="flex flex-wrap gap-1.5">
+            {certifications.map((cert) => (
+              <span
+                key={cert._id || cert.name}
+                title={cert.issuer ? `${cert.issuer}${cert.year ? ' · ' + cert.year : ''}` : undefined}
+                className={`inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full ${
+                  cert.verified
+                    ? 'bg-[#F0EBFE] text-[#6C5CE7]'
+                    : 'bg-slate-100 text-slate-600'
+                }`}
+              >
+                {cert.name}
+                {cert.verified && <span className="text-[10px]">✓</span>}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
