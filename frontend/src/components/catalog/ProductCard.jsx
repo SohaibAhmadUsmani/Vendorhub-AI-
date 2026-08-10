@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Trash2 } from 'lucide-react';
 
 /**
  * ProductCard — Foundational component for Module 6 (Product Catalog) 75% Completion Scope
@@ -160,11 +159,10 @@ export default function ProductCard({
             {onDelete && (
               <button 
                 onClick={(e) => { e.stopPropagation(); onDelete(product); }}
-                style={{ fontSize: '0.75rem', color: '#EF4444', cursor: 'pointer', background: 'none', border: 'none', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}
+                style={{ fontSize: '0.75rem', color: '#EF4444', cursor: 'pointer', background: 'none', border: 'none', fontWeight: 600 }}
                 title="Delete Product"
               >
-                <Trash2 size={14} />
-                <span>Delete</span>
+                Delete
               </button>
             )}
           </div>
@@ -190,10 +188,10 @@ export default function ProductCard({
 
         <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '1rem', fontSize: '0.725rem' }}>
           <span className="font-mono" style={{ backgroundColor: 'var(--bg-main)', color: 'var(--text-secondary)', padding: '0.25rem 0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontWeight: 600 }}>
-            📦 MOQ: {product.moq}
+            MOQ: {product.moq}
           </span>
           <span className="font-mono" style={{ backgroundColor: '#E0F2FE', color: '#0369A1', padding: '0.25rem 0.5rem', borderRadius: 'var(--radius-sm)', fontWeight: 600 }}>
-            ⚡ Lead: {product.leadTimeDisplay}
+            Lead: {product.leadTimeDisplay}
           </span>
         </div>
 

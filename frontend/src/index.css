@@ -724,14 +724,19 @@ html, body, #root {
   background: transparent !important;
 }
 
-/* Dark containers (sidebar) get a dark-tuned scrollbar */
-aside ::-webkit-scrollbar-thumb,
-.sidebar-scroll ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.12) !important;
+/* Dark containers (sidebar) hide scrollbars visually while maintaining full scroll functionality */
+aside,
+.sidebar-scroll {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
 }
-aside ::-webkit-scrollbar-thumb:hover,
-.sidebar-scroll ::-webkit-scrollbar-thumb:hover {
-  background: rgba(108, 92, 231, 0.4) !important;
+aside::-webkit-scrollbar,
+.sidebar-scroll::-webkit-scrollbar,
+aside ::-webkit-scrollbar,
+.sidebar-scroll ::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 /* Modal Pop & Fade Entrance Animation */

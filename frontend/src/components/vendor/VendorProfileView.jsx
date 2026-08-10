@@ -122,8 +122,8 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
 
   const facilityPhotos = [
     "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800&auto=format&fit=crop&q=80",
-    "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&auto=format&fit=crop&q=80",
-    "https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=800&auto=format&fit=crop&q=80"
+    "https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=800&auto=format&fit=crop&q=80",
+    "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&auto=format&fit=crop&q=80"
   ];
 
   return (
@@ -145,7 +145,6 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <span style={{ fontSize: '1.2rem' }}>🏭</span>
           <div>
             <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontFamily: 'var(--font-heading)' }}>
               Select Active Vendor Profile (6 Profiles Available)
@@ -287,7 +286,7 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
                 exportVendorCatalogPDF(vendorData, products);
               }}
             >
-              📄 Export PDF Catalog
+              Export PDF Catalog
             </button>
           </div>
         </div>
@@ -555,7 +554,12 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
                   onClick={() => setActiveLightboxImage(photo)}
                   style={{ height: '200px', borderRadius: 'var(--radius-md)', overflow: 'hidden', cursor: 'pointer', border: '1px solid var(--border-color)' }}
                 >
-                  <img src={photo} alt={`Facility ${i+1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <img 
+                    src={photo} 
+                    alt={`Facility ${i+1}`} 
+                    onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&auto=format&fit=crop&q=80'; }}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                  />
                 </div>
               ))}
             </div>

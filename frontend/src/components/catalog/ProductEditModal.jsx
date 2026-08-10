@@ -41,9 +41,9 @@ export default function ProductEditModal({ product, isOpen, onClose, onSave }) {
   };
 
   const sectionTabs = [
-    { id: 'details', label: 'Product Details', icon: '📦' },
-    { id: 'pricing', label: 'Pricing & Stock', icon: '💰' },
-    { id: 'media', label: 'Media & Specs', icon: '🖼' }
+    { id: 'details', label: 'Product Details' },
+    { id: 'pricing', label: 'Pricing & Stock' },
+    { id: 'media', label: 'Media & Specs' }
   ];
 
   const inputClass = `w-full min-h-[44px] bg-[var(--bg-main)] border border-[var(--border-card)] text-[var(--text-primary)] placeholder-[var(--text-light)] rounded-xl px-4 py-3 outline-none transition-all duration-200 text-sm font-sans`;
@@ -192,7 +192,6 @@ export default function ProductEditModal({ product, isOpen, onClose, onSave }) {
                 marginBottom: '-1px'
               }}
             >
-              <span style={{ fontSize: '0.9rem' }}>{tab.icon}</span>
               {tab.label}
             </button>
           ))}
@@ -211,7 +210,7 @@ export default function ProductEditModal({ product, isOpen, onClose, onSave }) {
               {/* Product Title */}
               <div>
                 <label className="font-mono" style={{ display: 'block', fontSize: '0.65rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
-                  📦 Product Title *
+                  Product Title *
                 </label>
                 <input type="text" name="title" value={formData.title} onChange={handleChange} required
                   placeholder="e.g. FIFA Pro Thermal Match Soccer Ball"
@@ -231,7 +230,7 @@ export default function ProductEditModal({ product, isOpen, onClose, onSave }) {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div>
                   <label className="font-mono" style={{ display: 'block', fontSize: '0.65rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
-                    🏷️ Category
+                    Category
                   </label>
                   <div style={{ position: 'relative' }}>
                     <select name="category" value={formData.category} onChange={handleChange}
@@ -257,7 +256,7 @@ export default function ProductEditModal({ product, isOpen, onClose, onSave }) {
                 </div>
                 <div>
                   <label className="font-mono" style={{ display: 'block', fontSize: '0.65rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
-                    🔖 SKU / Model Number
+                    SKU / Model Number
                   </label>
                   <input type="text" name="sku" value={formData.sku} onChange={handleChange}
                     placeholder="e.g. SS-FB-900"
@@ -277,7 +276,7 @@ export default function ProductEditModal({ product, isOpen, onClose, onSave }) {
               {/* Unit Type */}
               <div>
                 <label className="font-mono" style={{ display: 'block', fontSize: '0.65rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
-                  📐 Unit Type
+                  Unit Type
                 </label>
                 <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                   {['piece', 'set', 'pair', 'kg', 'meter', 'carton'].map(unit => (
@@ -306,7 +305,7 @@ export default function ProductEditModal({ product, isOpen, onClose, onSave }) {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
                 <div>
                   <label className="font-mono" style={{ display: 'block', fontSize: '0.65rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
-                    💲 Unit Price (USD) *
+                    Unit Price (USD) *
                   </label>
                   <div style={{ position: 'relative' }}>
                     <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--primary-purple)', fontWeight: 800, fontSize: '1rem', fontFamily: 'var(--font-mono)' }}>$</span>
@@ -325,7 +324,7 @@ export default function ProductEditModal({ product, isOpen, onClose, onSave }) {
                 </div>
                 <div>
                   <label className="font-mono" style={{ display: 'block', fontSize: '0.65rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
-                    📦 MOQ (Units)
+                    MOQ (Units)
                   </label>
                   <input type="number" name="moq" value={formData.moq} onChange={handleChange} required
                     style={{
@@ -341,7 +340,7 @@ export default function ProductEditModal({ product, isOpen, onClose, onSave }) {
                 </div>
                 <div>
                   <label className="font-mono" style={{ display: 'block', fontSize: '0.65rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
-                    ⚡ Lead Time (Days)
+                    Lead Time (Days)
                   </label>
                   <input type="number" name="leadTimeDays" value={formData.leadTimeDays} onChange={handleChange} required
                     style={{
@@ -361,7 +360,7 @@ export default function ProductEditModal({ product, isOpen, onClose, onSave }) {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div>
                   <label className="font-mono" style={{ display: 'block', fontSize: '0.65rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
-                    🏭 Available Stock Quantity
+                    Available Stock Quantity
                   </label>
                   <input type="number" name="availableStock" value={formData.availableStock} onChange={handleChange}
                     style={{
@@ -377,7 +376,7 @@ export default function ProductEditModal({ product, isOpen, onClose, onSave }) {
                 </div>
                 <div>
                   <label className="font-mono" style={{ display: 'block', fontSize: '0.65rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
-                    📊 Stock Availability
+                    Stock Availability
                   </label>
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
                     {['In Stock', 'Low Stock', 'Made to Order'].map(status => (
@@ -441,7 +440,7 @@ export default function ProductEditModal({ product, isOpen, onClose, onSave }) {
               {/* Image URL with preview */}
               <div>
                 <label className="font-mono" style={{ display: 'block', fontSize: '0.65rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
-                  🖼 Product Image URL
+                  Product Image URL
                 </label>
                 <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
                   <div style={{
@@ -518,7 +517,7 @@ export default function ProductEditModal({ product, isOpen, onClose, onSave }) {
               {/* Specifications */}
               <div>
                 <label className="font-mono" style={{ display: 'block', fontSize: '0.65rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
-                  📋 Technical Specifications & Details
+                  Technical Specifications & Details
                 </label>
                 <textarea name="specifications" rows={6} value={formData.specifications} onChange={handleChange}
                   placeholder={"Material: Microfiber PU\nSize: 5 (Standard)\nWeight: 430g ± 10g\nCertification: FIFA Quality Pro\nCustomization: Available (Logo Print, Color)"}
