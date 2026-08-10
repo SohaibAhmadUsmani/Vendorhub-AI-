@@ -7,17 +7,19 @@
  */
 
 const mongoose = require('mongoose');
+const jwt = require('jsonwebtoken');
 const Vendor = require('../models/Vendor');
 const Product = require('../models/Product');
 const RFQ = require('../models/RFQ');
 const Order = require('../models/Order');
 const CustomerRequest = require('../models/CustomerRequest');
 const Notification = require('../models/Notification');
-// Side-effect import: registering the User model is required for every
+const Quote = require('../models/Quote');
+// Side-effect import + reference: the User model is required for every
 // `.populate('buyer')` below (RFQs, orders, requests, messages) — without
 // it Mongoose throws "Schema hasn't been registered for model 'User'" once
 // real docs exist.
-require('../models/User');
+const UserModel = require('../models/User');
 
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
@@ -31,6 +33,32 @@ async function resolveVendor(vendorId) {
     vendor = await Vendor.findOne({}).sort({ rating: -1 });
   }
   return vendor;
+}
+
+/**
+ * Resolve the vendor scoped to the requesting user, when a valid JWT is
+ * present. Vendors are owned by whoever registered their vendor account with
+ * a matching contact email, so an authenticated vendor only ever sees their
+ * own data. Without a usable token (dev/demo mode) this falls back to the
+ * existing dashboard resolution so the current app keeps working.
+ */
+async function resolveVendorForRequest(req) {
+  const token = req?.header ? req.header('Authorization')?.replace('Bearer ', '') : null;
+  if (token && process.env.JWT_SECRET) {
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      if (decoded?.id) {
+        const user = await UserModel.findById(decoded.id).lean();
+        if (user?.email && user.role === 'vendor') {
+          const owned = await Vendor.findOne({ 'contact.email': user.email });
+          if (owned) return owned;
+        }
+      }
+    } catch {
+      /* Invalid/expired token — fall through to the default resolution. */
+    }
+  }
+  return resolveVendor(req?.query?.vendorId);
 }
 
 function percentageChange(current, previous) {
@@ -1709,6 +1737,459 @@ async function buildRecommendations(vendorId) {
   return recommendations.slice(0, 4);
 }
 
+/* --------------------------- AI Insights Page --------------------------- */
+
+const AI_RANGES = ['7d', '30d', '90d'];
+
+/** Clamp an AI-page range to a supported key (defaults to 30d). */
+function aiPageRange(range) {
+  return AI_RANGES.includes(range) ? range : '30d';
+}
+
+/** Impact level for an opportunity, derived from its real priority label. */
+function opportunityImpact(priority) {
+  const p = String(priority || '').toLowerCase();
+  if (p === 'critical' || p === 'high') return 'high';
+  if (p === 'medium') return 'medium';
+  return 'low';
+}
+
+/** Signed delta phrase for a composed summary ("up 12%" / "down 4%"). */
+function formatDelta(pct) {
+  if (pct == null) return '';
+  return pct >= 0
+    ? `, up ${pct}% versus the prior period`
+    : `, down ${Math.abs(pct)}% versus the prior period`;
+}
+
+/**
+ * Per-day "insight signal" counts across the window — new RFQs, orders,
+ * customer requests and product listings. This real activity drives the
+ * trend chart and the count-card sparklines on the AI Insights page.
+ */
+function buildActivityTimeline(window, sources) {
+  const buckets = new Map();
+  for (
+    let cursor = new Date(window.start);
+    cursor < window.end;
+    cursor = advanceBucket(cursor, 'day')
+  ) {
+    const info = bucketInfo(cursor, 'day');
+    buckets.set(info.key, { date: info.key, label: info.label, value: 0 });
+  }
+  (sources || []).forEach((items) => {
+    (items || []).forEach((doc) => {
+      const created = new Date(doc.createdAt || Date.now());
+      if (created < window.start || created >= window.end) return;
+      const bucket = buckets.get(bucketInfo(created, 'day').key);
+      if (bucket) bucket.value += 1;
+    });
+  });
+  return Array.from(buckets.values());
+}
+
+/**
+ * buildAISummary — the single payload for the AI Insights page. Every figure
+ * is computed from real collections for the selected range; the executive
+ * summary paragraph is composed server-side from those live numbers (a
+ * Groq-backed paraphrase is wired up in the next step). Empty collections
+ * produce honest empty states, never fabricated values.
+ */
+async function buildAISummary(vendorOrId, range = '30d') {
+  /* The controller resolves the authenticated vendor and passes it in; a raw
+     id is accepted too so the builder stays self-contained for other callers. */
+  const vendor =
+    vendorOrId && typeof vendorOrId === 'object' ? vendorOrId : await resolveVendor(vendorOrId);
+  const key = aiPageRange(range);
+  const now = new Date();
+  const window = performanceWindow(key, now.getTime());
+
+  const empty = {
+    generatedAt: now.toISOString(),
+    range: key,
+    periodLabel: window.label,
+    kpis: null,
+    summary: { text: null, confidence: null, level: null },
+    observations: [],
+    trend: { points: [], counts: { total: 0, high: 0, medium: 0, low: 0 } },
+    categories: [],
+    buyerInterest: [],
+    opportunities: [],
+    recommendations: [],
+    ai: { available: false, reason: 'no_vendor' },
+  };
+  if (!vendor) return empty;
+
+  const vid = vendor._id;
+  const [orders, rfqs, requests, products, quotes] = await Promise.all([
+    Order.find({ vendor: vid }).lean(),
+    RFQ.find({}).lean(),
+    CustomerRequest.find({ vendor: vid }).lean(),
+    Product.find({ vendorId: vid }).lean(),
+    Quote.find({ vendor: vid }).lean(),
+  ]);
+
+  const inWindow = (t) => t >= window.start && t < window.end;
+  const created = (doc) => new Date(doc.createdAt || now).getTime();
+
+  /* Revenue in the window vs the previous window (real order totals). */
+  const revenueFor = (start, end) =>
+    orders
+      .filter((o) => created(o) >= start && created(o) < end)
+      .reduce((sum, o) => sum + Number(o.total || 0), 0);
+  const revenue = revenueFor(window.start, window.end);
+  const prevRevenue = revenueFor(window.prevStart, window.start);
+  const revenueDelta = percentageChange(revenue, prevRevenue);
+
+  /* Live insights + recommendations (reused builders — no duplicate logic). */
+  const insights = await buildInsights(vid);
+  const recommendations = await buildRecommendations(vid);
+
+  /* Activity series + per-day revenue series (both real historical data). */
+  const activity = buildActivityTimeline(window, [rfqs, orders, requests, products]);
+  const revenueSpark = dailyAmounts(orders, PERFORMANCE_RANGES[key].days);
+
+  /* Open RFQs = the current opportunities, ranked by priority then age. */
+  const openRfqs = rfqs
+    .filter((r) => ['sent', 'pending', 'draft'].includes(String(r.status).toLowerCase()))
+    .sort(
+      (a, b) =>
+        (PRIORITY_WEIGHT[String(b.priority || 'medium').toLowerCase()] || 2) -
+          (PRIORITY_WEIGHT[String(a.priority || 'medium').toLowerCase()] || 2) ||
+        new Date(a.createdAt) - new Date(b.createdAt),
+    );
+
+  const productMap = new Map(products.map((p) => [String(p._id), p]));
+  const opportunities = openRfqs.slice(0, 4).map((rfq) => {
+    const product = matchProductName(String(rfq.product || ''), products);
+    const price = product ? Number(product.price || 0) : 0;
+    const qty = Number(rfq.quantity || 0);
+    /* Potential value = requested quantity × the matching catalog price.
+       Real data when a price is known, otherwise null. */
+    const potentialValue = price > 0 && qty > 0 ? price * qty : null;
+    return {
+      id: `rfq-${String(rfq._id)}`,
+      name: rfq.product ?? 'New RFQ',
+      country: rfq.country ?? null,
+      quantity: qty,
+      priority: rfq.priority ?? 'medium',
+      impact: opportunityImpact(rfq.priority),
+      potentialValue,
+      potentialLabel: potentialValue != null ? fmtMoney(potentialValue) : null,
+      ctaLabel: 'View RFQ',
+    };
+  });
+
+  /* Impact for each live recommendation, derived from the same real signals
+     the recommendation builder used. */
+  const unread = requests.filter((r) => !r.read);
+  const hasIso = (vendor.certifications || []).some((c) =>
+    /iso\s*9001|iso\s*14001/i.test(c.name || ''),
+  );
+  const cancelled = orders.filter((o) => o.status === 'cancelled').length;
+  const impactFor = (rec) => {
+    switch (rec.id) {
+      case 'quote-rfqs':
+        return openRfqs.some((r) => opportunityImpact(r.priority) === 'high') ? 'high' : 'medium';
+      case 'reply-messages':
+        return unread.length > 2 ? 'high' : 'medium';
+      case 'restock':
+        return 'high';
+      case 'certificate':
+        return 'medium';
+      case 'reduce-cancellations':
+        return 'high';
+      default:
+        return 'medium';
+    }
+  };
+  const enriched = recommendations.map((rec) => ({ ...rec, impact: impactFor(rec) }));
+
+  /* If no open RFQs exist yet, surface the live recommendations as the
+     current opportunities so the rail is never empty (still real data). */
+  if (!opportunities.length) {
+    enriched.slice(0, 4).forEach((rec) => {
+      opportunities.push({
+        id: `rec-${rec.id}`,
+        name: rec.title,
+        country: null,
+        quantity: null,
+        priority: 'medium',
+        impact: rec.impact ?? 'medium',
+        potentialValue: null,
+        potentialLabel: null,
+        ctaLabel: rec.ctaLabel ?? 'Take action',
+      });
+    });
+  }
+
+  /* Category revenue share (real order revenue, else catalog counts). */
+  const categoryValue = new Map();
+  if (orders.length) {
+    orders.forEach((o) => {
+      if (!inWindow(created(o))) return;
+      (o.items || []).forEach((item) => {
+        const product = item.product ? productMap.get(String(item.product)) : null;
+        const name = product ? product.category : null;
+        if (!name) return;
+        categoryValue.set(
+          name,
+          (categoryValue.get(name) || 0) + Number(item.unitPrice || 0) * Number(item.quantity || 0),
+        );
+      });
+    });
+  } else {
+    products.forEach((p) => {
+      if (!p.category || !inWindow(created(p))) return;
+      categoryValue.set(p.category, (categoryValue.get(p.category) || 0) + 1);
+    });
+  }
+  const categoryTotal = Array.from(categoryValue.values()).reduce((sum, n) => sum + n, 0);
+  const categories = Array.from(categoryValue.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([name, value]) => ({
+      name,
+      value: Math.round(value),
+      percentage: categoryTotal ? Math.round((value / categoryTotal) * 100) : 0,
+    }));
+
+  /* Buyer interest — real RFQ country counts within the window. */
+  const countryCounts = new Map();
+  rfqs.forEach((r) => {
+    if (!r.country || !inWindow(created(r))) return;
+    countryCounts.set(r.country, (countryCounts.get(r.country) || 0) + 1);
+  });
+  const buyerTotal = Array.from(countryCounts.values()).reduce((sum, n) => sum + n, 0);
+  const buyerInterest = Array.from(countryCounts.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([country, count]) => ({
+      country,
+      count,
+      percentage: buyerTotal ? Math.round((count / buyerTotal) * 100) : 0,
+    }));
+
+  /* Insight counts by priority (drives the trend card's segmented chips). */
+  const priorityCounts = { total: insights.length, high: 0, medium: 0, low: 0 };
+  insights.forEach((i) => {
+    if (priorityCounts[i.priority] != null) priorityCounts[i.priority] += 1;
+  });
+
+  /* Window-level stats shared by the summary, the AI dataset and confidence. */
+  const ordersInWindow = orders.filter((o) => inWindow(created(o)));
+  const rfqsInWindow = rfqs.filter((r) => inWindow(created(r)));
+  const requestsInWindow = requests.filter((r) => inWindow(created(r)));
+  const windowRfqIds = new Set(rfqsInWindow.map((r) => String(r._id)));
+  const convertedInWindow = ordersInWindow.filter(
+    (o) => o.rfq && windowRfqIds.has(String(o.rfq)),
+  ).length;
+  const conversionRate =
+    rfqsInWindow.length > 0 ? Math.round((convertedInWindow / rfqsInWindow.length) * 100) : null;
+  const avgOrderValue = ordersInWindow.length ? Math.round(revenue / ordersInWindow.length) : null;
+  const quotesOpen = quotes.filter((q) =>
+    ['pending', 'submitted', 'under_negotiation'].includes(String(q.status).toLowerCase()),
+  ).length;
+
+  /* Top products by revenue within the window (real order lines). */
+  const productRevenue = new Map();
+  ordersInWindow.forEach((o) => {
+    (o.items || []).forEach((item) => {
+      const product = item.product ? productMap.get(String(item.product)) : null;
+      const name = product ? product.name : null;
+      if (!name) return;
+      const entry = productRevenue.get(name) || { revenue: 0, units: 0, category: product.category };
+      entry.revenue += Number(item.unitPrice || 0) * Number(item.quantity || 0);
+      entry.units += Number(item.quantity || 0);
+      productRevenue.set(name, entry);
+    });
+  });
+  const topProducts = Array.from(productRevenue.entries())
+    .sort((a, b) => b[1].revenue - a[1].revenue)
+    .slice(0, 5)
+    .map(([name, entry]) => ({
+      name,
+      category: entry.category,
+      revenue: Math.round(entry.revenue),
+      units: entry.units,
+    }));
+
+  /* Confidence — blended from data presence, recency, vendor-profile
+     completeness, metric breadth and source consistency. */
+  const presenceSignals = [
+    products.length > 0,
+    orders.length > 0,
+    rfqs.length > 0,
+    requests.length > 0,
+    quotes.length > 0,
+  ];
+  const presence = presenceSignals.filter(Boolean).length / presenceSignals.length;
+
+  const profileChecks = [
+    Boolean(vendor.name && vendor.overview && vendor.location),
+    Boolean(vendor.logo),
+    products.length > 0,
+    (vendor.certifications || []).length > 0,
+    Boolean(vendor.contact?.email || vendor.contact?.phone || vendor.contact?.website),
+    vendor.verificationStatus === 'Verified',
+  ];
+  const profilePct = (profileChecks.filter(Boolean).length / profileChecks.length) * 100;
+
+  const allDocs = [products, orders, rfqs, requests, quotes];
+  const latestTs = Math.max(0, ...allDocs.flatMap((list) => (list.length ? list.map(created) : [])));
+  const stalenessDays = (Date.now() - latestTs) / DAY_MS;
+  const recency = latestTs > 0 ? Math.max(0, Math.min(1, 1 - stalenessDays / 90)) : 0;
+
+  const breadthSignals = [
+    products.length > 0,
+    orders.length > 0,
+    rfqs.length > 0,
+    requests.length > 0,
+    quotes.length > 0,
+    revenue > 0 || prevRevenue > 0,
+    categories.length > 0,
+    activity.some((p) => p.value > 0),
+    buyerInterest.length > 0,
+  ];
+  const breadth = breadthSignals.filter(Boolean).length / breadthSignals.length;
+
+  const timestampHealthy = (list) =>
+    list.length ? list.filter((d) => created(d) <= Date.now()).length / list.length : 1;
+  const ordersWithItems = orders.filter((o) => (o.items || []).length > 0).length;
+  const consistency =
+    (timestampHealthy(orders) +
+      timestampHealthy(rfqs) +
+      (orders.length ? ordersWithItems / orders.length : 1)) /
+    3;
+
+  const confidence = Math.min(
+    95,
+    Math.max(
+      5,
+      Math.round(
+        100 * (0.45 * presence + 0.15 * recency + 0.15 * (profilePct / 100) + 0.15 * breadth + 0.1 * consistency),
+      ),
+    ),
+  );
+  const confidenceLevel = confidence >= 70 ? 'high' : confidence >= 40 ? 'medium' : 'low';
+
+  /* Executive summary — composed from the live numbers above (the controller
+     overlays the Groq-generated text when the AI layer is available). */
+  const sentences = [];
+  if (vendor.name) sentences.push(`Here's your business snapshot for ${vendor.name}.`);
+  if (rfqsInWindow.length > 0)
+    sentences.push(
+      `${rfqsInWindow.length} new RFQ${rfqsInWindow.length === 1 ? '' : 's'} came in during this period.`,
+    );
+  if (ordersInWindow.length > 0)
+    sentences.push(
+      `${ordersInWindow.length} order${ordersInWindow.length === 1 ? '' : 's'} were placed in the same window.`,
+    );
+  if (revenue > 0)
+    sentences.push(`Revenue reached ${fmtMoney(revenue)}${formatDelta(revenueDelta)}.`);
+  if (categories.length)
+    sentences.push(`${categories[0].name} leads your categories with a ${categories[0].percentage}% share.`);
+  if (openRfqs.length)
+    sentences.push(
+      `${openRfqs.length} open ${openRfqs.length === 1 ? 'opportunity is' : 'opportunities are'} waiting on a quote.`,
+    );
+  if (insights.length) {
+    sentences.push(
+      priorityCounts.high > 0
+        ? `${priorityCounts.high} high-priority insight${priorityCounts.high === 1 ? '' : 's'} need${priorityCounts.high === 1 ? 's' : ''} your attention.`
+        : 'Your recent signals look healthy — no high-priority alerts right now.',
+    );
+  }
+  const text = sentences.length
+    ? sentences.join(' ')
+    : "There isn't enough activity in this period yet to summarize — new RFQs, orders and inquiries will appear here as they happen.";
+
+  /* Structured, non-sensitive dataset handed to the AI service. No buyer PII,
+     addresses or private contact details are included — only business
+     aggregates the model needs to reason with. */
+  const aiContext = {
+    businessName: vendor.name,
+    period: {
+      periodLabel: window.label,
+      newRfqs: rfqsInWindow.length,
+      newOrders: ordersInWindow.length,
+      newRequests: requestsInWindow.length,
+      revenue,
+      prevRevenue,
+      revenueDelta,
+      avgOrderValue,
+      conversionRate,
+      cancellationRate: orders.length ? Math.round((cancelled / orders.length) * 100) : null,
+      openQuotes: quotesOpen,
+    },
+    totals: {
+      products: products.length,
+      activeProducts: products.filter((p) => p.inStock !== false).length,
+      orders: orders.length,
+      rfqs: rfqs.length,
+      customerRequests: requests.length,
+      quotes: quotes.length,
+      openRfqs: openRfqs.length,
+      unreadRequests: requests.filter((r) => !r.read).length,
+    },
+    catalogProfile: {
+      country: vendor.country,
+      responseTime: vendor.responseTime,
+      rating: vendor.rating,
+      verification: vendor.verificationStatus,
+      certificationNames: (vendor.certifications || []).map((c) => c.name || c.title).filter(Boolean),
+      profileCompletePct: Math.round(profilePct),
+    },
+    topCategories: categories,
+    topMarkets: buyerInterest,
+    topProducts,
+    activitySignals: activity
+      .slice(-7)
+      .reverse()
+      .map((p) => ({ label: p.label, signals: p.value })),
+  };
+
+  const payload = {
+    generatedAt: now.toISOString(),
+    range: key,
+    periodLabel: window.label,
+    kpis: {
+      totalInsights: insights.length,
+      highImpact: priorityCounts.high,
+      opportunities: openRfqs.length,
+      revenueImpact: revenue,
+      revenueDelta,
+      updatedAt: now.toISOString(),
+      spark: {
+        activity: activity.map((p) => p.value),
+        revenue: revenueSpark,
+      },
+    },
+    summary: { text, confidence, level: confidenceLevel },
+    observations: insights.slice(0, 4),
+    trend: {
+      points: activity,
+      counts: priorityCounts,
+    },
+    categories,
+    buyerInterest,
+    opportunities,
+    recommendations: enriched,
+    ai: { available: false, reason: null },
+  };
+
+  /* The AI dataset is internal plumbing — non-enumerable so Express JSON
+     serialization never leaks it to the frontend. */
+  Object.defineProperty(payload, '_aiContext', {
+    value: aiContext,
+    enumerable: false,
+    writable: true,
+    configurable: true,
+  });
+
+  return payload;
+}
+
 /* -------------------- Metric Details & CSV Reports -------------------- */
 
 /** Presentation metadata shared by metric details + CSV exports. */
@@ -2411,6 +2892,7 @@ function serializeCsv(headers, rows) {
 
 module.exports = {
   resolveVendor,
+  resolveVendorForRequest,
   buildOverview,
   buildOverviewMetrics,
   buildAnalytics,
@@ -2426,6 +2908,7 @@ module.exports = {
   buildRecentOrders,
   buildRecentMessages,
   buildRecommendations,
+  buildAISummary,
   buildMetricDetails,
   buildMetricReport,
   serializeCsv,

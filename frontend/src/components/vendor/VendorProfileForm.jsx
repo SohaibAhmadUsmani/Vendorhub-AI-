@@ -111,17 +111,14 @@ export default function VendorProfileForm({ profile, onClose, onSaveProfile }) {
       >
         
         {/* Modal Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid var(--border-color)', pb: '1rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-            <span style={{ fontSize: '1.5rem' }}>✏️</span>
-            <div>
-              <h2 className="font-heading" style={{ fontSize: '1.35rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
-                Edit Vendor Profile
-              </h2>
-              <span className="font-mono" style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                Update company specs, manufacturing capabilities & contact details
-              </span>
-            </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
+          <div>
+            <h2 className="font-heading" style={{ fontSize: '1.35rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
+              Edit Vendor Profile
+            </h2>
+            <span className="font-mono" style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+              Update company specs, manufacturing capabilities & contact details
+            </span>
           </div>
           <button 
             onClick={onClose} 
@@ -132,7 +129,7 @@ export default function VendorProfileForm({ profile, onClose, onSaveProfile }) {
         </div>
 
         {/* Tab Selection Header inside Form */}
-        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', pb: '0.5rem' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem' }}>
           {[
             { id: 'basic', label: '1. Basic Info & Branding' },
             { id: 'capacity', label: '2. Manufacturing & Plant' },
@@ -144,14 +141,17 @@ export default function VendorProfileForm({ profile, onClose, onSaveProfile }) {
               type="button"
               onClick={() => setActiveFormTab(tab.id)}
               style={{
-                padding: '0.5rem 0.85rem',
+                padding: '0.55rem 0.95rem',
                 fontSize: '0.825rem',
                 fontWeight: activeFormTab === tab.id ? 700 : 500,
                 color: activeFormTab === tab.id ? '#FFFFFF' : 'var(--text-secondary)',
                 backgroundColor: activeFormTab === tab.id ? 'var(--primary-purple)' : 'transparent',
                 borderRadius: 'var(--radius-sm)',
                 border: 'none',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                transition: 'all 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
+                boxShadow: activeFormTab === tab.id ? '0 4px 12px rgba(108, 92, 231, 0.3)' : 'none',
+                whiteSpace: 'nowrap'
               }}
             >
               {tab.label}
@@ -373,7 +373,7 @@ export default function VendorProfileForm({ profile, onClose, onSaveProfile }) {
               Cancel
             </button>
             <button type="submit" className="btn-purple-primary" disabled={saving}>
-              {saving ? 'Saving Updates...' : '💾 Save Vendor Profile'}
+              {saving ? 'Saving Updates...' : 'Save Vendor Profile'}
             </button>
           </div>
         </form>
@@ -381,7 +381,7 @@ export default function VendorProfileForm({ profile, onClose, onSaveProfile }) {
       <style>{`
         @keyframes vpfFadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes vpfSlideUp { from { opacity: 0; transform: translateY(20px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
-        @keyframes vpfTabFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes vpfTabFade { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
       `}</style>
     </div>,
     document.body
