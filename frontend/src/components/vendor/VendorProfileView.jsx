@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useParams } from 'react-router-dom';
 import ProductCatalogView from '../catalog/ProductCatalogView';
 import VendorProfileForm from './VendorProfileForm';
 import VendorTeamCard from './VendorTeamCard';
@@ -10,14 +10,14 @@ import FactoryVideoModal from './FactoryVideoModal';
 import CertificationViewerModal from './CertificationViewerModal';
 import { fetchVendorProfile, fetchAllVendorProfiles, updateVendorProfile, submitVendorReview, toggleSaveVendor } from '../../services/vendorService';
 
-
 /**
  * VendorProfileView — Module 5 (Vendor Profiles) 100% Completion View
  * Interactive 6-Vendor Switcher Dropdown, Centered Glassmorphic Edit Modal, 6 Tabs
  */
 export default function VendorProfileView({ initialVendorId = "v-sialkot-101" }) {
   const [searchParams, setSearchParams] = useSearchParams();
-  const queryVendorId = searchParams.get('id');
+  const routeParams = useParams();
+  const queryVendorId = routeParams.id || searchParams.get('id');
 
   const [selectedVendorId, setSelectedVendorId] = useState(queryVendorId || initialVendorId);
   const [allVendors, setAllVendors] = useState([]);
@@ -122,8 +122,8 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
 
   const facilityPhotos = [
     "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800&auto=format&fit=crop&q=80",
-    "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&auto=format&fit=crop&q=80",
-    "https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=800&auto=format&fit=crop&q=80"
+    "https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=800&auto=format&fit=crop&q=80",
+    "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&auto=format&fit=crop&q=80"
   ];
 
   return (
@@ -145,7 +145,6 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <span style={{ fontSize: '1.2rem' }}>🏭</span>
           <div>
             <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontFamily: 'var(--font-heading)' }}>
               Select Active Vendor Profile (6 Profiles Available)
@@ -160,16 +159,18 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
           value={selectedVendorId}
           onChange={(e) => setSelectedVendorId(e.target.value)}
           style={{
-            padding: '0.45rem 1rem',
+            padding: '0.55rem 1.15rem',
             borderRadius: 'var(--radius-md)',
-            border: '1px solid var(--primary-purple)',
+            border: '1.5px solid var(--primary-purple)',
             backgroundColor: 'var(--bg-main)',
             color: 'var(--text-primary)',
             fontSize: '0.85rem',
             fontWeight: 700,
             cursor: 'pointer',
             outline: 'none',
-            minWidth: '240px'
+            minWidth: '250px',
+            boxShadow: '0 2px 8px rgba(108,92,231,0.15)',
+            transition: 'all 0.2s ease'
           }}
         >
           {allVendors.map((v) => (
@@ -180,8 +181,10 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
         </select>
       </div>
 
-      {/* Top Header Banner Card */}
-      <div className="card-surface" style={{ padding: 0, overflow: 'hidden', marginBottom: '1.5rem' }}>
+      {/* Main Vendor Profile Content Wrapper with Smooth Switch Animation */}
+      <div key={selectedVendorId} style={{ animation: 'vpvVendorFade 0.35s cubic-bezier(0.16, 1, 0.3, 1)' }}>
+        {/* Top Header Banner Card */}
+        <div className="card-surface" style={{ padding: 0, overflow: 'hidden', marginBottom: '1.5rem' }}>
         <div style={{
           height: '200px',
           backgroundImage: `url(${vendorData.coverImage})`,
@@ -239,7 +242,7 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
                   style={{ backgroundColor: '#E0F2FE', color: '#0369A1', border: '1px solid #BAE6FD', cursor: 'pointer' }}
                   title="Click to view Audit Details"
                 >
-                  ✓ {vendorData.verificationBadge} ℹ️
+                  ✓ {vendorData.verificationBadge}
                 </span>
               </div>
 
@@ -261,21 +264,21 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
           <div className="profile-hero-actions" style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
             <button 
               className="btn-purple-primary" 
-              style={{ minHeight: '40px', padding: '0.4rem 1rem' }}
+              style={{ minHeight: '48px', padding: '0.6rem 1.5rem', borderRadius: '12px' }}
               onClick={() => setShowEditModal(true)}
             >
-              ✏️ Edit Profile
+              Edit Profile
             </button>
             <button 
               className="btn-outline-secondary" 
-              style={{ minHeight: '40px', padding: '0.4rem 1rem' }}
+              style={{ minHeight: '48px', padding: '0.6rem 1.5rem', borderRadius: '12px' }}
               onClick={() => setShowRiskModal(true)}
             >
               🛡 Audit Report
             </button>
             <button 
               className="btn-outline-secondary" 
-              style={{ minHeight: '40px', padding: '0.4rem 1rem' }}
+              style={{ minHeight: '48px', padding: '0.6rem 1.5rem', borderRadius: '12px' }}
               onClick={async () => {
                 const { exportVendorCatalogPDF } = await import('../../services/pdfExportService');
                 const { fetchProducts } = await import('../../services/productService');
@@ -283,7 +286,7 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
                 exportVendorCatalogPDF(vendorData, products);
               }}
             >
-              📄 Export PDF Catalog
+              Export PDF Catalog
             </button>
           </div>
         </div>
@@ -475,18 +478,18 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
             </div>
 
             <div className="card-surface" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              <button className="btn-purple-primary" style={{ width: '100%', justifyContent: 'center' }}>
-                📝 Submit RFQ
+              <button className="btn-purple-primary" style={{ width: '100%', justifyContent: 'center', minHeight: '48px' }}>
+                Submit RFQ
               </button>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
                 <a 
                   href={`mailto:${vendorData.contactDetails?.email}`}
                   className="btn-outline-secondary" 
-                  style={{ justifyContent: 'center', textDecoration: 'none', display: 'flex', alignItems: 'center' }}
+                  style={{ justifyContent: 'center', textDecoration: 'none', display: 'flex', alignItems: 'center', minHeight: '44px' }}
                 >
-                  ✉️ Contact
+                  Contact
                 </a>
-                <button className="btn-outline-secondary" style={{ justifyContent: 'center' }}>💬 Live Chat</button>
+                <button className="btn-outline-secondary" style={{ justifyContent: 'center', minHeight: '44px' }}>Live Chat</button>
               </div>
               <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center', marginTop: '0.25rem' }}>
                 Typical response time: <strong>{vendorData.responseTime}</strong>
@@ -551,7 +554,12 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
                   onClick={() => setActiveLightboxImage(photo)}
                   style={{ height: '200px', borderRadius: 'var(--radius-md)', overflow: 'hidden', cursor: 'pointer', border: '1px solid var(--border-color)' }}
                 >
-                  <img src={photo} alt={`Facility ${i+1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <img 
+                    src={photo} 
+                    alt={`Facility ${i+1}`} 
+                    onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&auto=format&fit=crop&q=80'; }}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                  />
                 </div>
               ))}
             </div>
@@ -677,7 +685,7 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
           onClick={() => setShowEditModal(true)}
           className="flex-1 py-2.5 px-3 bg-[#6C5CE7] hover:bg-[#5A4AD1] text-white text-xs font-bold rounded-xl shadow-md text-center"
         >
-          ✏️ Edit Vendor Profile
+          Edit Vendor Profile
         </button>
         <a 
           href={`mailto:${vendorData.contactDetails?.email}`}
@@ -751,10 +759,16 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
       )}
 
 
+      </div>
+
       <style>{`
         @keyframes vpvTabFade {
           from { opacity: 0; transform: translateY(8px); }
           to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes vpvVendorFade {
+          from { opacity: 0; transform: translateY(12px) scale(0.99); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
         }
       `}</style>
     </div>
