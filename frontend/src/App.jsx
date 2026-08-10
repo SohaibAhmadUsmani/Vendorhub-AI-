@@ -9,6 +9,10 @@ import QuotesPage from "./pages/QuotesPage";
 import MessagesPage from "./pages/MessagesPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import TeammateModulePlaceholder from "./components/layout/TeammateModulePlaceholder";
+import OrdersPage from "./pages/OrdersPage";
+import RiskAnalysisPage from "./pages/RiskAnalysisPage";
+import DocumentsPage from "./pages/DocumentsPage";
+
 import "./App.css";
 
 function App() {
@@ -21,8 +25,11 @@ function App() {
           <Route path="ai-search" element={<TeammateModulePlaceholder pageTitle="AI Search" />} />
           <Route path="rfqs" element={<TeammateModulePlaceholder pageTitle="RFQs" />} />
           <Route path="quotes" element={<QuotesPage />} />
-          <Route path="orders" element={<TeammateModulePlaceholder pageTitle="Orders" />} />
           
+          <Route path="orders" element={<OrdersPage />} />
+          <Route path="/buyer/risk-analysis/:vendorId" element={<RiskAnalysisPage />} />
+          <Route path="documents" element={<DocumentsPage />} />
+
           {/* Muzammil's Module 5 & Module 6 Views */}
           <Route path="vendors" element={<VendorProfileView />} />
           <Route path="product-catalog" element={<ProductCatalogView />} />
