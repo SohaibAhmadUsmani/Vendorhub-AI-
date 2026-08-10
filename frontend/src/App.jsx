@@ -22,6 +22,10 @@ import RFQGeneratorPage from "./pages/RFQGeneratorPage";
 
 import TeammateModulePlaceholder from "./components/layout/TeammateModulePlaceholder";
 
+import OrdersPage from "./pages/OrdersPage";
+import RiskAnalysisPage from "./pages/RiskAnalysisPage";
+import DocumentsPage from "./pages/DocumentsPage";
+
 import Signup from "./pages/auth/Signup";
 import Login from "./pages/auth/Login";
 import ForgotPassword from "./pages/auth/ForgotPassword";
@@ -131,11 +135,7 @@ function App() {
             {/* Orders */}
             <Route
               path="orders"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Orders"
-                />
-              }
+              element={<OrdersPage />}
             />
 
             {/* Saved Vendors */}
@@ -167,11 +167,7 @@ function App() {
             {/* Documents */}
             <Route
               path="documents"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Documents"
-                />
-              }
+              element={<DocumentsPage />}
             />
 
             {/* Risk Analysis */}
@@ -182,6 +178,11 @@ function App() {
                   pageTitle="Supplier Risk Analysis"
                 />
               }
+            />
+
+            <Route
+              path="risk-analysis/:vendorId"
+              element={<RiskAnalysisPage />}
             />
 
             {/* Reviews */}
