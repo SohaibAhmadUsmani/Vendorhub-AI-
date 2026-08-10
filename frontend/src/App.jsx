@@ -357,11 +357,8 @@ function App() {
             {/* Notifications */}
             <Route
               path="notifications"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Notifications"
-                />
-              }
+              element={<NotificationsPage />}
+
             />
 
             {/* Settings */}
