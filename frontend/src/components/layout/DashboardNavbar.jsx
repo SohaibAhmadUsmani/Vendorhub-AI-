@@ -108,13 +108,6 @@ export default function DashboardNavbar({ onToggleSidebar }) {
   };
   const PROFILE_MENU =
     PROFILE_MENU_BY_ROLE[role] || PROFILE_MENU_BY_ROLE.buyer;
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setProfileOpen(false);
-    navigate("/login", { replace: true });
-  };
-  const handleSignOut = handleLogout;
 
   useEffect(() => {
     try {
@@ -185,7 +178,15 @@ export default function DashboardNavbar({ onToggleSidebar }) {
   );
   const feed = notifications.slice(0, 5);
 
-  
+  function handleSignOut() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setProfileOpen(false);
+    navigate("/login", { replace: true });
+  }
+
+  const handleLogout = handleSignOut;
+
   const messagesPath = {
     buyer: "/buyer/messages",
     vendor: "/vendor/messages",
