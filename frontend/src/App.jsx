@@ -26,6 +26,12 @@ import OrdersPage from "./pages/OrdersPage";
 import RiskAnalysisPage from "./pages/RiskAnalysisPage";
 import DocumentsPage from "./pages/DocumentsPage";
 
+import SettingsPage from "./pages/SettingsPage";
+import CertificationsPage from "./pages/CertificationsPage";
+import AdminUsersPage from "./pages/AdminUsersPage";
+import AdminVendorsPage from "./pages/AdminVendorsPage";
+import SavedVendorsPage from "./pages/SavedVendorsPage";
+
 import Signup from "./pages/auth/Signup";
 import Login from "./pages/auth/Login";
 import ForgotPassword from "./pages/auth/ForgotPassword";
@@ -139,7 +145,7 @@ function App() {
             {/* Saved Vendors */}
             <Route
               path="saved-vendors"
-              element={<VendorProfileView />}
+              element={<SavedVendorsPage />}
             />
 
             {/* Messages */}
@@ -210,7 +216,7 @@ function App() {
             {/* Settings */}
             <Route
               path="settings"
-              element={<VendorProfileView />}
+              element={<SettingsPage />}
             />
 
           </Route>
@@ -258,7 +264,7 @@ function App() {
             {/* Certifications */}
             <Route
               path="certifications"
-              element={<VendorProfileView />}
+              element={<CertificationsPage />}
             />
 
             {/* Pricing */}
@@ -326,7 +332,7 @@ function App() {
             {/* Settings */}
             <Route
               path="settings"
-              element={<VendorProfileView />}
+              element={<SettingsPage />}
             />
 
           </Route>
@@ -352,13 +358,13 @@ function App() {
             {/* Manage Users */}
             <Route
               path="users"
-              element={<VendorProfileView />}
+              element={<AdminUsersPage />}
             />
 
             {/* Verify Vendors */}
             <Route
               path="vendors"
-              element={<VendorProfileView />}
+              element={<AdminVendorsPage />}
             />
 
             {/* Product Catalog & Categories */}
@@ -452,7 +458,7 @@ function App() {
             {/* Settings */}
             <Route
               path="settings"
-              element={<VendorProfileView />}
+              element={<SettingsPage />}
             />
 
           </Route>
