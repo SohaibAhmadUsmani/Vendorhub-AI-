@@ -25,6 +25,7 @@ const documentRoutes = require("./routes/documentRoutes");
 const Notification = require('./models/Notification');
 const analyticsRoutes = require('./routes/analyticsRoutes');
 const authRoutes = require('./routes/authRoutes');
+const passport = require('./config/passport');
 
 const app = express();
 const server = http.createServer(app);
@@ -40,6 +41,7 @@ connectDB();
 app.use(cors({ exposedHeaders: ['Content-Disposition'] }));
 app.use(express.json());
 app.use(morgan('dev'));
+app.use(passport.initialize());
 
 // Static Uploads Folder
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

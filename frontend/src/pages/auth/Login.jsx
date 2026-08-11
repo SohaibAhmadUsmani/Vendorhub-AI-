@@ -167,16 +167,27 @@ function Login() {
                   <SocialButton
                     icon={<FcGoogle size={22} />}
                     text="Continue with Google"
+                    onClick={() => {
+                      window.location.href = "http://localhost:5000/api/auth/google";
+                    }}
                   />
 
                   <SocialButton
                     icon={<RiMicrosoftFill size={20} />}
                     text="Continue with Microsoft"
+                    onClick={() => {
+                      window.location.href =
+                        "http://localhost:5000/api/auth/microsoft";
+                    }}
                   />
 
                   <SocialButton
                     icon={<FaLinkedin size={20} />}
                     text="Continue with LinkedIn"
+                    onClick={() => {
+                      window.location.href =
+                        "http://localhost:5000/api/auth/linkedin";
+                    }}
                   />
                 </div>
 

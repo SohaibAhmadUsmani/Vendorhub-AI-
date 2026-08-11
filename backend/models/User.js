@@ -6,6 +6,7 @@ const userSchema = new mongoose.Schema({
   password: { type: String },
   role: { type: String, enum: ['buyer', 'vendor', 'admin'], required: true },
   oauthProvider: { type: String, enum: ['google', 'linkedin', 'microsoft', null], default: null },
+  oauthId: { type: String,  default: null},
   isVerified: { type: Boolean, default: false },
   twoFAEnabled: { type: Boolean, default: false },
   savedVendors: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Vendor' }],
