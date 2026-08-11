@@ -14,6 +14,9 @@ export default function RFQForm() {
   const [errors, setErrors] = useState({})
   const [submitting, setSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState(null) // 'success' | 'error' | null
+  const [attachmentWarning, setAttachmentWarning] = useState(null)
+  const [lastSubmitted, setLastSubmitted] = useState(null)
+  const [exportingPdf, setExportingPdf] = useState(false)
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -33,12 +36,40 @@ export default function RFQForm() {
     return Object.keys(newErrors).length === 0
   }
 
+  const uploadAttachment = async (file) => {
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const res = await fetch('/api/upload/image', {
+      method: 'POST',
+      body: formData, // NOTE: no Content-Type header — browser sets multipart boundary automatically
+    })
+
+    if (!res.ok) throw new Error('File upload failed')
+
+    const data = await res.json()
+    return data.url
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!validate()) return
 
     setSubmitting(true)
     setSubmitStatus(null)
+    setAttachmentWarning(null)
+
+    // Try to upload the attachment, but never let a failed upload block RFQ submission.
+    let attachmentUrls = []
+if (form.attachments) {
+  try {
+    const url = await uploadAttachment(form.attachments)
+    attachmentUrls = [url]
+  } catch (err) {
+    console.error('Attachment upload failed, continuing without it:', err)
+       
+  }
+}
 
     try {
       const payload = {
@@ -49,6 +80,7 @@ export default function RFQForm() {
         deliveryDate: form.deliveryDate,
         paymentTerms: form.paymentTerms,
         shippingMethod: form.shippingMethod,
+        attachments: attachmentUrls,
       }
 
       // NOTE: change 'token' below if your login stores it under a different key
@@ -68,6 +100,7 @@ export default function RFQForm() {
       const data = await res.json()
       console.log('RFQ saved:', data)
       setSubmitStatus('success')
+      setLastSubmitted(payload)
       setForm({
         product: '', quantity: '', material: '', budget: '',
         deliveryDate: '', paymentTerms: '', shippingMethod: '', attachments: null,
@@ -77,6 +110,36 @@ export default function RFQForm() {
       setSubmitStatus('error')
     } finally {
       setSubmitting(false)
+    }
+  }
+
+  const handleExportPdf = async () => {
+    if (!lastSubmitted) return
+    setExportingPdf(true)
+
+    try {
+      const res = await fetch('/api/rfq/export-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(lastSubmitted),
+      })
+
+      if (!res.ok) throw new Error('Failed to generate PDF')
+
+      const blob = await res.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `RFQ-${lastSubmitted.product || 'export'}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      window.URL.revokeObjectURL(url)
+    } catch (err) {
+      console.error(err)
+      alert('Could not generate PDF. Please try again.')
+    } finally {
+      setExportingPdf(false)
     }
   }
 
@@ -96,8 +159,23 @@ export default function RFQForm() {
       </h2>
 
       {submitStatus === 'success' && (
-        <div className="mb-4 px-4 py-3 rounded-xl bg-green-50 text-green-700 text-sm font-medium">
-          RFQ submitted successfully!
+        <div className="mb-4 space-y-2">
+          <div className="px-4 py-3 rounded-xl bg-green-50 flex items-center justify-between gap-3 flex-wrap">
+            <span className="text-green-700 text-sm font-medium">RFQ submitted successfully!</span>
+            <button
+              type="button"
+              onClick={handleExportPdf}
+              disabled={exportingPdf}
+              className="text-xs font-semibold text-[#6C5CE7] bg-white border border-[#6C5CE7]/30 hover:bg-[#F0EBFE] px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+            >
+              {exportingPdf ? 'Generating PDF...' : 'Download PDF'}
+            </button>
+          </div>
+          {attachmentWarning && (
+            <div className="px-4 py-2 rounded-xl bg-amber-50 text-amber-700 text-xs font-medium">
+              {attachmentWarning}
+            </div>
+          )}
         </div>
       )}
       {submitStatus === 'error' && (
@@ -191,7 +269,7 @@ export default function RFQForm() {
         disabled={submitting}
         className="w-full min-h-[44px] bg-[#6C5CE7] hover:bg-[#5A4AD1] text-white font-semibold px-5 py-2.5 rounded-xl shadow-card hover:shadow-hover transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {submitting ? 'Submitting...' : 'Submit RFQ'}
+        {submitting ? (form.attachments ? 'Uploading & Submitting...' : 'Submitting...') : 'Submit RFQ'}
       </button>
     </form>
   )

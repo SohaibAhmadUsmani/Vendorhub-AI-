@@ -1,6 +1,13 @@
 const puppeteer = require('puppeteer');
 
 function buildRFQHtml(rfq) {
+  const attachmentsHtml =
+    Array.isArray(rfq.attachments) && rfq.attachments.length > 0
+      ? rfq.attachments
+          .map((url, i) => `<a href="${url}" style="color:#6C5CE7;">Attachment ${i + 1}</a>`)
+          .join('<br/>')
+      : '-';
+
   return `
   <html>
     <head>
@@ -21,7 +28,8 @@ function buildRFQHtml(rfq) {
         <tr><td>Budget</td><td>${rfq.budget ? '$' + rfq.budget : '-'}</td></tr>
         <tr><td>Delivery Date</td><td>${rfq.deliveryDate || '-'}</td></tr>
         <tr><td>Payment Terms</td><td>${rfq.paymentTerms || '-'}</td></tr>
-        <tr><td>Shipping Method</td><td>${rfq.shippingMethod || '-'}</td></tr>
+        <tr><td>Shipping Method</td><td>${rfq.shippingMethod || '-'}</td>
+        </tr>
       </table>
     </body>
   </html>`;
