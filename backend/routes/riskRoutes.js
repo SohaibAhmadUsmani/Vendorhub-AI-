@@ -2,11 +2,15 @@ const express = require("express");
 
 const {
   analyzeRisk,
-} = require("../controllers/riskAnalysisController");
+  analyzeAllRisks,
+} = require("../controllers/riskController");
 
 const router = express.Router();
 
-// Analyze vendor risk
+// Analyze all vendors (summary list)
+router.get("/", analyzeAllRisks);
+
+// Analyze a single vendor
 router.get("/:vendorId", analyzeRisk);
 
 module.exports = router;

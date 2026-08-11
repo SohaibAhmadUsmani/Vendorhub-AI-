@@ -33,9 +33,43 @@ const documentSchema = new mongoose.Schema(
       type: String,
     },
 
+    size: {
+      type: Number,
+    },
+
+    cloudinaryId: {
+      type: String,
+    },
+
+    description: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    tags: {
+      type: [String],
+      default: [],
+    },
+
+    keywords: {
+      type: [String],
+      default: [],
+    },
+
     summary: {
       type: String,
       default: "",
+    },
+
+    summaryKeyPoints: {
+      type: [String],
+      default: [],
+    },
+
+    summaryConcerns: {
+      type: [String],
+      default: [],
     },
 
     uploadedBy: {

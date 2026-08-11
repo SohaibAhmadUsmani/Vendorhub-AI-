@@ -20,6 +20,7 @@ import {
   X,
   LogOut,
   UserRound,
+  ShieldAlert,
 } from "lucide-react";
 import VendorHubLogo from "./VendorHubLogo";
 import Avatar from "./Avatar";
@@ -105,6 +106,11 @@ const NAV_GROUPS_BY_ROLE = {
           label: "Documents",
           path: "/buyer/documents",
           icon: Files,
+        },
+        {
+          label: "Risk Analysis",
+          path: "/buyer/risk-analysis",
+          icon: ShieldAlert,
         },
       ],
     },

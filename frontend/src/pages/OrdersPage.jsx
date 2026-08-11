@@ -1,18 +1,78 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   getOrders,
+  createOrderFromQuote,
+  initiatePayment,
   updateOrderStatus,
   updateDelivery,
   updateShipment,
   updateInvoice,
   updatePayment,
-} from "../services/orderService";
+} from "../services/orderservice";
+import OrderModal from "../components/orders/OrderModal";
+import {
+  DeliveryForm,
+  ShipmentForm,
+  InvoiceForm,
+  PaymentForm,
+} from "../components/orders/OrderEditForms";
+import { downloadInvoicePdf } from "../components/orders/invoicePdfService";
+
+const STATUS_TRANSITIONS = {
+  pending: ["in_progress", "cancelled"],
+  in_progress: ["shipped", "cancelled"],
+  shipped: ["delivered", "cancelled"],
+  delivered: [],
+  cancelled: [],
+};
+
+const STATUS_LABELS = {
+  pending: "Pending",
+  in_progress: "In Progress",
+  shipped: "Shipped",
+  delivered: "Delivered",
+  cancelled: "Cancelled",
+};
 
 const OrdersPage = () => {
+  const navigate = useNavigate();
+
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState("");
+  const [modal, setModal] = useState(null);
+  const [modalSubmitting, setModalSubmitting] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [quoteId, setQuoteId] = useState("");
+  const [createError, setCreateError] = useState("");
+
+  const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+  const role = storedUser?.role?.toLowerCase() || "buyer";
+
+  const handleCreateOrder = async (e) => {
+    e?.preventDefault?.();
+    if (!quoteId.trim()) {
+      setCreateError("Please paste an accepted Quote ID.");
+      return;
+    }
+
+    try {
+      setModalSubmitting(true);
+      setCreateError("");
+
+      await createOrderFromQuote(quoteId.trim());
+
+      setCreateOpen(false);
+      setQuoteId("");
+      await loadOrders();
+    } catch (err) {
+      setCreateError(err.message || "Failed to create order");
+    } finally {
+      setModalSubmitting(false);
+    }
+  };
 
   const loadOrders = async () => {
     try {
@@ -44,148 +104,67 @@ const OrdersPage = () => {
     }
   };
 
-  const handleDeliveryUpdate = async (order) => {
+  const openModal = (type, order) => setModal({ type, order });
+  const closeModal = () => {
+    if (modalSubmitting) return;
+    setModal(null);
+  };
+
+  const handleSubmit = async (values) => {
+    const order = modal?.order;
+    if (!order) return;
+
     try {
-      setSaving(order._id);
+      setModalSubmitting(true);
+      setError("");
 
-      await updateDelivery(order._id, {
-        expectedDate: order.delivery?.expectedDate || "",
-        address: order.delivery?.address || "",
-        notes: order.delivery?.notes || "",
-      });
+      if (modal.type === "delivery") {
+        await updateDelivery(order._id, values);
+      } else if (modal.type === "shipment") {
+        await updateShipment(order._id, values);
+      } else if (modal.type === "invoice") {
+        await updateInvoice(order._id, values);
+      } else if (modal.type === "payment") {
+        await updatePayment(order._id, values);
+      }
 
+      setModal(null);
       await loadOrders();
     } catch (err) {
-      setError(err.message || "Failed to update delivery");
+      setError(err.message || "Failed to save changes");
     } finally {
-      setSaving("");
+      setModalSubmitting(false);
     }
   };
 
-  const handleShipmentUpdate = async (order) => {
+  const handlePayNow = async (order) => {
     try {
-      setSaving(order._id);
+      setModalSubmitting(true);
+      setError("");
 
-      const trackingNumber = prompt(
-        "Enter tracking number:",
-        order.shipment?.trackingNumber || ""
-      );
-
-      if (trackingNumber === null) {
-        setSaving("");
-        return;
-      }
-
-      const carrier = prompt(
-        "Enter carrier:",
-        order.shipment?.carrier || ""
-      );
-
-      if (carrier === null) {
-        setSaving("");
-        return;
-      }
-
-      await updateShipment(order._id, {
-        carrier,
-        trackingNumber,
-      });
-
-      await loadOrders();
-    } catch (err) {
-      setError(err.message || "Failed to update shipment");
-    } finally {
-      setSaving("");
-    }
-  };
-
-  const handleInvoiceUpdate = async (order) => {
-    try {
-      setSaving(order._id);
-
-      const invoiceNumber = prompt(
-        "Enter invoice number:",
-        order.invoice?.invoiceNumber || ""
-      );
-
-      if (invoiceNumber === null) {
-        setSaving("");
-        return;
-      }
-
-      const status = prompt(
-        "Invoice status: pending / issued / paid / cancelled",
-        order.invoice?.status || "pending"
-      );
-
-      if (status === null) {
-        setSaving("");
-        return;
-      }
-
-      await updateInvoice(order._id, {
-        invoiceNumber,
-        amount: Number(order.invoice?.amount || order.total || 0),
-        status,
-        issuedAt:
-          status === "issued" || status === "paid"
-            ? new Date().toISOString()
-            : order.invoice?.issuedAt || undefined,
-      });
-
-      await loadOrders();
-    } catch (err) {
-      setError(err.message || "Failed to update invoice");
-    } finally {
-      setSaving("");
-    }
-  };
-
-  const handlePaymentUpdate = async (order) => {
-    try {
-      setSaving(order._id);
-
-      const status = prompt(
-        "Payment status: pending / paid / failed / refunded",
-        order.payment?.status || "pending"
-      );
-
-      if (status === null) {
-        setSaving("");
-        return;
-      }
-
-      const method = prompt(
-        "Payment method:",
-        order.payment?.method || ""
-      );
-
-      if (method === null) {
-        setSaving("");
-        return;
-      }
-
-      const transactionId = prompt(
-        "Transaction ID:",
-        order.payment?.transactionId || ""
-      );
-
-      if (transactionId === null) {
-        setSaving("");
-        return;
-      }
+      const result = await initiatePayment(order._id);
 
       await updatePayment(order._id, {
-        status,
-        method,
-        transactionId,
+        status: "paid",
+        method: "card",
+        transactionId:
+          result.transactionId || `SIM-${Date.now().toString().slice(-8)}`,
       });
 
+      setModal(null);
       await loadOrders();
     } catch (err) {
-      setError(err.message || "Failed to update payment");
+      setError(err.message || "Payment failed");
     } finally {
-      setSaving("");
+      setModalSubmitting(false);
+    }
+  };
+
+  const handleDownloadInvoice = async (order) => {
+    try {
+      await downloadInvoicePdf(order);
+    } catch (err) {
+      setError(err.message || "Failed to generate invoice PDF");
     }
   };
 
@@ -197,6 +176,8 @@ const OrdersPage = () => {
     );
   }
 
+  const quotesPath = role === "vendor" ? "/vendor/quotes" : "/buyer/quotes";
+
   return (
     <div
       style={{
@@ -205,20 +186,49 @@ const OrdersPage = () => {
         minHeight: "100vh",
       }}
     >
-      <div style={{ marginBottom: "30px" }}>
-        <h1
-          style={{
-            fontSize: "36px",
-            marginBottom: "8px",
-            color: "#111827",
-          }}
-        >
-          Order Management
-        </h1>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          gap: "16px",
+          flexWrap: "wrap",
+          marginBottom: "30px",
+        }}
+      >
+        <div>
+          <h1
+            style={{
+              fontSize: "36px",
+              marginBottom: "8px",
+              color: "#111827",
+            }}
+          >
+            Order Management
+          </h1>
 
-        <p style={{ color: "#64748b", fontSize: "16px" }}>
-          Manage purchase orders, delivery, shipments, invoices and payments.
-        </p>
+          <p style={{ color: "#64748b", fontSize: "16px" }}>
+            Manage purchase orders, delivery, shipments, invoices and payments.
+          </p>
+        </div>
+
+        {role === "buyer" && (
+          <button
+            onClick={() => setCreateOpen(true)}
+            style={{
+              padding: "12px 22px",
+              border: "none",
+              borderRadius: "10px",
+              background: "#635bff",
+              color: "#fff",
+              fontWeight: "600",
+              cursor: "pointer",
+              fontSize: "15px",
+            }}
+          >
+            + New Purchase Order
+          </button>
+        )}
       </div>
 
       {error && (
@@ -251,6 +261,24 @@ const OrdersPage = () => {
             Orders will appear here when an accepted quote is converted into
             an order.
           </p>
+
+          {role === "buyer" && (
+            <button
+              onClick={() => navigate(quotesPath)}
+              style={{
+                marginTop: "20px",
+                padding: "12px 24px",
+                border: "none",
+                borderRadius: "10px",
+                background: "#635bff",
+                color: "#fff",
+                fontWeight: "600",
+                cursor: "pointer",
+              }}
+            >
+              View Accepted Quotes
+            </button>
+          )}
         </div>
       ) : (
         <div style={{ display: "grid", gap: "24px" }}>
@@ -278,7 +306,7 @@ const OrdersPage = () => {
               >
                 <div>
                   <h2 style={{ margin: 0, color: "#111827" }}>
-                    Order #{order._id?.slice(-6)}
+                    {order.orderNumber || `Order #${order._id?.slice(-6)}`}
                   </h2>
 
                   <p
@@ -287,7 +315,10 @@ const OrdersPage = () => {
                       color: "#64748b",
                     }}
                   >
-                    Vendor: {order.vendor?.name || "N/A"}
+                    {role === "vendor" ? "Buyer" : "Vendor"}:{" "}
+                    {role === "vendor"
+                      ? order.buyer?.name || "N/A"
+                      : order.vendor?.name || "N/A"}
                   </p>
                 </div>
 
@@ -304,11 +335,14 @@ const OrdersPage = () => {
                     fontWeight: "600",
                   }}
                 >
-                  <option value="pending">Pending</option>
-                  <option value="in_progress">In Progress</option>
-                  <option value="shipped">Shipped</option>
-                  <option value="delivered">Delivered</option>
-                  <option value="cancelled">Cancelled</option>
+                  <option value={order.status}>
+                    {STATUS_LABELS[order.status] || order.status}
+                  </option>
+                  {(STATUS_TRANSITIONS[order.status] || []).map((s) => (
+                    <option key={s} value={s}>
+                      {STATUS_LABELS[s]}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -391,7 +425,7 @@ const OrdersPage = () => {
                 </p>
 
                 <button
-                  onClick={() => handleDeliveryUpdate(order)}
+                  onClick={() => openModal("delivery", order)}
                   disabled={saving === order._id}
                   style={buttonStyle}
                 >
@@ -415,7 +449,7 @@ const OrdersPage = () => {
                 </p>
 
                 <button
-                  onClick={() => handleShipmentUpdate(order)}
+                  onClick={() => openModal("shipment", order)}
                   disabled={saving === order._id}
                   style={buttonStyle}
                 >
@@ -429,23 +463,32 @@ const OrdersPage = () => {
 
                 {order.shipment?.timeline?.length ? (
                   <div>
-                    {order.shipment.timeline.map(
-                      (event, index) => (
+                    {order.shipment.timeline.map((event, index) => (
+                      <div
+                        key={index}
+                        style={{
+                          display: "flex",
+                          gap: "14px",
+                          padding: "12px 0",
+                          borderBottom: "1px solid #e5e7eb",
+                        }}
+                      >
                         <div
-                          key={index}
                           style={{
-                            padding: "12px 0",
-                            borderBottom:
-                              "1px solid #e5e7eb",
+                            width: "10px",
+                            height: "10px",
+                            borderRadius: "50%",
+                            background: "#635bff",
+                            marginTop: "6px",
+                            flexShrink: 0,
                           }}
-                        >
+                        />
+
+                        <div>
                           <strong>{event.status}</strong>
 
                           {event.location && (
-                            <span>
-                              {" "}
-                              — {event.location}
-                            </span>
+                            <span> — {event.location}</span>
                           )}
 
                           {event.note && (
@@ -473,8 +516,8 @@ const OrdersPage = () => {
                               : ""}
                           </small>
                         </div>
-                      )
-                    )}
+                      </div>
+                    ))}
                   </div>
                 ) : (
                   <p>No shipment events yet.</p>
@@ -487,16 +530,13 @@ const OrdersPage = () => {
 
                 <p>
                   <strong>Invoice Number:</strong>{" "}
-                  {order.invoice?.invoiceNumber ||
-                    "Not issued"}
+                  {order.invoice?.invoiceNumber || "Not issued"}
                 </p>
 
                 <p>
                   <strong>Amount:</strong> $
                   {Number(
-                    order.invoice?.amount ||
-                      order.total ||
-                      0
+                    order.invoice?.amount || order.total || 0
                   ).toFixed(2)}
                 </p>
 
@@ -506,11 +546,23 @@ const OrdersPage = () => {
                 </p>
 
                 <button
-                  onClick={() => handleInvoiceUpdate(order)}
+                  onClick={() => openModal("invoice", order)}
                   disabled={saving === order._id}
                   style={buttonStyle}
                 >
                   Update Invoice
+                </button>
+
+                <button
+                  onClick={() => handleDownloadInvoice(order)}
+                  disabled={saving === order._id}
+                  style={{
+                    ...buttonStyle,
+                    background: "#0f172a",
+                    marginLeft: "10px",
+                  }}
+                >
+                  Download PDF
                 </button>
               </section>
 
@@ -530,12 +582,11 @@ const OrdersPage = () => {
 
                 <p>
                   <strong>Transaction ID:</strong>{" "}
-                  {order.payment?.transactionId ||
-                    "Not available"}
+                  {order.payment?.transactionId || "Not available"}
                 </p>
 
                 <button
-                  onClick={() => handlePaymentUpdate(order)}
+                  onClick={() => openModal("payment", order)}
                   disabled={saving === order._id}
                   style={buttonStyle}
                 >
@@ -556,6 +607,172 @@ const OrdersPage = () => {
             </div>
           ))}
         </div>
+      )}
+
+      {/* MODALS */}
+      {modal?.type === "delivery" && (
+        <OrderModal
+          title="Update Delivery"
+          subtitle="Update the expected date, shipping address and notes."
+          onClose={closeModal}
+        >
+          <DeliveryForm
+            order={modal.order}
+            submitting={modalSubmitting}
+            onSubmit={handleSubmit}
+            onCancel={closeModal}
+          />
+        </OrderModal>
+      )}
+
+      {modal?.type === "shipment" && (
+        <OrderModal
+          title="Update Shipment"
+          subtitle="Update carrier/tracking details and add a timeline event."
+          onClose={closeModal}
+        >
+          <ShipmentForm
+            order={modal.order}
+            submitting={modalSubmitting}
+            onSubmit={handleSubmit}
+            onCancel={closeModal}
+          />
+        </OrderModal>
+      )}
+
+      {modal?.type === "invoice" && (
+        <OrderModal
+          title="Update Invoice"
+          subtitle="Manage the invoice number, amount, status and issue date."
+          onClose={closeModal}
+        >
+          <InvoiceForm
+            order={modal.order}
+            submitting={modalSubmitting}
+            onSubmit={handleSubmit}
+            onCancel={closeModal}
+          />
+        </OrderModal>
+      )}
+
+      {modal?.type === "payment" && (
+        <OrderModal
+          title="Update Payment"
+          subtitle="Record the payment status, method and transaction ID."
+          onClose={closeModal}
+        >
+          <PaymentForm
+            order={modal.order}
+            submitting={modalSubmitting}
+            onSubmit={handleSubmit}
+            onCancel={closeModal}
+            onProcessPayment={() => handlePayNow(modal.order)}
+            processing={modalSubmitting}
+          />
+        </OrderModal>
+      )}
+
+      {createOpen && (
+        <OrderModal
+          title="New Purchase Order"
+          subtitle="Create a purchase order from an accepted quote."
+          onClose={() => {
+            if (modalSubmitting) return;
+            setCreateOpen(false);
+            setCreateError("");
+          }}
+        >
+          <form onSubmit={handleCreateOrder}>
+            <div style={{ marginBottom: "14px" }}>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "6px",
+                  color: "#334155",
+                  fontSize: "13px",
+                  fontWeight: "600",
+                }}
+              >
+                Accepted Quote ID
+              </label>
+              <input
+                type="text"
+                value={quoteId}
+                onChange={(e) => setQuoteId(e.target.value)}
+                placeholder="Paste the accepted quote ID"
+                style={{
+                  width: "100%",
+                  boxSizing: "border-box",
+                  padding: "10px 12px",
+                  border: "1px solid #cbd5e1",
+                  borderRadius: "10px",
+                  fontSize: "14px",
+                  outline: "none",
+                }}
+              />
+              <p style={{ color: "#64748b", fontSize: "13px", marginTop: "8px" }}>
+                The quote must be marked as accepted before it can be converted.
+              </p>
+            </div>
+
+            {createError && (
+              <div
+                style={{
+                  padding: "10px 14px",
+                  marginBottom: "14px",
+                  background: "#fee2e2",
+                  color: "#991b1b",
+                  borderRadius: "8px",
+                  fontSize: "14px",
+                }}
+              >
+                {createError}
+              </div>
+            )}
+
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "10px",
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => {
+                  setCreateOpen(false);
+                  setCreateError("");
+                }}
+                style={{
+                  padding: "10px 20px",
+                  border: "1px solid #cbd5e1",
+                  borderRadius: "10px",
+                  background: "#fff",
+                  color: "#334155",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={modalSubmitting}
+                style={{
+                  padding: "10px 20px",
+                  border: "none",
+                  borderRadius: "10px",
+                  background: "#635bff",
+                  color: "#fff",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                }}
+              >
+                {modalSubmitting ? "Creating..." : "Create Order"}
+              </button>
+            </div>
+          </form>
+        </OrderModal>
       )}
     </div>
   );
