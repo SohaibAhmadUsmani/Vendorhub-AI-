@@ -22,6 +22,7 @@ const Conversation = require('./models/Conversation');
 const orderRoutes = require('./routes/orderRoutes');
 const riskRoutes = require('./routes/riskRoutes');
 const documentRoutes = require("./routes/documentRoutes");
+const Notification = require('./models/Notification');
 const analyticsRoutes = require('./routes/analyticsRoutes');
 const authRoutes = require('./routes/authRoutes');
 const passport = require('./config/passport');
@@ -29,7 +30,10 @@ const passport = require('./config/passport');
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: '*', methods: ['GET', 'POST'] } });
+const notificationNamespace = io.of('/notifications');
 
+app.set('io', io);
+app.set('notificationIo', notificationNamespace);
 connectDB();
 
 // Expose Content-Disposition so the dashboard's CSV downloads can read the
@@ -62,6 +66,18 @@ app.use('/api/documents', documentRoutes);
 app.use('/api/analytics', analyticsRoutes);
 
 // Module 11 — Real-time Messaging (Socket.io)
+notificationNamespace.on('connection', (socket) => {
+  console.log('Notification client connected:', socket.id);
+
+  socket.on('vendorhub:join_notifications', () => {
+    socket.join('vendorhub:notifications');
+  });
+
+  socket.on('vendorhub:leave_notifications', () => {
+    socket.leave('vendorhub:notifications');
+  });
+});
+
 io.on('connection', (socket) => {
   console.log('Client connected:', socket.id);
 
@@ -92,6 +108,24 @@ io.on('connection', (socket) => {
       await Conversation.findByIdAndUpdate(conversationId, {
         lastMessage: text || 'Sent an attachment',
         lastMessageAt: new Date(),
+      });
+
+      const notification = await Notification.create({
+        title: 'New message received',
+        message: text || 'You received a new message',
+        type: 'message',
+        link: '/buyer/messages',
+        read: false,
+      });
+
+      notificationNamespace.to('vendorhub:notifications').emit('vendorhub:notification:new', {
+        id: String(notification._id),
+        title: notification.title,
+        message: notification.message,
+        type: notification.type,
+        time: notification.createdAt,
+        unread: true,
+        link: notification.link,
       });
 
       io.to(conversationId).emit('receive_message', message);

@@ -8,6 +8,9 @@ const {
   getCustomerRequests,
   getProductPerformance,
   getNotifications,
+  deleteNotification,
+  markNotificationRead,
+  markAllNotificationsRead,
   getAdvancedAnalytics,
   getRecentActivity,
   getInsights,
@@ -25,6 +28,9 @@ router.get('/rfqs', getRfqs);
 router.get('/customer-requests', getCustomerRequests);
 router.get('/product-performance', getProductPerformance);
 router.get('/notifications', getNotifications);
+router.delete('/notifications/:id', deleteNotification);
+router.patch('/notifications/:id/read', markNotificationRead);
+router.patch('/notifications/read-all', markAllNotificationsRead);
 router.get('/advanced-analytics', getAdvancedAnalytics);
 router.get('/recent-activity', getRecentActivity);
 router.get('/insights', getInsights);
