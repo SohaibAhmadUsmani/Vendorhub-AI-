@@ -114,6 +114,7 @@ export default function DashboardNavbar({ onToggleSidebar }) {
     setProfileOpen(false);
     navigate("/login", { replace: true });
   };
+  const handleSignOut = handleLogout;
 
   useEffect(() => {
     try {
