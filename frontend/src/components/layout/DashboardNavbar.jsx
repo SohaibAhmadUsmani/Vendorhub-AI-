@@ -21,6 +21,7 @@ import Avatar from "./Avatar";
 import {
   fetchOverview,
   selectOverview,
+  selectNotificationCount,
   selectOverviewUser,
 } from "../../redux/dashboardSlice";
 import { useNotifications } from "../../contexts/NotificationContext";
@@ -62,12 +63,68 @@ export default function DashboardNavbar({ onToggleSidebar }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const overview = useSelector(selectOverview);
-  const user = useSelector(selectOverviewUser);
+  const notificationCount = useSelector(selectNotificationCount);
+  const overviewUser = useSelector(selectOverviewUser);
   const { notifications, loading, error, unreadCount, markRead, markAllRead, refreshNotifications } = useNotifications();
 
+  const [user, setUser] = useState(null);
+  const role = user?.role;
+  const PROFILE_MENU_BY_ROLE = {
+    buyer: [
+      {
+        label: "View Profile",
+        path: "/buyer/vendors",
+        icon: UserRound,
+      },
+      {
+        label: "Settings",
+        path: "/buyer/settings",
+        icon: Settings,
+      },
+    ],
+
+    vendor: [
+      {
+        label: "View Profile",
+        path: "/vendor/profile",
+        icon: UserRound,
+      },
+      {
+        label: "Settings",
+        path: "/vendor/settings",
+        icon: Settings,
+      },
+    ],
+
+    admin: [
+      {
+        label: "Manage Users",
+        path: "/admin/users",
+        icon: UserRound,
+      },
+      {
+        label: "Settings",
+        path: "/admin/settings",
+        icon: Settings,
+      },
+    ],
+  };
+  const PROFILE_MENU =
+    PROFILE_MENU_BY_ROLE[role] || PROFILE_MENU_BY_ROLE.buyer;
   useEffect(() => {
-    if (overview.status === "idle") dispatch(fetchOverview());
-  }, [overview.status, dispatch]);
+    try {
+      const storedUser = localStorage.getItem("user");
+
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      } else {
+        setUser(null);
+      }
+    } catch (error) {
+      console.error("Failed to read logged-in user:", error);
+      setUser(null);
+    }
+  }, []);
 
   /* ------------------------------- Search ------------------------------- */
   const searchRef = useRef(null);
@@ -96,11 +153,18 @@ export default function DashboardNavbar({ onToggleSidebar }) {
 
   const submitSearch = (e) => {
     e.preventDefault();
+
     const q = query.trim();
     setMobileSearchOpen(false);
-    navigate(q ? `/buyer/ai-search?q=${encodeURIComponent(q)}` : "/buyer/ai-search");
-  };
 
+    if (role === "buyer") {
+      navigate(
+        q
+          ? `/buyer/ai-search?q=${encodeURIComponent(q)}`
+          : "/buyer/ai-search"
+      );
+    }
+  };
   /* ------------------------------ Dropdowns ----------------------------- */
   const [bellOpen, setBellOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -123,10 +187,12 @@ export default function DashboardNavbar({ onToggleSidebar }) {
     }
   };
 
-  const PROFILE_MENU = [
-    { label: "View Profile", path: "/buyer/vendors", icon: UserRound },
-    { label: "Settings", path: "/buyer/settings", icon: Settings },
-  ];
+  
+  const messagesPath = {
+    buyer: "/buyer/messages",
+    vendor: "/vendor/messages",
+    admin: "/admin/dashboard",
+  }[role];
 
   return (
     <header className="sticky top-0 z-30 h-[74px] shrink-0 border-b border-[#EEF1F6] bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
@@ -358,6 +424,7 @@ export default function DashboardNavbar({ onToggleSidebar }) {
                   {/* Clean Footer Link */}
                   <div className="border-t border-[#EEF1F6] bg-[#F8FAFC] px-4 py-3 text-center">
                     <Link
+                      to={messagesPath}
                       to="/buyer/notifications"
                       onClick={() => setBellOpen(false)}
                       className="inline-flex items-center justify-center gap-1.5 text-xs font-bold text-[var(--primary-purple)] hover:underline"
@@ -386,14 +453,15 @@ export default function DashboardNavbar({ onToggleSidebar }) {
                   {user?.name ?? "Loading…"}
                 </span>
                 <span className="block truncate max-w-[11rem] text-[11px] font-medium text-[var(--text-muted)]">
-                  {user?.role ?? "Verified Vendor"}
+                  {user?.role
+                    ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+                    : "User"}
                 </span>
               </span>
               <ChevronDown
                 size={15}
-                className={`hidden shrink-0 text-[var(--text-muted)] transition-transform duration-200 md:block ${
-                  profileOpen ? "rotate-180" : ""
-                }`}
+                className={`hidden shrink-0 text-[var(--text-muted)] transition-transform duration-200 md:block ${profileOpen ? "rotate-180" : ""
+                  }`}
               />
             </button>
 

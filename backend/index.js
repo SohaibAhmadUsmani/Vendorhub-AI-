@@ -10,6 +10,7 @@ const vendorRoutes = require('./routes/vendorRoutes');
 const productRoutes = require('./routes/productRoutes');
 const matchRoutes = require('./routes/matchRoutes');
 const rfqRoutes = require('./routes/rfqRoutes');
+
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const vendorDashboardRoutes = require('./routes/vendorDashboardRoutes');
 const quoteRoutes = require('./routes/quoteRoutes');
@@ -18,14 +19,20 @@ const messageRoutes = require('./routes/messageRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
 const Message = require('./models/Message');
 const Conversation = require('./models/Conversation');
+const orderRoutes = require('./routes/orderRoutes');
+const riskRoutes = require('./routes/riskRoutes');
+const documentRoutes = require("./routes/documentRoutes");
 const Notification = require('./models/Notification');
 const analyticsRoutes = require('./routes/analyticsRoutes');
+const authRoutes = require('./routes/authRoutes');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: '*', methods: ['GET', 'POST'] } });
+const notificationNamespace = io.of('/notifications');
 
 app.set('io', io);
+app.set('notificationIo', notificationNamespace);
 connectDB();
 
 // Expose Content-Disposition so the dashboard's CSV downloads can read the
@@ -38,10 +45,12 @@ app.use(morgan('dev'));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // API Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/vendors', vendorRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/match', matchRoutes);
 app.use('/api/rfq', rfqRoutes);
+
 app.use('/api/vendor/dashboard', dashboardRoutes);
 app.use('/api/vendor', vendorDashboardRoutes);
 app.use('/api/dashboard', dashboardRoutes.overviewRouter);
@@ -49,19 +58,26 @@ app.use('/api/quotes', quoteRoutes);
 app.use('/api/negotiation', negotiationRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/risk', riskRoutes);
+app.use('/api/documents', documentRoutes);
 app.use('/api/analytics', analyticsRoutes);
 
 // Module 11 — Real-time Messaging (Socket.io)
+notificationNamespace.on('connection', (socket) => {
+  console.log('Notification client connected:', socket.id);
+
+  socket.on('vendorhub:join_notifications', () => {
+    socket.join('vendorhub:notifications');
+  });
+
+  socket.on('vendorhub:leave_notifications', () => {
+    socket.leave('vendorhub:notifications');
+  });
+});
+
 io.on('connection', (socket) => {
   console.log('Client connected:', socket.id);
-
-  socket.on('join_notifications', () => {
-    socket.join('notifications');
-  });
-
-  socket.on('leave_notifications', () => {
-    socket.leave('notifications');
-  });
 
   // Join a room scoped to a specific conversation
   socket.on('join_conversation', (conversationId) => {
@@ -100,7 +116,7 @@ io.on('connection', (socket) => {
         read: false,
       });
 
-      io.to('notifications').emit('notification:new', {
+      notificationNamespace.to('vendorhub:notifications').emit('vendorhub:notification:new', {
         id: String(notification._id),
         title: notification.title,
         message: notification.message,

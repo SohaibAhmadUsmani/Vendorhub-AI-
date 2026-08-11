@@ -49,11 +49,11 @@ export function NotificationProvider({ children }) {
   useEffect(() => {
     if (socketRef.current) return undefined;
 
-    const socket = io(API_BASE_URL, { transports: ['websocket'] });
+    const socket = io(`${API_BASE_URL}/notifications`, { transports: ['websocket'] });
     socketRef.current = socket;
 
     const onConnect = () => {
-      socket.emit('join_notifications');
+      socket.emit('vendorhub:join_notifications');
     };
 
     const onNewNotification = (payload) => {
@@ -82,18 +82,18 @@ export function NotificationProvider({ children }) {
     };
 
     socket.on('connect', onConnect);
-    socket.on('notification:new', onNewNotification);
-    socket.on('notification:updated', onUpdatedNotification);
-    socket.on('notification:deleted', onDeletedNotification);
-    socket.on('notifications:updated', onNotificationsUpdated);
+    socket.on('vendorhub:notification:new', onNewNotification);
+    socket.on('vendorhub:notification:updated', onUpdatedNotification);
+    socket.on('vendorhub:notification:deleted', onDeletedNotification);
+    socket.on('vendorhub:notifications:updated', onNotificationsUpdated);
 
     return () => {
       socket.off('connect', onConnect);
-      socket.off('notification:new', onNewNotification);
-      socket.off('notification:updated', onUpdatedNotification);
-      socket.off('notification:deleted', onDeletedNotification);
-      socket.off('notifications:updated', onNotificationsUpdated);
-      socket.emit('leave_notifications');
+      socket.off('vendorhub:notification:new', onNewNotification);
+      socket.off('vendorhub:notification:updated', onUpdatedNotification);
+      socket.off('vendorhub:notification:deleted', onDeletedNotification);
+      socket.off('vendorhub:notifications:updated', onNotificationsUpdated);
+      socket.emit('vendorhub:leave_notifications');
       socket.disconnect();
       socketRef.current = null;
     };

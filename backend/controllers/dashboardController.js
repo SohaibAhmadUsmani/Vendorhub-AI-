@@ -78,7 +78,7 @@ const deleteNotification = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Notification not found' });
     }
 
-    req.app.get('io')?.to('notifications').emit('notification:deleted', {
+    req.app.get('notificationIo')?.to('vendorhub:notifications').emit('vendorhub:notification:deleted', {
       id: String(req.params.id),
     });
 
@@ -100,7 +100,7 @@ const markNotificationRead = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Notification not found' });
     }
 
-    req.app.get('io')?.to('notifications').emit('notification:updated', {
+    req.app.get('notificationIo')?.to('vendorhub:notifications').emit('vendorhub:notification:updated', {
       id: String(notification._id),
       unread: false,
       read: true,
@@ -115,7 +115,7 @@ const markNotificationRead = async (req, res) => {
 const markAllNotificationsRead = async (req, res) => {
   try {
     const result = await Notification.updateMany({ read: false }, { read: true });
-    req.app.get('io')?.to('notifications').emit('notifications:updated', {
+    req.app.get('notificationIo')?.to('vendorhub:notifications').emit('vendorhub:notifications:updated', {
       unreadCount: 0,
       count: result.modifiedCount,
     });
