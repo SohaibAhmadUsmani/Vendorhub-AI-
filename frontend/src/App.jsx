@@ -19,7 +19,7 @@ import MessagesPage from "./pages/MessagesPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import VendorMatchingPage from "./pages/VendorMatchingPage";
 import RFQGeneratorPage from "./pages/RFQGeneratorPage";
-
+import BuyerDashboard from "./pages/buyerDashboard";
 import TeammateModulePlaceholder from "./components/layout/TeammateModulePlaceholder";
 
 import OrdersPage from "./pages/OrdersPage";
@@ -73,7 +73,7 @@ function App() {
             {/* Dashboard */}
             <Route
               path="dashboard"
-              element={<Dashboard />}
+              element={<BuyerDashboard />}
             />
 
             {/* AI Search / Supplier Search */}
