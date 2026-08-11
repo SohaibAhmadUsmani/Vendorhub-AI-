@@ -374,7 +374,7 @@ function normalizeVendor(v) {
       cncMachines: `${v.factoryDetails?.productionLines || 12} Automated Lines`,
       automatedLines: `${v.factoryDetails?.productionLines || 12} Assembly Lines`
     },
-    exportCountries: v.exportCountries || [
+    exportCountries: (Array.isArray(v.exportCountries) && v.exportCountries.length > 0) ? v.exportCountries : [
       { country: "Germany", code: "DE", flag: "🇩🇪", percent: 40 },
       { country: "United States", code: "US", flag: "🇺🇸", percent: 35 },
       { country: "United Arab Emirates", code: "AE", flag: "🇦🇪", percent: 15 },

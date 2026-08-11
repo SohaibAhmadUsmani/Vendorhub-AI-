@@ -68,7 +68,7 @@ export default function DashboardNavbar({ onToggleSidebar }) {
   const { notifications, loading, error, unreadCount, markRead, markAllRead, refreshNotifications } = useNotifications();
 
   const [user, setUser] = useState(null);
-  const role = user?.role;
+  const role = user?.role ? String(user.role).toLowerCase() : "buyer";
   const PROFILE_MENU_BY_ROLE = {
     buyer: [
       {

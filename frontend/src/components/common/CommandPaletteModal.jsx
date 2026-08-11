@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Users, Package, FileText, X, Sparkles, CornerDownLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { getRoleRoute } from '../../utils/routeUtils';
 
 /**
  * CommandPaletteModal — Screenshot 3 Fix: 100x Enterprise Search Modal
@@ -29,10 +30,10 @@ export default function CommandPaletteModal({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   const quickActions = [
-    { title: 'Search Verified Vendors & Manufacturers', desc: 'Sialkot Sports, Atlas Corp, Precision Gear', type: 'Vendors', icon: Users, path: '/buyer/vendors' },
-    { title: 'Explore B2B Product Catalog', desc: 'Pipes, Hydraulics, CNC Shells, Sensors', type: 'Catalog', icon: Package, path: '/buyer/product-catalog' },
-    { title: 'Create New RFQ Request', desc: 'Request customized supplier quotes & pricing', type: 'RFQ', icon: FileText, path: '/buyer/rfqs' },
-    { title: 'AI Supplier Matchfinder', desc: 'Calculate AI compatibility score & risk metrics', type: 'AI Search', icon: Sparkles, path: '/buyer/ai-search' }
+    { title: 'Search Verified Vendors & Manufacturers', desc: 'Sialkot Sports, Atlas Corp, Precision Gear', type: 'Vendors', icon: Users, path: getRoleRoute('vendors') },
+    { title: 'Explore B2B Product Catalog', desc: 'Pipes, Hydraulics, CNC Shells, Sensors', type: 'Catalog', icon: Package, path: getRoleRoute('product-catalog') },
+    { title: 'Create New RFQ Request', desc: 'Request customized supplier quotes & pricing', type: 'RFQ', icon: FileText, path: getRoleRoute('rfqs') },
+    { title: 'AI Supplier Matchfinder', desc: 'Calculate AI compatibility score & risk metrics', type: 'AI Search', icon: Sparkles, path: getRoleRoute('ai-search') }
   ];
 
   const filteredActions = quickActions.filter(a => 

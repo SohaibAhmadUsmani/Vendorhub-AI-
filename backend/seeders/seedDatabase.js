@@ -50,6 +50,12 @@ const seedData = async () => {
         { name: 'FIFA Quality Pro', issuer: 'FIFA Laboratory', year: '2024', verified: true },
         { name: 'BSCI Social Audit', issuer: 'Amfori', year: '2023', verified: true }
       ],
+      exportCountries: [
+        { country: "Germany", code: "DE", flag: "🇩🇪", percent: 40 },
+        { country: "United States", code: "US", flag: "🇺🇸", percent: 35 },
+        { country: "United Arab Emirates", code: "AE", flag: "🇦🇪", percent: 15 },
+        { country: "United Kingdom", code: "GB", flag: "🇬🇧", percent: 10 }
+      ],
       team: [
         { name: 'Tariq Mehmood', role: 'Managing Director', email: 'tariq@sialkotsports.com', phone: '+92-300-8611122', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&q=80' },
         { name: 'Usman Ali', role: 'Head of Quality Assurance', email: 'usman.qa@sialkotsports.com', phone: '+92-300-8611123', avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=150&q=80' }
@@ -98,6 +104,12 @@ const seedData = async () => {
         { name: 'ISO 14001:2015', issuer: 'TÜV Rheinland', year: '2023', verified: true },
         { name: 'API 6D Specification', issuer: 'American Petroleum Institute', year: '2024', verified: true }
       ],
+      exportCountries: [
+        { country: "Saudi Arabia", code: "SA", flag: "🇸🇦", percent: 45 },
+        { country: "United Arab Emirates", code: "AE", flag: "🇦🇪", percent: 30 },
+        { country: "Qatar", code: "QA", flag: "🇶🇦", percent: 15 },
+        { country: "Oman", code: "OM", flag: "🇴🇲", percent: 10 }
+      ],
       team: [
         { name: 'Khurram Shahzad', role: 'Chief Technical Officer', email: 'khurram@atlasind.com', phone: '+92-321-4455667', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80' }
       ],
@@ -136,6 +148,11 @@ const seedData = async () => {
       employeeCount: '100-250 Employees',
       factoryDetails: { area: '45,000 sq ft', productionLines: 6, annualOutput: '800,000 gear assemblies', videoTourUrl: 'https://www.youtube.com/embed/kJQP7kiw5Fk' },
       certifications: [{ name: 'IATF 16949 Automotive', issuer: 'Bureau Veritas', year: '2023', verified: true }],
+      exportCountries: [
+        { country: "Japan", code: "JP", flag: "🇯🇵", percent: 40 },
+        { country: "Germany", code: "DE", flag: "🇩🇪", percent: 35 },
+        { country: "United States", code: "US", flag: "🇺🇸", percent: 25 }
+      ],
       team: [{ name: 'Hamza Niaz', role: 'Head of Engineering', email: 'hamza@precisiongear.pk' }],
       riskBreakdown: { overallScore: 94, complianceRisk: 'Low', operationalRisk: 'Low', financialRisk: 'Low' },
       contact: { email: 'info@precisiongear.pk', phone: '+92-42-35889900', address: 'Sundar Industrial Estate, Lahore, Pakistan' }
@@ -175,6 +192,12 @@ const seedData = async () => {
         { name: 'GOTS Organic Certified', issuer: 'Control Union', year: '2024', verified: true },
         { name: 'OEKO-TEX Standard 100', issuer: 'Hohenstein', year: '2024', verified: true }
       ],
+      exportCountries: [
+        { country: "United States", code: "US", flag: "🇺🇸", percent: 50 },
+        { country: "United Kingdom", code: "GB", flag: "🇬🇧", percent: 25 },
+        { country: "France", code: "FR", flag: "🇫🇷", percent: 15 },
+        { country: "Italy", code: "IT", flag: "🇮🇹", percent: 10 }
+      ],
       team: [{ name: 'Salman Ahmed', role: 'Export Director', email: 'salman@apextextiles.com' }],
       riskBreakdown: { overallScore: 98, complianceRisk: 'Low', operationalRisk: 'Low', financialRisk: 'Low' },
       contact: { email: 'sales@apextextiles.com', phone: '+92-41-8765432', address: 'Sheikhupura Road, Faisalabad, Pakistan' }
@@ -211,6 +234,11 @@ const seedData = async () => {
       employeeCount: '250-500 Employees',
       factoryDetails: { area: '180,000 sq ft', productionLines: 4, annualOutput: '50,000 metric tons steel', videoTourUrl: 'https://www.youtube.com/embed/1vR_sW5h140' },
       certifications: [{ name: 'ASTM A615 Grade 60', issuer: 'PCSIR', year: '2023', verified: true }],
+      exportCountries: [
+        { country: "United Arab Emirates", code: "AE", flag: "🇦🇪", percent: 50 },
+        { country: "Oman", code: "OM", flag: "🇴🇲", percent: 30 },
+        { country: "Bahrain", code: "BH", flag: "🇧🇭", percent: 20 }
+      ],
       team: [{ name: 'Bilal Chaudhry', role: 'Operations Manager', email: 'bilal@empiremills.pk' }],
       riskBreakdown: { overallScore: 91, complianceRisk: 'Low', operationalRisk: 'Medium', financialRisk: 'Low' },
       contact: { email: 'info@empiremills.pk', phone: '+92-55-4223344', address: 'GT Road, Gujranwala, Pakistan' }
@@ -249,6 +277,11 @@ const seedData = async () => {
       certifications: [
         { name: 'CE Mark Compliance', issuer: 'Eurofins', year: '2024', verified: true },
         { name: 'RoHS Directive', issuer: 'SGS', year: '2023', verified: true }
+      ],
+      exportCountries: [
+        { country: "Germany", code: "DE", flag: "🇩🇪", percent: 45 },
+        { country: "Netherlands", code: "NL", flag: "🇳🇱", percent: 35 },
+        { country: "Sweden", code: "SE", flag: "🇸🇪", percent: 20 }
       ],
       team: [{ name: 'Dr. Shahbaz Khan', role: 'Head of Embedded Systems', email: 'shahbaz@eurotech.io' }],
       riskBreakdown: { overallScore: 97, complianceRisk: 'Low', operationalRisk: 'Low', financialRisk: 'Low' },

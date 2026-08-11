@@ -167,13 +167,15 @@ export async function downloadMetricReport(key) {
  * layer instead of inside the component, keeping components free of
  * hardcoded route tables. `icon` is a Lucide icon key mapped in the UI.
  */
+import { getRoleRoute } from "../../utils/routeUtils";
+
 export function getQuickActions() {
   return [
-    { id: "add-product", label: "Add Product", route: "/buyer/product-catalog", icon: "PackagePlus" },
-    { id: "generate-quote", label: "Generate Quote", route: "/buyer/quotes", icon: "FilePlus2" },
-    { id: "view-orders", label: "View Orders", route: "/buyer/orders", icon: "ClipboardList" },
-    { id: "upload-certificate", label: "Upload Certificate", route: "/buyer/vendors", icon: "Award" },
-    { id: "company-profile", label: "Company Profile", route: "/buyer/vendors", icon: "UserRound" },
-    { id: "ai-search", label: "AI Search", route: "/buyer/ai-search", icon: "Sparkles" },
+    { id: "add-product", label: "Add Product", route: getRoleRoute("product-catalog"), icon: "PackagePlus" },
+    { id: "generate-quote", label: "Generate Quote", route: getRoleRoute("quotes"), icon: "FilePlus2" },
+    { id: "view-orders", label: "View Orders", route: getRoleRoute("orders"), icon: "ClipboardList" },
+    { id: "upload-certificate", label: "Upload Certificate", route: getRoleRoute("vendors"), icon: "Award" },
+    { id: "company-profile", label: "Company Profile", route: getRoleRoute("profile"), icon: "UserRound" },
+    { id: "ai-search", label: "AI Search", route: getRoleRoute("ai-search"), icon: "Sparkles" },
   ];
 }

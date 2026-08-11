@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getRoleRoute } from '../../utils/routeUtils';
 
 /**
  * VendorHeaderCard — Foundational component for Module 5 (Vendor Profiles)
@@ -115,14 +116,14 @@ export default function VendorHeaderCard({ vendor }) {
             </button>
             <button 
               className="btn-cyan-accent" 
-              onClick={() => navigate('/buyer/messages', { state: { vendorName: data.name, vendorId: data.id } })}
+              onClick={() => navigate(getRoleRoute("messages"), { state: { vendorName: data.name, vendorId: data.id } })}
               style={{ minHeight: '48px', padding: '0 1.25rem', borderRadius: '12px' }}
             >
               💬 Contact Vendor
             </button>
             <button 
               className="btn-purple-primary" 
-              onClick={() => navigate('/buyer/rfqs', { state: { vendorName: data.name, vendorId: data.id } })}
+              onClick={() => navigate(getRoleRoute("rfqs"), { state: { vendorName: data.name, vendorId: data.id } })}
               style={{ minHeight: '48px', padding: '0 1.25rem', borderRadius: '12px' }}
             >
               📝 Request RFQ

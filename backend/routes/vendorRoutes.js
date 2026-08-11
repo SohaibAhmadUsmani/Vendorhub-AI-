@@ -4,6 +4,7 @@ const { authMiddleware, roleMiddleware } = require('../middleware/authMiddleware
 const {
   getVendors,
   getVendorById,
+  getVendorMe,
   createVendor,
   updateVendor,
   deleteVendor,
@@ -14,6 +15,9 @@ const {
 router.route('/')
   .get(getVendors)
   .post(authMiddleware, roleMiddleware('vendor', 'admin'), createVendor);
+
+router.route('/me')
+  .get(authMiddleware, getVendorMe);
 
 router.route('/:id')
   .get(getVendorById)

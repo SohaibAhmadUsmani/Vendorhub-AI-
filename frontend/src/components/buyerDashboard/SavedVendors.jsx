@@ -4,8 +4,11 @@ import {
     ArrowRight,
     Store,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { getRoleRoute } from "../../utils/routeUtils";
 
 export default function SavedVendors() {
+    const navigate = useNavigate();
     const vendors = [];
 
     if (vendors.length === 0) {
@@ -33,7 +36,8 @@ export default function SavedVendors() {
 
                     <button
                         type="button"
-                        className="inline-flex shrink-0 items-center gap-1 text-[12px] font-bold text-[var(--primary-purple)] transition-opacity hover:opacity-75"
+                        onClick={() => navigate(getRoleRoute("vendors"))}
+                        className="inline-flex shrink-0 items-center gap-1 text-[12px] font-bold text-[var(--primary-purple)] transition-opacity hover:opacity-75 cursor-pointer"
                     >
                         View All
                         <ArrowRight className="h-3.5 w-3.5" />
@@ -86,7 +90,8 @@ export default function SavedVendors() {
 
                 <button
                     type="button"
-                    className="inline-flex items-center gap-1 text-[12px] font-bold text-[var(--primary-purple)]"
+                    onClick={() => navigate(getRoleRoute("vendors"))}
+                    className="inline-flex items-center gap-1 text-[12px] font-bold text-[var(--primary-purple)] cursor-pointer"
                 >
                     View All
                     <ArrowRight className="h-3.5 w-3.5" />

@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Lightbulb, Rocket, ArrowUpRight } from "lucide-react";
+import { getRoleRoute } from "../../utils/routeUtils";
 
 /* --------------------------------------------------------------------------
    TopOpportunitiesCard — open RFQs ranked by priority, with a real impact
@@ -97,7 +98,7 @@ export default function TopOpportunitiesCard({ page }) {
             {opportunities.length}
           </span>
           <Link
-            to="/buyer/rfqs"
+            to={getRoleRoute("rfqs")}
             className="inline-flex items-center gap-0.5 text-[11px] font-bold text-[var(--primary-purple)] transition-colors hover:text-[var(--primary-purple-hover)]"
             aria-label="View all opportunities"
           >

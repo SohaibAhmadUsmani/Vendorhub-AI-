@@ -1,5 +1,7 @@
 import React from "react";
 import { MoreVertical, SlidersHorizontal, Download } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { getRoleRoute } from "../../utils/routeUtils";
 
 const RFQS = [
   {
@@ -44,6 +46,7 @@ const STATUS_STYLES = {
 };
 
 export default function RecentRFQTracker() {
+  const navigate = useNavigate();
   return (
     <div className="dash-card overflow-hidden">
       {/* Header */}
@@ -156,7 +159,8 @@ export default function RecentRFQTracker() {
       <div className="border-t border-[#EEF1F6] px-5 py-3 text-center">
         <button
           type="button"
-          className="text-[12px] font-bold text-[var(--primary-purple)] transition hover:opacity-80"
+          onClick={() => navigate(getRoleRoute("rfqs"))}
+          className="text-[12px] font-bold text-[var(--primary-purple)] transition hover:opacity-80 cursor-pointer"
         >
           View All RFQs →
         </button>

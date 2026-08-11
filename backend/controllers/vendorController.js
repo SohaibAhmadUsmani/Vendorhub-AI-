@@ -205,9 +205,37 @@ const updateVendorRisk = async (req, res) => {
   }
 };
 
+/**
+ * @desc    Get currently logged-in vendor profile
+ * @route   GET /api/vendors/me
+ * @access  Private (Vendor)
+ */
+const getVendorMe = async (req, res) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ success: false, message: 'Not authenticated' });
+    }
+    let vendor = await Vendor.findOne({ userId: req.user.id });
+    if (!vendor) {
+      // Fallback to searching by user email or first vendor
+      vendor = await Vendor.findOne({ 'contact.email': req.user.email });
+    }
+    if (!vendor) {
+      vendor = await Vendor.findOne({});
+    }
+    if (!vendor) {
+      return res.status(404).json({ success: false, message: 'Vendor profile not found' });
+    }
+    res.status(200).json({ success: true, data: vendor });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   getVendors,
   getVendorById,
+  getVendorMe,
   createVendor,
   updateVendor,
   deleteVendor,

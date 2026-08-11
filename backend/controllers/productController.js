@@ -132,6 +132,10 @@ const getProductById = async (req, res) => {
     if (!product) {
       return res.status(404).json({ success: false, message: 'Product not found' });
     }
+
+    // Asynchronously increment views counter for vendor performance analytics
+    Product.findByIdAndUpdate(product._id, { $inc: { views: 1 } }).catch(() => {});
+
     res.status(200).json({ success: true, data: product });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

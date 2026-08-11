@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, ChevronLeft, ChevronRight, FileText, FileSearch } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { getRoleRoute } from "../../utils/routeUtils";
 import {
   useVendorRfqs,
   normalizeRfqs,
@@ -195,7 +196,7 @@ export default function RecentRFQs() {
         </div>
         <button
           type="button"
-          onClick={() => navigate("/buyer/rfqs")}
+          onClick={() => navigate(getRoleRoute("rfqs"))}
           className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-1.5 text-xs font-semibold text-[var(--text-secondary)] transition hover:border-[var(--primary-purple)] hover:text-[var(--primary-purple)]"
         >
           View all

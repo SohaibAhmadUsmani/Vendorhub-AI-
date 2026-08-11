@@ -1,19 +1,12 @@
 import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { BrainCircuit, ArrowUpRight } from "lucide-react";
+import { getRoleRoute } from "../../utils/routeUtils";
 import { useVendorInsightsFeed, getInsightsFeed } from "../../services/dashboard/insightsService";
 import AIInsightItem from "./AIInsightItem";
 import AIInsightEmptyState from "./AIInsightEmptyState";
 import AIInsightSkeleton from "./AIInsightSkeleton";
 import DashboardErrorState from "./DashboardErrorState";
-
-/* --------------------------------------------------------------------------
-   AIInsightsCard — right-rail intelligence feed. Shows the three most recent
-   AI-generated insights (icon, title, description, timestamp, priority).
-   "View All" deep-links to the dedicated AI Insights page. Everything is
-   backend-driven via /api/vendor/insights (React Query); loading skeletons,
-   inline error + retry, and an empty state keep the widget always visible.
-   -------------------------------------------------------------------------- */
 
 const MAX_INSIGHTS = 5;
 
@@ -25,15 +18,7 @@ export default function AIInsightsCard() {
     [data, isSuccess],
   );
 
-  const userRole = (() => {
-    try {
-      return JSON.parse(localStorage.getItem("user"))?.role?.toLowerCase() || "buyer";
-    } catch {
-      return "buyer";
-    }
-  })();
-
-  const targetPath = userRole === "vendor" ? "/vendor/analytics" : "/buyer/ai-insights";
+  const targetPath = getRoleRoute("ai-insights");
 
   return (
     <section

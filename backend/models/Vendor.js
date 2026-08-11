@@ -39,6 +39,7 @@ const reviewSchema = new mongoose.Schema({
 });
 
 const vendorSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   name: { type: String, required: true, unique: true },
   tagline: { type: String },
   logo: { type: String },
@@ -62,6 +63,21 @@ const vendorSchema = new mongoose.Schema({
   businessType: { type: String },
   industryRank: { type: String },
   compliance: { type: String },
+  exportCountries: [{
+    country: { type: String },
+    code: { type: String },
+    flag: { type: String },
+    percent: { type: Number }
+  }],
+  manufacturingCapabilities: {
+    capacity: { type: String },
+    leadTime: { type: String },
+    rndDept: { type: String },
+    customTooling: { type: String },
+    factoryArea: { type: String },
+    cncMachines: { type: String },
+    automatedLines: { type: String }
+  },
   factoryDetails: {
     area: { type: String },
     productionLines: { type: Number },

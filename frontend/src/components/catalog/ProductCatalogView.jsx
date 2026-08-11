@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useParams, useNavigate } from 'react-router-dom';
+import { getRoleRoute } from '../../utils/routeUtils';
 import { SlidersHorizontal, RotateCcw, Plus, X } from 'lucide-react';
 import ProductCard from './ProductCard';
 import ProductListView from './ProductListView';
@@ -125,7 +126,7 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
     setTimeout(() => {
       setBulkRfqSuccessMsg(false);
       setSelectedProductIds([]);
-      navigate('/buyer/rfqs', { state: { selectedProducts: selectedProds } });
+      navigate(getRoleRoute("rfqs"), { state: { selectedProducts: selectedProds } });
     }, 1200);
   };
 

@@ -2,6 +2,7 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { motion } from "framer-motion";
 import { DollarSign, FileQuestion } from "lucide-react";
+import { getRoleRoute } from "../../utils/routeUtils";
 import { fetchOverview, selectOverview } from "../../redux/dashboardSlice";
 import OverviewCard from "./OverviewCard";
 import OverviewCardSkeleton from "./OverviewCardSkeleton";
@@ -58,7 +59,7 @@ export default function DashboardOverviewCards() {
             icon={<FileQuestion className="h-6 w-6" strokeWidth={2} />}
             title="No dashboard data available yet"
             hint="Start receiving RFQs and orders and your key metrics will appear here."
-            action={{ label: "Create RFQ", to: "/buyer/rfqs" }}
+            action={{ label: "Create RFQ", to: getRoleRoute("rfqs") }}
             compact
           />
         </div>

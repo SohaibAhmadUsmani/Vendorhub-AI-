@@ -239,9 +239,19 @@ function App() {
               element={<VendorProfileView />}
             />
 
-            {/* Products */}
+            {/* Vendors View */}
+            <Route
+              path="vendors"
+              element={<VendorProfileView />}
+            />
+
+            {/* Products & Catalog */}
             <Route
               path="products"
+              element={<ProductCatalogView />}
+            />
+            <Route
+              path="product-catalog"
               element={<ProductCatalogView />}
             />
 
@@ -281,10 +291,18 @@ function App() {
               element={<MessagesPage />}
             />
 
-            {/* Analytics */}
+            {/* Analytics & Insights */}
             <Route
               path="analytics"
               element={<AnalyticsPage />}
+            />
+            <Route
+              path="ai-insights"
+              element={<AIInsightsPage />}
+            />
+            <Route
+              path="ai-search"
+              element={<VendorMatchingPage />}
             />
 
             {/* Documents */}
@@ -297,7 +315,12 @@ function App() {
             <Route
               path="notifications"
               element={<NotificationsPage />}
+            />
 
+            {/* Risk Analysis */}
+            <Route
+              path="risk-analysis"
+              element={<RiskAnalysisPage />}
             />
 
             {/* Settings */}
@@ -338,10 +361,64 @@ function App() {
               element={<VendorProfileView />}
             />
 
-            {/* Categories */}
+            {/* Product Catalog & Categories */}
             <Route
               path="categories"
               element={<ProductCatalogView />}
+            />
+            <Route
+              path="product-catalog"
+              element={<ProductCatalogView />}
+            />
+            <Route
+              path="products"
+              element={<ProductCatalogView />}
+            />
+
+            {/* RFQs */}
+            <Route
+              path="rfqs"
+              element={<RFQGeneratorPage />}
+            />
+
+            {/* Quotes */}
+            <Route
+              path="quotes"
+              element={<QuotesPage />}
+            />
+
+            {/* Orders */}
+            <Route
+              path="orders"
+              element={<OrdersPage />}
+            />
+
+            {/* Messages */}
+            <Route
+              path="messages"
+              element={<MessagesPage />}
+            />
+
+            {/* Documents */}
+            <Route
+              path="documents"
+              element={<DocumentsPage />}
+            />
+
+            {/* Notifications */}
+            <Route
+              path="notifications"
+              element={<NotificationsPage />}
+            />
+
+            {/* AI Insights & Sourcing */}
+            <Route
+              path="ai-insights"
+              element={<AIInsightsPage />}
+            />
+            <Route
+              path="ai-search"
+              element={<VendorMatchingPage />}
             />
 
             {/* Reports */}
@@ -356,9 +433,13 @@ function App() {
               element={<AnalyticsPage />}
             />
 
-            {/* Fraud Monitoring */}
+            {/* Fraud Monitoring & Risk Analysis */}
             <Route
               path="fraud-monitoring"
+              element={<RiskAnalysisPage />}
+            />
+            <Route
+              path="risk-analysis"
               element={<RiskAnalysisPage />}
             />
 

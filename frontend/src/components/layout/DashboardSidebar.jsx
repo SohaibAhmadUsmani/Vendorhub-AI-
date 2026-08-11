@@ -337,7 +337,7 @@ export default function DashboardSidebar({
       console.error("Failed to read logged-in user:", error);
     }
   }, []);
-  const role = user?.role || "buyer";
+  const role = user?.role ? String(user.role).toLowerCase() : "buyer";
   const profilePath = {
   buyer: "/buyer/vendors",
   vendor: "/vendor/profile",
