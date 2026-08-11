@@ -18,12 +18,14 @@ const messageRoutes = require('./routes/messageRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
 const Message = require('./models/Message');
 const Conversation = require('./models/Conversation');
+const Notification = require('./models/Notification');
 const analyticsRoutes = require('./routes/analyticsRoutes');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: '*', methods: ['GET', 'POST'] } });
 
+app.set('io', io);
 connectDB();
 
 // Expose Content-Disposition so the dashboard's CSV downloads can read the
@@ -53,6 +55,14 @@ app.use('/api/analytics', analyticsRoutes);
 io.on('connection', (socket) => {
   console.log('Client connected:', socket.id);
 
+  socket.on('join_notifications', () => {
+    socket.join('notifications');
+  });
+
+  socket.on('leave_notifications', () => {
+    socket.leave('notifications');
+  });
+
   // Join a room scoped to a specific conversation
   socket.on('join_conversation', (conversationId) => {
     socket.join(conversationId);
@@ -80,6 +90,24 @@ io.on('connection', (socket) => {
       await Conversation.findByIdAndUpdate(conversationId, {
         lastMessage: text || 'Sent an attachment',
         lastMessageAt: new Date(),
+      });
+
+      const notification = await Notification.create({
+        title: 'New message received',
+        message: text || 'You received a new message',
+        type: 'message',
+        link: '/buyer/messages',
+        read: false,
+      });
+
+      io.to('notifications').emit('notification:new', {
+        id: String(notification._id),
+        title: notification.title,
+        message: notification.message,
+        type: notification.type,
+        time: notification.createdAt,
+        unread: true,
+        link: notification.link,
       });
 
       io.to(conversationId).emit('receive_message', message);
