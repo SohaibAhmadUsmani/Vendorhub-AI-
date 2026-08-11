@@ -29,6 +29,7 @@ import DocumentsPage from "./pages/DocumentsPage";
 import Signup from "./pages/auth/Signup";
 import Login from "./pages/auth/Login";
 import ForgotPassword from "./pages/auth/ForgotPassword";
+import OAuthSuccess from "./pages/auth/OAuthSuccess";
 
 import "./App.css";
 
@@ -49,6 +50,7 @@ function App() {
           path="/forgot-password"
           element={<ForgotPassword />}
         />
+        <Route path="/oauth-success" element={<OAuthSuccess />} />
 
         {/* =========================================================
             ROOT

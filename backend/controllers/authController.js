@@ -1,13 +1,52 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
+
 const {
-    generateToken,
-    sendOtpMail,
-    sendPasswordResetEmail,
-    sendVerificationEmail,
-    generateOtp
+  generateToken,
+  sendOtpMail,
+  sendPasswordResetEmail,
+  sendVerificationEmail,
+  generateOtp,
 } = require("../services/emailService");
-const {generateJwt} = require("../services/jwtService");
+
+const { generateJwt } = require("../services/jwtService");
+
+
+function handleOAuthCallback(req, res) {
+  const oauthUser = req.user;
+
+  // New OAuth user → send them to role selection
+  if (oauthUser?.isNewOAuthUser) {
+    const params = new URLSearchParams({
+      name: oauthUser.name,
+      email: oauthUser.email,
+      oauthProvider: oauthUser.oauthProvider,
+    });
+
+    return res.redirect(
+      `http://localhost:5173/oauth-success?${params.toString()}`
+    );
+  }
+
+  // Existing user → login normally
+  const token = generateJwt(oauthUser);
+
+  const user = {
+    id: oauthUser._id,
+    name: oauthUser.name,
+    email: oauthUser.email,
+    role: oauthUser.role,
+  };
+
+  const params = new URLSearchParams({
+    token,
+    user: JSON.stringify(user),
+  });
+
+  return res.redirect(
+    `http://localhost:5173/oauth-success?${params.toString()}`
+  );
+}
 
 /**
  * Register a new user and send an email verification link.
@@ -328,12 +367,88 @@ const verify2fa = async (req, res) => {
     });
 };
 
+/**
+ * Complete OAuth signup after the user selects their role.
+ */
+const completeOAuthSignup = async (req, res) => {
+  const { name, email, role, oauthProvider } = req.body;
+
+  // Validate required fields
+  if (!name || !email || !role || !oauthProvider) {
+    return res.status(400).json({
+      success: false,
+      message: "Name, email, role and OAuth provider are required.",
+    });
+  }
+
+  // Only buyer/vendor can be selected during signup
+  if (!["buyer", "vendor"].includes(role)) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid role selected.",
+    });
+  }
+
+  // Only supported OAuth providers
+  if (!["google", "microsoft", "linkedin"].includes(oauthProvider)) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid OAuth provider.",
+    });
+  }
+
+  try {
+    // Check whether the email was already registered
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      return res.status(409).json({
+        success: false,
+        message: "An account with this email already exists.",
+      });
+    }
+
+    // Create the user only now, after role selection
+    const user = await User.create({
+      name,
+      email,
+      password: null,
+      role,
+      oauthProvider,
+      isVerified: true,
+    });
+
+    // Generate normal VendorHub JWT
+    const token = generateJwt(user);
+
+    return res.status(201).json({
+      success: true,
+      message: "Account created successfully.",
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    console.error("OAuth signup error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Unable to complete OAuth signup.",
+    });
+  }
+};
+
 module.exports = {
-    signup,
-    login,
-    verifyEmail,
-    resendVerification,
-    forgotPassword,
-    resetPassword,
-    verify2fa
+  signup,
+  login,
+  verifyEmail,
+  resendVerification,
+  forgotPassword,
+  resetPassword,
+  verify2fa,
+  completeOAuthSignup
 };
