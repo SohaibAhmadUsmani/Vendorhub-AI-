@@ -210,12 +210,6 @@ export default function DashboardNavbar({ onToggleSidebar }) {
     admin: "/admin/dashboard",
   }[role];
 
-  const notificationsPath = {
-    buyer: "/buyer/notifications",
-    vendor: "/vendor/notifications",
-    admin: "/admin/dashboard",
-  }[role];
-
   return (
     <header className="sticky top-0 z-30 h-[74px] shrink-0 border-b border-[#EEF1F6] bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
       <div className="flex h-full items-center gap-3 px-4 sm:px-6">
