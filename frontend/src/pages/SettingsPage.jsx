@@ -116,7 +116,12 @@ export default function SettingsPage() {
                   <h3 className="text-sm font-medium text-gray-900 dark:text-white">Two-Factor Authentication (2FA)</h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Add an extra layer of security to your account.</p>
                 </div>
-                <button className="btn-outline-secondary">Enable 2FA</button>
+                <button 
+                  className="btn-outline-secondary"
+                  onClick={() => alert("OTP Verification Modal Triggered: Scan QR Code and enter 6-digit pin")}
+                >
+                  Enable 2FA
+                </button>
               </div>
             </div>
           </div>

@@ -30,13 +30,23 @@ export default function QuotesPage() {
   }, [rfqId]);
 
   const handleAccept = async (quote) => {
-    await acceptQuote(quote._id);
-    fetchQuotes(rfqId);
+    try {
+      await acceptQuote(quote._id);
+      alert(`Successfully accepted quote from ${quote.vendorName || 'Vendor'}`);
+      fetchQuotes(rfqId);
+    } catch (err) {
+      alert(`Failed to accept quote: ${err.message}`);
+    }
   };
 
   const handleReject = async (quote) => {
-    await rejectQuote(quote._id);
-    fetchQuotes(rfqId);
+    try {
+      await rejectQuote(quote._id);
+      alert(`Quote rejected`);
+      fetchQuotes(rfqId);
+    } catch (err) {
+      alert(`Failed to reject quote: ${err.message}`);
+    }
   };
 
   return (
