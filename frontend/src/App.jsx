@@ -19,7 +19,7 @@ import MessagesPage from "./pages/MessagesPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import VendorMatchingPage from "./pages/VendorMatchingPage";
 import RFQGeneratorPage from "./pages/RFQGeneratorPage";
-
+import BuyerDashboard from "./pages/buyerDashboard";
 import TeammateModulePlaceholder from "./components/layout/TeammateModulePlaceholder";
 
 import OrdersPage from "./pages/OrdersPage";
@@ -29,6 +29,7 @@ import DocumentsPage from "./pages/DocumentsPage";
 import Signup from "./pages/auth/Signup";
 import Login from "./pages/auth/Login";
 import ForgotPassword from "./pages/auth/ForgotPassword";
+import OAuthSuccess from "./pages/auth/OAuthSuccess";
 
 import "./App.css";
 
@@ -49,6 +50,7 @@ function App() {
           path="/forgot-password"
           element={<ForgotPassword />}
         />
+        <Route path="/oauth-success" element={<OAuthSuccess />} />
 
         {/* =========================================================
             ROOT
@@ -73,7 +75,7 @@ function App() {
             {/* Dashboard */}
             <Route
               path="dashboard"
-              element={<Dashboard />}
+              element={<BuyerDashboard />}
             />
 
             {/* AI Search / Supplier Search */}

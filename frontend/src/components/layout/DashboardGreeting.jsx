@@ -48,18 +48,24 @@ function GreetingSkeleton() {
   );
 }
 
-export default function DashboardGreeting() {
+export default function DashboardGreeting({ type = "vendor" }) {
   const dispatch = useDispatch();
   const { status, data } = useSelector(selectOverview);
+  const isBuyer = type === "buyer";
 
   useEffect(() => {
     if (status === "idle") dispatch(fetchOverview());
   }, [status, dispatch]);
 
   const loading = status === "loading" || status === "idle";
-  const name = data?.vendorName;
+  const name = isBuyer
+    ? data?.buyerName ?? data?.userName ?? null
+    : data?.vendorName;
   const greeting = data?.greeting ?? greetingFallback();
   const dateLabel = formatDate(data?.currentDate);
+  const subtitle = isBuyer
+    ? "Here's what's happening with your procurement today."
+    : "Here's what's happening with your business today.";
 
   return (
     <header className="mb-1 flex flex-wrap items-end justify-between gap-6 xl:mb-0">
@@ -69,7 +75,7 @@ export default function DashboardGreeting() {
         ) : (
           <>
             <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[var(--primary-purple)]">
-              Vendor Dashboard
+              {isBuyer ? "Buyer Dashboard" : "Vendor Dashboard"}
             </p>
             <h1 className="mt-2 font-heading text-[34px] font-bold leading-[1.15] tracking-tight text-[var(--text-primary)] sm:text-[36px] xl:text-[38px]">
               {greeting}{name ? `, ${name}` : ""}
@@ -78,8 +84,7 @@ export default function DashboardGreeting() {
               </span>
             </h1>
             <p className="mt-3 text-[16px] font-medium leading-relaxed text-[var(--text-secondary)]">
-              Here's what's happening with your business today.
-            </p>
+              {subtitle}            </p>
           </>
         )}
       </div>

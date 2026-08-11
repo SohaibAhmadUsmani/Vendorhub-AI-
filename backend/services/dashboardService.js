@@ -15,6 +15,7 @@ const Order = require('../models/Order');
 const CustomerRequest = require('../models/CustomerRequest');
 const Notification = require('../models/Notification');
 const Quote = require('../models/Quote');
+const Message = require('../models/Message');
 // Side-effect import + reference: the User model is required for every
 // `.populate('buyer')` below (RFQs, orders, requests, messages) — without
 // it Mongoose throws "Schema hasn't been registered for model 'User'" once
@@ -22,6 +23,43 @@ const Quote = require('../models/Quote');
 const UserModel = require('../models/User');
 
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+
+function serializeNotification(n) {
+  return {
+    id: String(n._id),
+    title: n.title,
+    message: n.message ?? '',
+    type: n.type ?? 'system',
+    time: n.createdAt ?? n.time,
+    unread: !n.read,
+    link: n.link ?? null,
+  };
+}
+
+async function purgeSeededNotifications() {
+  const seedMatches = [
+    {
+      title: 'RFQ response needed',
+      message: 'A buyer is waiting on your quote for the premium packaging order.',
+    },
+    {
+      title: 'New message from buyer',
+      message: 'Please confirm the delivery window before we release the next purchase order.',
+    },
+    {
+      title: 'Order shipped',
+      message: 'Order #10492 has moved to shipped and is now in transit.',
+    },
+    {
+      title: 'Quote approved',
+      message: 'The latest quote for the home-office set was approved by the buyer.',
+    },
+  ];
+
+  if (!seedMatches.length) return 0;
+  const result = await Notification.deleteMany({ $or: seedMatches });
+  return result.deletedCount || 0;
+}
 
 /** Resolve the vendor the dashboard belongs to (explicit id or top-rated). */
 async function resolveVendor(vendorId) {
@@ -587,16 +625,9 @@ async function buildProductPerformance(vendorId, range) {
 }
 
 async function buildNotifications() {
-  const list = await Notification.find({}).sort({ createdAt: -1 }).limit(10).lean();
-
-  return list.map((n) => ({
-    id: String(n._id),
-    title: n.title,
-    message: n.message,
-    type: n.type,
-    time: n.createdAt,
-    unread: !n.read,
-  }));
+  await purgeSeededNotifications();
+  const list = await Notification.find({}).sort({ createdAt: -1 }).limit(15).lean();
+  return list.map(serializeNotification);
 }
 
 /* -------------------------- Advanced Analytics -------------------------- */
