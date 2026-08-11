@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://via.placeholder.com/150x150/6C5CE7/FFFFFF?text=VH" alt="VendorHub AI Logo" width="120" />
+  <img src="https://placehold.co/150x150/6C5CE7/FFFFFF?text=VH" alt="VendorHub AI Logo" width="120" />
 
   <h1>VendorHub AI</h1>
   <p><em>Find the Right Supplier. Faster. Smarter.</em></p>
