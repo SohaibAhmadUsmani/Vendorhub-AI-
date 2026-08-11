@@ -498,7 +498,7 @@ export default function DashboardNavbar({ onToggleSidebar }) {
                   <button
                     type="button"
                     role="menuitem"
-                    onClick={handleLogout}
+                    onClick={handleSignOut}
                     className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-[13px] font-medium text-[#DC2626] transition-colors hover:bg-red-50 cursor-pointer"
                   >
                     <LogOut size={15} strokeWidth={2} />
