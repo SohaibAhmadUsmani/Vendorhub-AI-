@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { NavLink, Link } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { NavLink, Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
@@ -21,10 +20,10 @@ import {
   X,
   LogOut,
   UserRound,
+  ShieldAlert,
 } from "lucide-react";
 import VendorHubLogo from "./VendorHubLogo";
 import Avatar from "./Avatar";
-import { fetchOverview, selectOverview, selectOverviewUser } from "../../redux/dashboardSlice";
 import useClickOutside from "../../hooks/useClickOutside";
 
 /* --------------------------------------------------------------------------
@@ -37,55 +36,250 @@ import useClickOutside from "../../hooks/useClickOutside";
    backdrop. All labels, icons, routes and profile values are data-driven.
    -------------------------------------------------------------------------- */
 
-const NAV_GROUPS = [
-  { items: [{ label: "Dashboard", path: "/buyer/dashboard", icon: LayoutDashboard }] },
-  {
-    items: [
-      { label: "AI Search", path: "/buyer/ai-search", icon: Sparkles },
-      { label: "RFQs", path: "/buyer/rfqs", icon: FileText },
-      { label: "Quotes", path: "/buyer/quotes", icon: MessageSquare },
-      { label: "Orders", path: "/buyer/orders", icon: ShoppingCart },
-    ],
-  },
-  {
-    items: [
-      { label: "Vendors", path: "/buyer/vendors", icon: Users },
-      { label: "Saved Vendors", path: "/buyer/saved-vendors", icon: Bookmark },
-      { label: "Product Catalog", path: "/buyer/product-catalog", icon: Package },
-    ],
-  },
-  {
-    items: [
-      { label: "Messages", path: "/buyer/messages", icon: MessageCircle },
-      { label: "Contracts", path: "/buyer/contracts", icon: FileSignature },
-      { label: "Documents", path: "/buyer/documents", icon: Files },
-    ],
-  },
-  {
-    items: [
-      { label: "Analytics", path: "/buyer/analytics", icon: BarChart3 },
-      { label: "Spend Summary", path: "/buyer/spend-summary", icon: Wallet },
-    ],
-  },
-];
+const NAV_GROUPS_BY_ROLE = {
+  buyer: [
+    {
+      items: [
+        {
+          label: "Dashboard",
+          path: "/buyer/dashboard",
+          icon: LayoutDashboard,
+        },
+      ],
+    },
+    {
+      items: [
+        {
+          label: "AI Search",
+          path: "/buyer/ai-search",
+          icon: Sparkles,
+        },
+        {
+          label: "RFQs",
+          path: "/buyer/rfqs",
+          icon: FileText,
+        },
+        {
+          label: "Quotes",
+          path: "/buyer/quotes",
+          icon: MessageSquare,
+        },
+        {
+          label: "Orders",
+          path: "/buyer/orders",
+          icon: ShoppingCart,
+        },
+      ],
+    },
+    {
+      items: [
+        {
+          label: "Vendors",
+          path: "/buyer/vendors",
+          icon: Users,
+        },
+        {
+          label: "Saved Vendors",
+          path: "/buyer/saved-vendors",
+          icon: Bookmark,
+        },
+        {
+          label: "Product Catalog",
+          path: "/buyer/product-catalog",
+          icon: Package,
+        },
+      ],
+    },
+    {
+      items: [
+        {
+          label: "Messages",
+          path: "/buyer/messages",
+          icon: MessageCircle,
+        },
+        {
+          label: "Contracts",
+          path: "/buyer/contracts",
+          icon: FileSignature,
+        },
+        {
+          label: "Documents",
+          path: "/buyer/documents",
+          icon: Files,
+        },
+        {
+          label: "Risk Analysis",
+          path: "/buyer/risk-analysis",
+          icon: ShieldAlert,
+        },
+      ],
+    },
+    {
+      items: [
+        {
+          label: "Analytics",
+          path: "/buyer/analytics",
+          icon: BarChart3,
+        },
+        {
+          label: "Spend Summary",
+          path: "/buyer/spend-summary",
+          icon: Wallet,
+        },
+      ],
+    },
+  ],
 
-const PROFILE_MENU = [
-  { label: "View Profile", path: "/buyer/vendors", icon: UserRound },
-];
+  vendor: [
+    {
+      items: [
+        {
+          label: "Dashboard",
+          path: "/vendor/dashboard",
+          icon: LayoutDashboard,
+        },
+      ],
+    },
+    {
+      items: [
+        {
+          label: "Company Profile",
+          path: "/vendor/profile",
+          icon: UserRound,
+        },
+        {
+          label: "Products",
+          path: "/vendor/products",
+          icon: Package,
+        },
+        {
+          label: "Certifications",
+          path: "/vendor/certifications",
+          icon: FileSignature,
+        },
+        {
+          label: "Pricing",
+          path: "/vendor/pricing",
+          icon: Wallet,
+        },
+      ],
+    },
+    {
+      items: [
+        {
+          label: "Received RFQs",
+          path: "/vendor/rfqs",
+          icon: FileText,
+        },
+        {
+          label: "Quotations",
+          path: "/vendor/quotes",
+          icon: MessageSquare,
+        },
+        {
+          label: "Orders",
+          path: "/vendor/orders",
+          icon: ShoppingCart,
+        },
+      ],
+    },
+    {
+      items: [
+        {
+          label: "Messages",
+          path: "/vendor/messages",
+          icon: MessageCircle,
+        },
+        {
+          label: "Documents",
+          path: "/vendor/documents",
+          icon: Files,
+        },
+        {
+          label: "Analytics",
+          path: "/vendor/analytics",
+          icon: BarChart3,
+        },
+        {
+          label: "Notifications",
+          path: "/vendor/notifications",
+          icon: Sparkles,
+        },
+      ],
+    },
+  ],
+
+  admin: [
+    {
+      items: [
+        {
+          label: "Dashboard",
+          path: "/admin/dashboard",
+          icon: LayoutDashboard,
+        },
+      ],
+    },
+    {
+      items: [
+        {
+          label: "Manage Users",
+          path: "/admin/users",
+          icon: Users,
+        },
+        {
+          label: "Verify Vendors",
+          path: "/admin/vendors",
+          icon: UserRound,
+        },
+        {
+          label: "Categories",
+          path: "/admin/categories",
+          icon: Package,
+        },
+      ],
+    },
+    {
+      items: [
+        {
+          label: "Reports",
+          path: "/admin/reports",
+          icon: FileText,
+        },
+        {
+          label: "Subscriptions",
+          path: "/admin/subscriptions",
+          icon: Wallet,
+        },
+        {
+          label: "Fraud Monitoring",
+          path: "/admin/fraud-monitoring",
+          icon: FileSignature,
+        },
+      ],
+    },
+    {
+      items: [
+        {
+          label: "Platform Analytics",
+          path: "/admin/analytics",
+          icon: BarChart3,
+        },
+      ],
+    },
+  ],
+};
 
 const NavItemInner = React.memo(function NavItemInner({ item, showLabels, isActive, rail }) {
   return (
     <>
       <span
-        className={`relative flex shrink-0 items-center justify-center rounded-xl transition-all duration-200 ${
-          showLabels ? "h-11 w-11" : "h-12 w-12"
-        } ${
-          rail && isActive
+        className={`relative flex shrink-0 items-center justify-center rounded-xl transition-all duration-200 ${showLabels ? "h-11 w-11" : "h-12 w-12"
+          } ${rail && isActive
             ? "bg-gradient-to-br from-[#7C6CF0] to-[#5A4AE8] text-white shadow-lg shadow-black/40 ring-1 ring-white/20"
             : rail
               ? "bg-white/[0.04] text-[#C9BDFF] group-hover:bg-white/10 group-hover:text-white group-hover:scale-105"
               : ""
-        } ${!rail && isActive ? "text-white" : !rail ? "text-[#C9BDFF] group-hover:text-white" : ""}`}
+          } ${!rail && isActive ? "text-white" : !rail ? "text-[#C9BDFF] group-hover:text-white" : ""}`}
       >
         <item.icon size={20} strokeWidth={2.1} />
         {rail && isActive && (
@@ -105,16 +299,13 @@ const NavItem = React.memo(function NavItem({ item, showLabels, onNavigate }) {
       title={!showLabels ? item.label : undefined}
       aria-label={item.label}
       className={({ isActive }) =>
-        `group relative flex items-center rounded-2xl text-sm transition-all duration-200 cursor-pointer ${
-          showLabels ? "justify-start" : "justify-center"
-        } ${
-          showLabels ? "px-3 py-2" : "px-0 py-1"
-        } ${
-          isActive
-            ? showLabels
-              ? "bg-gradient-to-r from-[#6C63FF] to-[#7C6CF0] text-white shadow-lg shadow-[#6C63FF]/30"
-              : "text-white"
-            : "text-[#C7BDFF] hover:text-white"
+        `group relative flex items-center rounded-2xl text-sm transition-all duration-200 cursor-pointer ${showLabels ? "justify-start" : "justify-center"
+        } ${showLabels ? "px-3 py-2" : "px-0 py-1"
+        } ${isActive
+          ? showLabels
+            ? "bg-gradient-to-r from-[#6C63FF] to-[#7C6CF0] text-white shadow-lg shadow-[#6C63FF]/30"
+            : "text-white"
+          : "text-[#C7BDFF] hover:text-white"
         }`
       }
     >
@@ -125,14 +316,36 @@ const NavItem = React.memo(function NavItem({ item, showLabels, onNavigate }) {
   );
 });
 
-export default function DashboardSidebar({ collapsed, mobileOpen, isMobile, onCloseMobile }) {
-  const dispatch = useDispatch();
-  const overview = useSelector(selectOverview);
-  const user = useSelector(selectOverviewUser);
+export default function DashboardSidebar({
+  collapsed,
+  mobileOpen,
+  isMobile,
+  onCloseMobile,
+}) {
+  const navigate = useNavigate();
+
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    if (overview.status === "idle") dispatch(fetchOverview());
-  }, [overview.status, dispatch]);
+    try {
+      const storedUser = localStorage.getItem("user");
+
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
+    } catch (error) {
+      console.error("Failed to read logged-in user:", error);
+    }
+  }, []);
+  const role = user?.role || "buyer";
+  const profilePath = {
+  buyer: "/buyer/vendors",
+  vendor: "/vendor/profile",
+  admin: "/admin/users",
+}[role];
+
+  const navGroups =
+    NAV_GROUPS_BY_ROLE[role] || NAV_GROUPS_BY_ROLE.buyer;
 
   const [hovered, setHovered] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -144,6 +357,18 @@ export default function DashboardSidebar({ collapsed, mobileOpen, isMobile, onCl
 
   const width = isMobile ? "w-[288px]" : expandedLabel ? "w-[240px]" : "w-[88px]";
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    setProfileOpen(false);
+
+    if (isMobile) {
+      onCloseMobile();
+    }
+
+    navigate("/login", { replace: true });
+  };
   return (
     <>
       {/* Mobile drawer backdrop */}
@@ -164,18 +389,16 @@ export default function DashboardSidebar({ collapsed, mobileOpen, isMobile, onCl
       <aside
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        className={`z-50 flex h-screen flex-col overflow-hidden bg-gradient-to-b from-[#251B5E] via-[#1D144A] to-[#150D3A] text-[#C9BDFF] transition-all duration-300 ${
-          isMobile
-            ? `fixed top-0 left-0 ${width} shadow-2xl ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`
-            : `sticky top-0 shrink-0 ${width}`
-        }`}
+        className={`z-50 flex h-screen flex-col overflow-hidden bg-gradient-to-b from-[#251B5E] via-[#1D144A] to-[#150D3A] text-[#C9BDFF] transition-all duration-300 ${isMobile
+          ? `fixed top-0 left-0 ${width} shadow-2xl ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`
+          : `sticky top-0 shrink-0 ${width}`
+          }`}
         aria-label="Primary navigation"
       >
         {/* Brand */}
         <div
-          className={`flex shrink-0 items-center border-b border-white/10 pb-5 ${
-            showLabels ? "justify-between px-4 pt-6" : "justify-center px-2 pt-6"
-          }`}
+          className={`flex shrink-0 items-center border-b border-white/10 pb-5 ${showLabels ? "justify-between px-4 pt-6" : "justify-center px-2 pt-6"
+            }`}
         >
           {showLabels ? (
             <VendorHubLogo size="small" showTagline={false} lightMode={false} />
@@ -198,7 +421,7 @@ export default function DashboardSidebar({ collapsed, mobileOpen, isMobile, onCl
         {/* Navigation — centered icon rail / expanded list */}
         <nav className="sidebar-scroll flex-1 overflow-y-auto px-3 py-4" aria-label="Sidebar sections">
           <div className={`flex flex-col gap-1 ${showLabels ? "" : "items-center"}`}>
-            {NAV_GROUPS.map((group, gi) => (
+            {navGroups.map((group, gi) => (
               <React.Fragment key={gi}>
                 {gi > 0 && <div className="my-2 h-px w-9 bg-white/10 mx-auto" aria-hidden="true" />}
                 {group.items.map((item) => (
@@ -219,17 +442,15 @@ export default function DashboardSidebar({ collapsed, mobileOpen, isMobile, onCl
           <div className={showLabels ? "space-y-2" : "flex flex-col items-center gap-2"}>
             {/* Settings shortcut */}
             <NavLink
-              to="/buyer/settings"
+              to={`/${role}/settings`}
               onClick={isMobile ? onCloseMobile : undefined}
               aria-label="Settings"
               title={!showLabels ? "Settings" : undefined}
               className={({ isActive }) =>
-                `flex items-center rounded-xl transition-all duration-200 ${
-                  showLabels ? "justify-start gap-3 px-3 py-2" : "justify-center h-12 w-12"
-                } ${
-                  isActive
-                    ? "bg-white/10 text-white"
-                    : "text-[#9A8CFF] hover:bg-white/10 hover:text-white hover:scale-105"
+                `flex items-center rounded-xl transition-all duration-200 ${showLabels ? "justify-start gap-3 px-3 py-2" : "justify-center h-12 w-12"
+                } ${isActive
+                  ? "bg-white/10 text-white"
+                  : "text-[#9A8CFF] hover:bg-white/10 hover:text-white hover:scale-105"
                 }`
               }
             >
@@ -247,9 +468,8 @@ export default function DashboardSidebar({ collapsed, mobileOpen, isMobile, onCl
                 aria-haspopup="menu"
                 aria-expanded={profileOpen && showLabels}
                 title={!showLabels ? user?.name ?? "Profile" : undefined}
-                className={`flex w-full items-center rounded-2xl p-2.5 transition-colors hover:bg-white/10 cursor-pointer ${
-                  showLabels ? "gap-3" : "justify-center"
-                } ${profileOpen ? "bg-white/10" : ""}`}
+                className={`flex w-full items-center rounded-2xl p-2.5 transition-colors hover:bg-white/10 cursor-pointer ${showLabels ? "gap-3" : "justify-center"
+                  } ${profileOpen ? "bg-white/10" : ""}`}
               >
                 <Avatar name={user?.name} src={user?.avatar} size={showLabels ? 36 : 34} />
                 {showLabels && (
@@ -289,22 +509,23 @@ export default function DashboardSidebar({ collapsed, mobileOpen, isMobile, onCl
                         )}
                       </div>
                     )}
-                    {PROFILE_MENU.map((item) => (
-                      <Link
-                        key={item.path}
-                        to={item.path}
-                        role="menuitem"
-                        onClick={() => setProfileOpen(false)}
-                        className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-[13px] font-medium text-[#C9BDFF] transition-colors hover:bg-white/10 hover:text-white"
-                      >
-                        <item.icon size={15} className="text-[#9A8CFF]" strokeWidth={2} />
-                        {item.label}
-                      </Link>
-                    ))}
+                    <Link
+                      to={profilePath}
+                      role="menuitem"
+                      onClick={() => setProfileOpen(false)}
+                      className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-[13px] font-medium text-[#C9BDFF] transition-colors hover:bg-white/10 hover:text-white"
+                    >
+                      <UserRound
+                        size={15}
+                        className="text-[#9A8CFF]"
+                        strokeWidth={2}
+                      />
+                      View Profile
+                    </Link>
                     <button
                       type="button"
                       role="menuitem"
-                      onClick={() => setProfileOpen(false)}
+                      onClick={handleLogout}
                       className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-[13px] font-medium text-[#FCA5A5] transition-colors hover:bg-red-500/10"
                     >
                       <LogOut size={15} strokeWidth={2} />
