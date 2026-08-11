@@ -366,7 +366,7 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
 
             {/* Company Background */}
             <div className="card-surface">
-              <h3 className="font-heading" style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '0.75rem' }}>
+              <h3 className="font-heading text-slate-900 text-lg font-extrabold mb-3">
                 Company Background & Executive Summary
               </h3>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.925rem', lineHeight: '1.65', marginBottom: '1.25rem' }}>
@@ -375,23 +375,23 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
                 <div style={{ padding: '1rem', backgroundColor: 'var(--bg-main)', borderRadius: 'var(--radius-md)' }}>
-                  <span className="font-mono" style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', textTransform: 'uppercase' }}>FOUNDED</span>
-                  <strong className="font-heading" style={{ fontSize: '1.25rem', color: 'var(--text-primary)' }}>{vendorData.founded}</strong>
+                  <span className="font-mono text-slate-700 text-[12px] font-bold block uppercase tracking-wider mb-1">FOUNDED</span>
+                  <strong className="font-heading text-slate-900 text-xl font-extrabold">{vendorData.founded}</strong>
                 </div>
                 <div style={{ padding: '1rem', backgroundColor: 'var(--bg-main)', borderRadius: 'var(--radius-md)' }}>
-                  <span className="font-mono" style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', textTransform: 'uppercase' }}>STAFF</span>
-                  <strong className="font-heading" style={{ fontSize: '1.25rem', color: 'var(--text-primary)' }}>{vendorData.staff}</strong>
+                  <span className="font-mono text-slate-700 text-[12px] font-bold block uppercase tracking-wider mb-1">STAFF</span>
+                  <strong className="font-heading text-slate-900 text-xl font-extrabold">{vendorData.staff}</strong>
                 </div>
                 <div style={{ padding: '1rem', backgroundColor: 'var(--bg-main)', borderRadius: 'var(--radius-md)' }}>
-                  <span className="font-mono" style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', textTransform: 'uppercase' }}>FACILITY SIZE</span>
-                  <strong className="font-heading" style={{ fontSize: '1.25rem', color: 'var(--text-primary)' }}>{vendorData.manufacturingCapabilities?.factoryArea || "120,000 sq ft"}</strong>
+                  <span className="font-mono text-slate-700 text-[12px] font-bold block uppercase tracking-wider mb-1">FACILITY SIZE</span>
+                  <strong className="font-heading text-slate-900 text-xl font-extrabold">{vendorData.manufacturingCapabilities?.factoryArea || "120,000 sq ft"}</strong>
                 </div>
               </div>
             </div>
 
             {/* Export Countries */}
             <div className="card-surface">
-              <h3 className="font-heading" style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '0.75rem' }}>
+              <h3 className="font-heading text-slate-900 text-lg font-extrabold mb-3">
                 🌍 Export Countries & Regional Volume Breakdown
               </h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
@@ -399,7 +399,7 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
                   <div 
                     key={idx}
                     style={{
-                      padding: '0.85rem',
+                      padding: '0.85rem 1.1rem',
                       backgroundColor: 'var(--bg-main)',
                       borderRadius: 'var(--radius-md)',
                       border: '1px solid var(--border-color)',
@@ -408,11 +408,11 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
                       justifyContent: 'space-between'
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                       <span style={{ fontSize: '1.4rem' }}>{exp.flag}</span>
-                      <span style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)' }}>{exp.country}</span>
+                      <span className="text-slate-900 font-bold text-sm">{exp.country}</span>
                     </div>
-                    <span className="font-mono" style={{ fontWeight: 700, color: 'var(--primary-purple)' }}>
+                    <span className="font-mono text-xs font-extrabold text-[#6C63FF] bg-[#F0EEFF] px-2.5 py-1 rounded-md border border-[#D8D2FF]">
                       {exp.percent}%
                     </span>
                   </div>
@@ -422,25 +422,25 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
 
             {/* Detailed Plant Capabilities */}
             <div className="card-surface">
-              <h3 className="font-heading" style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '1rem' }}>
+              <h3 className="font-heading text-slate-900 text-lg font-extrabold mb-3">
                 ⚙️ Manufacturing Plant Capabilities
               </h3>
               <div className="profile-grid-3col" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '1rem' }}>
                 <div style={{ padding: '0.85rem', backgroundColor: 'var(--bg-main)', borderRadius: 'var(--radius-md)' }}>
-                  <span className="font-mono" style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>MONTHLY CAPACITY</span>
-                  <strong style={{ fontSize: '0.95rem', color: 'var(--text-primary)' }}>{vendorData.manufacturingCapabilities.capacity}</strong>
+                  <span className="font-mono text-slate-700 text-[12px] font-bold block uppercase tracking-wider mb-1">MONTHLY CAPACITY</span>
+                  <strong className="text-slate-900 text-sm font-bold">{vendorData.manufacturingCapabilities.capacity}</strong>
                 </div>
                 <div style={{ padding: '0.85rem', backgroundColor: 'var(--bg-main)', borderRadius: 'var(--radius-md)' }}>
-                  <span className="font-mono" style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>SAMPLE LEAD TIME</span>
-                  <strong style={{ fontSize: '0.95rem', color: 'var(--text-primary)' }}>{vendorData.manufacturingCapabilities.leadTime}</strong>
+                  <span className="font-mono text-slate-700 text-[12px] font-bold block uppercase tracking-wider mb-1">SAMPLE LEAD TIME</span>
+                  <strong className="text-slate-900 text-sm font-bold">{vendorData.manufacturingCapabilities.leadTime}</strong>
                 </div>
                 <div style={{ padding: '0.85rem', backgroundColor: 'var(--bg-main)', borderRadius: 'var(--radius-md)' }}>
-                  <span className="font-mono" style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>CNC MACHINERY</span>
-                  <strong style={{ fontSize: '0.95rem', color: 'var(--text-primary)' }}>{vendorData.manufacturingCapabilities.cncMachines || "45 Haas Units"}</strong>
+                  <span className="font-mono text-slate-700 text-[12px] font-bold block uppercase tracking-wider mb-1">CNC MACHINERY</span>
+                  <strong className="text-slate-900 text-sm font-bold">{vendorData.manufacturingCapabilities.cncMachines || "45 Haas Units"}</strong>
                 </div>
                 <div style={{ padding: '0.85rem', backgroundColor: 'var(--bg-main)', borderRadius: 'var(--radius-md)' }}>
-                  <span className="font-mono" style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>AUTOMATED LINES</span>
-                  <strong style={{ fontSize: '0.95rem', color: 'var(--text-primary)' }}>{vendorData.manufacturingCapabilities.automatedLines || "6 Assembly Lines"}</strong>
+                  <span className="font-mono text-slate-700 text-[12px] font-bold block uppercase tracking-wider mb-1">AUTOMATED LINES</span>
+                  <strong className="text-slate-900 text-sm font-bold">{vendorData.manufacturingCapabilities.automatedLines || "6 Assembly Lines"}</strong>
                 </div>
               </div>
             </div>
@@ -462,10 +462,10 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
               <div style={{ fontSize: '3rem', fontWeight: 800, fontFamily: 'var(--font-heading)', lineHeight: 1, margin: '0.5rem 0' }}>
                 {vendorData.matchScore}%
               </div>
-              <p style={{ fontSize: '0.85rem', margin: '0.75rem 0 1.25rem', opacity: 0.9, lineHeight: '1.5' }}>
+              <p style={{ fontSize: '0.85rem', margin: '0.75rem 0 1.25rem', color: '#FFFFFF', lineHeight: '1.5' }}>
                 {vendorData.matchReason}
               </p>
-              <div style={{ borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: '0.75rem', fontSize: '0.8rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+              <div style={{ borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: '0.75rem', fontSize: '0.8rem', color: '#FFFFFF', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span>Lead Time Match:</span>
                   <strong>{vendorData.leadTimeMatch}</strong>

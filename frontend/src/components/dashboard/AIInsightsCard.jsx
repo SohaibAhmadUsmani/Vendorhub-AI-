@@ -25,6 +25,16 @@ export default function AIInsightsCard() {
     [data, isSuccess],
   );
 
+  const userRole = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("user"))?.role?.toLowerCase() || "buyer";
+    } catch {
+      return "buyer";
+    }
+  })();
+
+  const targetPath = userRole === "vendor" ? "/vendor/analytics" : "/buyer/ai-insights";
+
   return (
     <section
       className="relative flex w-full flex-1 flex-col overflow-hidden rounded-3xl border border-[#6C63FF]/40 bg-gradient-to-b from-[#3D3C8A] via-[#4B4AA8] to-[#7C70E8] p-5 shadow-[0_22px_52px_-22px_rgba(108,99,255,0.55)] sm:p-6"
@@ -43,13 +53,13 @@ export default function AIInsightsCard() {
             <h2 className="truncate font-heading text-[20px] font-bold tracking-tight text-white">
               AI Insights
             </h2>
-            <p className="truncate text-[13px] font-medium text-white/70">
+            <p className="truncate text-[13px] font-medium text-white/90">
               Business recommendations powered by live data
             </p>
           </div>
         </div>
         <Link
-          to="/buyer/ai-insights"
+          to={targetPath}
           className="group inline-flex shrink-0 items-center gap-1 rounded-full border border-white/40 bg-white/15 px-3 py-1.5 text-[11px] font-bold text-white backdrop-blur transition hover:border-white/70 hover:bg-white/25"
           aria-label="View all AI insights"
         >

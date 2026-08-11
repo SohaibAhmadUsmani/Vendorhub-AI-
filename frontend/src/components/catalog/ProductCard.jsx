@@ -140,17 +140,17 @@ export default function ProductCard({
 
         {/* Product Meta */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
-          <span className="font-mono" style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+          <span className="font-mono" style={{ fontSize: '0.75rem', color: '#334155', fontWeight: 700 }}>
             {product.sku}
           </span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span style={{ fontSize: '0.75rem', color: '#F59E0B', fontWeight: 600 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            <span style={{ fontSize: '0.75rem', color: '#D97706', fontWeight: 700 }}>
               ★ {product.rating}
             </span>
             {onEdit && (
               <button 
                 onClick={(e) => { e.stopPropagation(); onEdit(product); }}
-                style={{ fontSize: '0.75rem', color: 'var(--primary-purple)', cursor: 'pointer', background: 'none', border: 'none', fontWeight: 600 }}
+                style={{ fontSize: '0.75rem', color: '#6C63FF', cursor: 'pointer', background: 'none', border: 'none', fontWeight: 700 }}
                 title="Edit Product"
               >
                 Edit
@@ -159,7 +159,7 @@ export default function ProductCard({
             {onDelete && (
               <button 
                 onClick={(e) => { e.stopPropagation(); onDelete(product); }}
-                style={{ fontSize: '0.75rem', color: '#EF4444', cursor: 'pointer', background: 'none', border: 'none', fontWeight: 600 }}
+                style={{ fontSize: '0.75rem', color: '#DC2626', cursor: 'pointer', background: 'none', border: 'none', fontWeight: 700 }}
                 title="Delete Product"
               >
                 Delete
@@ -168,29 +168,29 @@ export default function ProductCard({
           </div>
         </div>
 
-        <h3 className="font-heading" style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.35rem', lineHeight: '1.35' }}>
+        <h3 className="font-heading" style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0F172A', marginBottom: '0.35rem', lineHeight: '1.35' }}>
           {product.title}
         </h3>
 
-        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>
-          Supplier: <strong style={{ color: 'var(--text-primary)' }}>{product.vendorName}</strong>
+        <p style={{ fontSize: '0.8rem', color: '#334155', marginBottom: '0.75rem', fontWeight: 500 }}>
+          Supplier: <strong style={{ color: '#0F172A', fontWeight: 700 }}>{product.vendorName}</strong>
         </p>
       </div>
 
       {/* Pricing & Stock Details */}
       <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '0.85rem', marginTop: '0.5rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.65rem' }}>
-          <span className="font-mono" style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+          <span className="font-mono" style={{ fontSize: '1.3rem', fontWeight: 800, color: '#0F172A' }}>
             {product.priceDisplay}
           </span>
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500 }}>/ {product.unit}</span>
+          <span style={{ fontSize: '0.785rem', color: '#334155', fontWeight: 600 }}>/ {product.unit}</span>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '1rem', fontSize: '0.725rem' }}>
-          <span className="font-mono" style={{ backgroundColor: 'var(--bg-main)', color: 'var(--text-secondary)', padding: '0.25rem 0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontWeight: 600 }}>
+        <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '1rem', fontSize: '0.75rem' }}>
+          <span className="font-mono" style={{ backgroundColor: '#F1F5F9', color: '#0F172A', padding: '0.25rem 0.6rem', borderRadius: '6px', border: '1px solid #CBD5E1', fontWeight: 700 }}>
             MOQ: {product.moq}
           </span>
-          <span className="font-mono" style={{ backgroundColor: '#E0F2FE', color: '#0369A1', padding: '0.25rem 0.5rem', borderRadius: 'var(--radius-sm)', fontWeight: 600 }}>
+          <span className="font-mono" style={{ backgroundColor: '#E0F2FE', color: '#0369A1', padding: '0.25rem 0.6rem', borderRadius: '6px', border: '1px solid #BAE6FD', fontWeight: 700 }}>
             Lead: {product.leadTimeDisplay}
           </span>
         </div>

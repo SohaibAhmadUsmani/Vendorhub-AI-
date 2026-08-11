@@ -169,7 +169,7 @@ export default function NotificationCenter() {
           {CATEGORIES.map((c) => (
             <button key={c.key} className={`nc-filter${c.key === 'all' ? ' active' : ''}`}>
               {c.color && <span className="nc-dot" style={{ background: c.color }} />}
-              {c.label} <span style={{ fontFamily: "'IBM Plex Mono', monospace", opacity: 0.65 }}>{c.count}</span>
+              {c.label} <span style={{ fontFamily: "'IBM Plex Mono', monospace", opacity: 0.85 }}>{c.count}</span>
             </button>
           ))}
         </div>

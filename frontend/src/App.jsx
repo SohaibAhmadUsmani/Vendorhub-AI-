@@ -125,11 +125,7 @@ function App() {
             {/* AI Negotiation */}
             <Route
               path="negotiation"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="AI Negotiation"
-                />
-              }
+              element={<QuotesPage />}
             />
 
             {/* Orders */}
@@ -141,11 +137,7 @@ function App() {
             {/* Saved Vendors */}
             <Route
               path="saved-vendors"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Saved Vendors"
-                />
-              }
+              element={<VendorProfileView />}
             />
 
             {/* Messages */}
@@ -157,11 +149,7 @@ function App() {
             {/* Contracts */}
             <Route
               path="contracts"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Contracts"
-                />
-              }
+              element={<DocumentsPage />}
             />
 
             {/* Documents */}
@@ -184,11 +172,7 @@ function App() {
             {/* Reviews */}
             <Route
               path="reviews"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Reviews & Ratings"
-                />
-              }
+              element={<VendorProfileView />}
             />
 
             {/* Notifications */}
@@ -212,31 +196,19 @@ function App() {
             {/* Vendor Analytics */}
             <Route
               path="vendor-analytics"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Vendor Analytics"
-                />
-              }
+              element={<AnalyticsPage />}
             />
 
             {/* Spend Summary */}
             <Route
               path="spend-summary"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Spend Summary"
-                />
-              }
+              element={<AnalyticsPage />}
             />
 
             {/* Settings */}
             <Route
               path="settings"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Settings"
-                />
-              }
+              element={<VendorProfileView />}
             />
 
           </Route>
@@ -262,51 +234,31 @@ function App() {
             {/* Company Profile */}
             <Route
               path="profile"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Company Profile"
-                />
-              }
+              element={<VendorProfileView />}
             />
 
             {/* Products */}
             <Route
               path="products"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Products"
-                />
-              }
+              element={<ProductCatalogView />}
             />
 
             {/* Certifications */}
             <Route
               path="certifications"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Certifications"
-                />
-              }
+              element={<VendorProfileView />}
             />
 
             {/* Pricing */}
             <Route
               path="pricing"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Pricing"
-                />
-              }
+              element={<AnalyticsPage />}
             />
 
             {/* Received RFQs */}
             <Route
               path="rfqs"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Received RFQs"
-                />
-              }
+              element={<RFQGeneratorPage />}
             />
 
             {/* Quotations */}
@@ -324,11 +276,7 @@ function App() {
             {/* Messages */}
             <Route
               path="messages"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Messages"
-                />
-              }
+              element={<MessagesPage />}
             />
 
             {/* Analytics */}
@@ -353,11 +301,7 @@ function App() {
             {/* Settings */}
             <Route
               path="settings"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Settings"
-                />
-              }
+              element={<VendorProfileView />}
             />
 
           </Route>
@@ -377,91 +321,55 @@ function App() {
             {/* Admin Dashboard */}
             <Route
               path="dashboard"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Admin Dashboard"
-                />
-              }
+              element={<Dashboard />}
             />
 
             {/* Manage Users */}
             <Route
               path="users"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Manage Users"
-                />
-              }
+              element={<VendorProfileView />}
             />
 
             {/* Verify Vendors */}
             <Route
               path="vendors"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Verify Vendors"
-                />
-              }
+              element={<VendorProfileView />}
             />
 
             {/* Categories */}
             <Route
               path="categories"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Categories"
-                />
-              }
+              element={<ProductCatalogView />}
             />
 
             {/* Reports */}
             <Route
               path="reports"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Reports"
-                />
-              }
+              element={<AnalyticsPage />}
             />
 
             {/* Subscription Plans */}
             <Route
               path="subscriptions"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Subscription Plans"
-                />
-              }
+              element={<AnalyticsPage />}
             />
 
             {/* Fraud Monitoring */}
             <Route
               path="fraud-monitoring"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Fraud Monitoring"
-                />
-              }
+              element={<RiskAnalysisPage />}
             />
 
             {/* Platform Analytics */}
             <Route
               path="analytics"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Platform Analytics"
-                />
-              }
+              element={<AnalyticsPage />}
             />
 
             {/* Settings */}
             <Route
               path="settings"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Settings"
-                />
-              }
+              element={<VendorProfileView />}
             />
 
           </Route>

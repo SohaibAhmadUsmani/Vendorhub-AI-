@@ -185,7 +185,7 @@ export default function ContactTeamMemberModal({ isOpen, onClose, member, vendor
                 }}>
                   <ShieldCheck size={14} />
                   {member?.role || 'Representative'}
-                  {vendorName && <span style={{ color: 'rgba(255,255,255,0.5)' }}>@ {vendorName}</span>}
+                  {vendorName && <span style={{ color: 'rgba(255,255,255,0.85)' }}>@ {vendorName}</span>}
                 </div>
               </div>
             </div>
@@ -198,7 +198,7 @@ export default function ContactTeamMemberModal({ isOpen, onClose, member, vendor
                 borderRadius: 'var(--radius-md, 8px)',
                 border: 'none',
                 background: 'transparent',
-                color: 'rgba(255,255,255,0.7)',
+                color: 'rgba(255,255,255,0.9)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -211,7 +211,7 @@ export default function ContactTeamMemberModal({ isOpen, onClose, member, vendor
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.color = 'rgba(255,255,255,0.7)';
+                e.currentTarget.style.color = 'rgba(255,255,255,0.9)';
               }}
             >
               <X size={20} />

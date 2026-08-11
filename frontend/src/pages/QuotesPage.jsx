@@ -53,10 +53,19 @@ export default function QuotesPage() {
           type="text"
           value={rfqId}
           onChange={(e) => setRfqId(e.target.value)}
-          placeholder="Paste an RFQ ID to view its quotes"
+          placeholder="Paste an RFQ ID to view its quotes (e.g. rfq_9981)..."
+          className="placeholder:text-slate-400"
           style={{
-            flex: 1, minHeight: '44px', border: '1px solid var(--border-color)',
-            borderRadius: 'var(--radius-md)', padding: '0 0.85rem', outline: 'none',
+            flex: 1, 
+            minHeight: '44px', 
+            border: '1.5px solid #CBD5E1',
+            borderRadius: 'var(--radius-md)', 
+            padding: '0 1rem', 
+            outline: 'none',
+            backgroundColor: '#FFFFFF',
+            color: '#0F172A',
+            fontSize: '0.9rem',
+            fontWeight: 600
           }}
         />
         <button

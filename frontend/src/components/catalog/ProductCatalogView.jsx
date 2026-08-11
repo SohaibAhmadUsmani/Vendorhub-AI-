@@ -216,13 +216,13 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
 
         {/* Natural Language Live Search with Inspira AI Border */}
         <div style={{ marginBottom: '1.5rem' }}>
-          <label style={{ fontSize: '0.825rem', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>AI SKU & Specs Search</label>
+          <label className="text-slate-800 dark:text-slate-200 text-xs font-bold block mb-1.5">AI SKU & Specs Search</label>
           <input 
             type="text"
             placeholder="Type SKU (e.g. SKU-PLC-8841)..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="inspira-glowing-border"
+            className="inspira-glowing-border placeholder:text-slate-400 font-medium"
             style={{
               width: '100%',
               boxSizing: 'border-box',
@@ -236,9 +236,9 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
 
         {/* Category Radio Group */}
         <div style={{ marginBottom: '1.5rem' }}>
-          <h4 style={{ fontSize: '0.825rem', fontWeight: 700, marginBottom: '0.5rem', color: 'var(--text-primary)' }}>Category</h4>
+          <h4 className="text-slate-900 dark:text-slate-100 text-xs font-extrabold mb-2">Category</h4>
           {['All', 'Sports & Outdoor', 'Apparel & Textiles', 'Industrial Tools', 'Mechanical Parts', 'Raw Materials', 'Electronic Components'].map((cat) => (
-            <label key={cat} style={{ display: 'flex', items: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.4rem', cursor: 'pointer' }}>
+            <label key={cat} className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 mb-1.5 cursor-pointer">
               <input 
                 type="radio" 
                 name="categoryFilter"
@@ -253,9 +253,9 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
 
         {/* Max MOQ Slider */}
         <div style={{ marginBottom: '1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.825rem', fontWeight: 700, marginBottom: '0.35rem' }}>
-            <span>Max MOQ</span>
-            <span className="font-mono" style={{ color: 'var(--primary-purple)' }}>{moqMax} pcs</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+            <span className="text-slate-800 dark:text-slate-200 text-xs font-bold">Max MOQ</span>
+            <span className="font-mono text-xs font-extrabold text-[#6C63FF] bg-[#F0EEFF] px-2 py-0.5 rounded-md border border-[#D8D2FF]">{moqMax} pcs</span>
           </div>
           <input 
             type="range" 
@@ -270,9 +270,9 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
 
         {/* Max Lead Time Slider */}
         <div style={{ marginBottom: '1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.825rem', fontWeight: 700, marginBottom: '0.35rem' }}>
-            <span>Max Lead Time</span>
-            <span className="font-mono" style={{ color: 'var(--primary-purple)' }}>{maxLeadTime} Days</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+            <span className="text-slate-800 dark:text-slate-200 text-xs font-bold">Max Lead Time</span>
+            <span className="font-mono text-xs font-extrabold text-[#6C63FF] bg-[#F0EEFF] px-2 py-0.5 rounded-md border border-[#D8D2FF]">{maxLeadTime} Days</span>
           </div>
           <input 
             type="range" 
@@ -286,9 +286,9 @@ export default function ProductCatalogView({ vendorIdFilter = null }) {
 
         {/* Stock Status Radio */}
         <div style={{ marginBottom: '1.5rem' }}>
-          <h4 style={{ fontSize: '0.825rem', fontWeight: 700, marginBottom: '0.5rem', color: 'var(--text-primary)' }}>Availability</h4>
+          <h4 className="text-slate-900 dark:text-slate-100 text-xs font-extrabold mb-2">Availability</h4>
           {['All', 'In Stock', 'Out of Stock'].map((st) => (
-            <label key={st} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.4rem', cursor: 'pointer' }}>
+            <label key={st} className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 mb-1.5 cursor-pointer">
               <input 
                 type="radio" 
                 name="stockFilter"

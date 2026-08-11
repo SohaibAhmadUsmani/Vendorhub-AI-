@@ -49,7 +49,7 @@ function OpportunityRow({ opp, index }) {
         </div>
 
         {/* Impact badge — fixed column so it lines up across rows. */}
-        <span className={`justify-self-start rounded-full px-2 py-0.5 text-center text-[9px] font-bold uppercase tracking-wider ${meta.chip}`}>
+        <span className={`justify-self-start rounded-full px-2 py-0.5 text-center text-[10px] font-bold uppercase tracking-wider ${meta.chip}`}>
           {meta.label}
         </span>
 
@@ -58,7 +58,7 @@ function OpportunityRow({ opp, index }) {
           <p className="truncate text-[12px] font-bold tabular-nums text-[#15803D]">
             {revenue ?? "—"}
           </p>
-          <p className="text-[9px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">Potential</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">Potential</p>
         </div>
       </div>
     </motion.article>

@@ -19,7 +19,7 @@ export function EmptyState({
       <h3 className="font-heading text-xl font-bold text-slate-900 dark:text-white mb-2">
         {title}
       </h3>
-      <p className="text-sm text-slate-500 dark:text-slate-400 max-w-md mb-6 leading-relaxed">
+      <p className="text-sm text-slate-600 dark:text-slate-400 max-w-md mb-6 leading-relaxed">
         {description}
       </p>
       {actionLabel && onAction && (

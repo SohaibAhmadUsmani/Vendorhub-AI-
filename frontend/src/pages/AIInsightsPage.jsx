@@ -175,7 +175,7 @@ export default function AIInsightsPage() {
             </div>
 
             {/* Range uptime note. */}
-            <p className="pt-1 text-center text-[11px] font-medium text-[var(--text-muted)]">
+            <p className="pt-1 text-center text-[12px] font-medium text-[var(--text-muted)]">
               Viewing {RANGE_LABELS[page.range] ?? page.range} of analytics · auto-refreshes as new data arrives
             </p>
           </motion.div>

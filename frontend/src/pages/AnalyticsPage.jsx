@@ -312,7 +312,7 @@ export default function AnalyticsPage() {
                 <div className="mt-4 h-28">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={purchaseTrendBars} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
-                      <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fill: "var(--text-muted)", fontSize: 10 }} />
+                      <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fill: "var(--text-muted)", fontSize: 11 }} />
                       <YAxis hide />
                       <Tooltip cursor={{ fill: "var(--border-card)", opacity: 0.4 }} content={<ChartTooltip />} />
                       <Bar dataKey="value" fill="#06b6d4" radius={[8, 8, 0, 0]} barSize={28} />

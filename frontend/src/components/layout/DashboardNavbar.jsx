@@ -108,6 +108,13 @@ export default function DashboardNavbar({ onToggleSidebar }) {
   };
   const PROFILE_MENU =
     PROFILE_MENU_BY_ROLE[role] || PROFILE_MENU_BY_ROLE.buyer;
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setProfileOpen(false);
+    navigate("/login", { replace: true });
+  };
+
   useEffect(() => {
     try {
       const storedUser = localStorage.getItem("user");
@@ -181,6 +188,12 @@ export default function DashboardNavbar({ onToggleSidebar }) {
   const messagesPath = {
     buyer: "/buyer/messages",
     vendor: "/vendor/messages",
+    admin: "/admin/dashboard",
+  }[role];
+
+  const notificationsPath = {
+    buyer: "/buyer/notifications",
+    vendor: "/vendor/notifications",
     admin: "/admin/dashboard",
   }[role];
 
@@ -305,7 +318,7 @@ export default function DashboardNavbar({ onToggleSidebar }) {
                           <p className="font-heading text-sm font-extrabold text-white tracking-tight">
                             Activity Feed & Alerts
                           </p>
-                          <p className="text-[11px] text-white/60 font-mono">
+                          <p className="text-[11px] text-white/85 font-mono">
                             Real-time platform notifications
                           </p>
                         </div>
@@ -405,11 +418,11 @@ export default function DashboardNavbar({ onToggleSidebar }) {
                   {/* Clean Footer Link */}
                   <div className="border-t border-[#EEF1F6] bg-[#F8FAFC] px-4 py-3 text-center">
                     <Link
-                      to={messagesPath}
+                      to={notificationsPath}
                       onClick={() => setBellOpen(false)}
                       className="inline-flex items-center justify-center gap-1.5 text-xs font-bold text-[var(--primary-purple)] hover:underline"
                     >
-                      View All Activity & Messages →
+                      View All Activity & Notifications →
                     </Link>
                   </div>
                 </motion.div>
@@ -483,8 +496,8 @@ export default function DashboardNavbar({ onToggleSidebar }) {
                   <button
                     type="button"
                     role="menuitem"
-                    onClick={() => setProfileOpen(false)}
-                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-[13px] font-medium text-[#DC2626] transition-colors hover:bg-red-50"
+                    onClick={handleLogout}
+                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-[13px] font-medium text-[#DC2626] transition-colors hover:bg-red-50 cursor-pointer"
                   >
                     <LogOut size={15} strokeWidth={2} />
                     Sign out
