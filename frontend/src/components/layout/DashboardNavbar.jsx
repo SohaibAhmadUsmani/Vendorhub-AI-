@@ -160,11 +160,11 @@ export default function DashboardNavbar({ onToggleSidebar }) {
     setMobileSearchOpen(false);
 
     if (role === "buyer") {
-      navigate(
-        q
-          ? `/buyer/ai-search?q=${encodeURIComponent(q)}`
-          : "/buyer/ai-search"
-      );
+      navigate(q ? `/buyer/ai-search?q=${encodeURIComponent(q)}` : "/buyer/ai-search");
+    } else if (role === "admin") {
+      navigate(q ? `/admin/search?q=${encodeURIComponent(q)}` : "/admin/search");
+    } else if (role === "vendor") {
+      navigate(q ? `/vendor/ai-search?q=${encodeURIComponent(q)}` : "/vendor/ai-search");
     }
   };
   /* ------------------------------ Dropdowns ----------------------------- */

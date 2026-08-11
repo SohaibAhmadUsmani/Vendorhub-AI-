@@ -227,6 +227,11 @@ const NAV_GROUPS_BY_ROLE = {
           icon: Users,
         },
         {
+          label: "All Vendors",
+          path: "/admin/all-vendors",
+          icon: Users,
+        },
+        {
           label: "Verify Vendors",
           path: "/admin/vendors",
           icon: UserRound,

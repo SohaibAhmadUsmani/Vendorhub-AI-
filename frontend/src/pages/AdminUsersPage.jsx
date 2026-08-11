@@ -1,14 +1,36 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Users, Search, Shield, Ban, Edit, CheckCircle } from "lucide-react";
 
 export default function AdminUsersPage() {
-  const users = [
+  const [users, setUsers] = useState([
     { id: 1, name: "John Doe", email: "john@example.com", role: "buyer", status: "active", joined: "2023-10-15" },
     { id: 2, name: "Jane Smith", email: "jane@acmecorp.com", role: "vendor", status: "active", joined: "2023-11-02" },
     { id: 3, name: "Admin User", email: "admin@vendorhub.ai", role: "admin", status: "active", joined: "2023-01-10" },
     { id: 4, name: "Suspended Buyer", email: "baduser@example.com", role: "buyer", status: "suspended", joined: "2024-01-20" }
-  ];
+  ]);
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [roleFilter, setRoleFilter] = useState("all");
+
+  const toggleUserStatus = (userId) => {
+    setUsers(users.map(user => 
+      user.id === userId 
+        ? { ...user, status: user.status === 'active' ? 'suspended' : 'active' }
+        : user
+    ));
+  };
+
+  const handleEdit = (userId) => {
+    alert(`Edit User modal would open for User ID: ${userId}`);
+  };
+
+  const filteredUsers = users.filter(user => {
+    const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          user.email.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesRole = roleFilter === "all" || user.role === roleFilter;
+    return matchesSearch && matchesRole;
+  });
 
   return (
     <div className="space-y-6 animate-fade-in pb-12">
@@ -29,11 +51,17 @@ export default function AdminUsersPage() {
           <input
             type="text"
             placeholder="Search by name or email..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-dark-hover border border-gray-200 dark:border-dark-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
           />
         </div>
         <div className="flex gap-2 w-full md:w-auto">
-          <select className="bg-gray-50 dark:bg-dark-hover border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm text-gray-700 dark:text-gray-300 focus:outline-none">
+          <select 
+            value={roleFilter}
+            onChange={(e) => setRoleFilter(e.target.value)}
+            className="bg-gray-50 dark:bg-dark-hover border border-gray-200 dark:border-dark-border rounded-lg px-3 py-2 text-sm text-gray-700 dark:text-gray-300 focus:outline-none"
+          >
             <option value="all">All Roles</option>
             <option value="buyer">Buyers</option>
             <option value="vendor">Vendors</option>
@@ -55,7 +83,7 @@ export default function AdminUsersPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-dark-border">
-              {users.map((user) => (
+              {filteredUsers.map((user) => (
                 <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-dark-hover transition-colors">
                   <td className="py-4 px-6">
                     <div className="flex items-center gap-3">
@@ -87,15 +115,15 @@ export default function AdminUsersPage() {
                   </td>
                   <td className="py-4 px-6 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <button className="p-2 text-gray-400 hover:text-purple-600 transition-colors" title="Edit User">
+                      <button onClick={() => handleEdit(user.id)} className="p-2 text-gray-400 hover:text-purple-600 transition-colors" title="Edit User">
                         <Edit className="h-4 w-4" />
                       </button>
                       {user.status === 'active' ? (
-                        <button className="p-2 text-gray-400 hover:text-red-600 transition-colors" title="Suspend User">
+                        <button onClick={() => toggleUserStatus(user.id)} className="p-2 text-gray-400 hover:text-red-600 transition-colors" title="Suspend User">
                           <Ban className="h-4 w-4" />
                         </button>
                       ) : (
-                        <button className="p-2 text-gray-400 hover:text-green-600 transition-colors" title="Reactivate User">
+                        <button onClick={() => toggleUserStatus(user.id)} className="p-2 text-gray-400 hover:text-green-600 transition-colors" title="Reactivate User">
                           <CheckCircle className="h-4 w-4" />
                         </button>
                       )}
@@ -103,6 +131,13 @@ export default function AdminUsersPage() {
                   </td>
                 </tr>
               ))}
+              {filteredUsers.length === 0 && (
+                <tr>
+                  <td colSpan="5" className="py-8 text-center text-gray-500">
+                    No users found matching your criteria.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

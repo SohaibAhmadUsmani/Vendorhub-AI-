@@ -367,6 +367,18 @@ function App() {
               element={<AdminVendorsPage />}
             />
 
+            {/* All Vendors */}
+            <Route
+              path="all-vendors"
+              element={<VendorProfileView />}
+            />
+
+            {/* Admin Search */}
+            <Route
+              path="search"
+              element={<VendorMatchingPage />}
+            />
+
             {/* Product Catalog & Categories */}
             <Route
               path="categories"
