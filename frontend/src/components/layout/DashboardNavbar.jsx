@@ -123,6 +123,7 @@ export default function DashboardNavbar({ onToggleSidebar }) {
     }
   }, []);
 
+
   /* ------------------------------- Search ------------------------------- */
   const searchRef = useRef(null);
   const [query, setQuery] = useState("");
@@ -176,7 +177,14 @@ export default function DashboardNavbar({ onToggleSidebar }) {
     [notificationsQ.status, notificationsQ.data],
   );
   const feed = notifications.slice(0, 5);
+   function handleSignOut() {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
 
+  setProfileOpen(false);
+
+  navigate("/login", { replace: true });
+}
   
   const messagesPath = {
     buyer: "/buyer/messages",
@@ -483,7 +491,7 @@ export default function DashboardNavbar({ onToggleSidebar }) {
                   <button
                     type="button"
                     role="menuitem"
-                    onClick={() => setProfileOpen(false)}
+                    onClick={handleSignOut}
                     className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-[13px] font-medium text-[#DC2626] transition-colors hover:bg-red-50"
                   >
                     <LogOut size={15} strokeWidth={2} />
