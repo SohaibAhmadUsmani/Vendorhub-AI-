@@ -173,11 +173,7 @@ function App() {
             {/* Risk Analysis */}
             <Route
               path="risk-analysis"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Supplier Risk Analysis"
-                />
-              }
+              element={<RiskAnalysisPage />}
             />
 
             <Route
@@ -322,11 +318,7 @@ function App() {
             {/* Orders */}
             <Route
               path="orders"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Orders"
-                />
-              }
+              element={<OrdersPage />}
             />
 
             {/* Messages */}
@@ -348,11 +340,7 @@ function App() {
             {/* Documents */}
             <Route
               path="documents"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Documents"
-                />
-              }
+              element={<DocumentsPage />}
             />
 
             {/* Notifications */}

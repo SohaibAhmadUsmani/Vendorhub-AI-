@@ -77,6 +77,11 @@ const orderSchema = new mongoose.Schema(
       default: 0,
     },
 
+    orderNumber: {
+      type: String,
+      default: '',
+    },
+
     total: {
       type: Number,
       required: true,
@@ -169,5 +174,17 @@ const orderSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Auto-generate a human-readable purchase order number (PO-2026-XXXXXX)
+orderSchema.pre('save', function (next) {
+  if (!this.orderNumber) {
+    const year = new Date().getFullYear();
+    const suffix = this._id
+      ? this._id.toString().slice(-6).toUpperCase()
+      : Math.random().toString(36).slice(2, 8).toUpperCase();
+    this.orderNumber = `PO-${year}-${suffix}`;
+  }
+  next();
+});
 
 module.exports = mongoose.model('Order', orderSchema);

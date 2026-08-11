@@ -6,12 +6,23 @@ const {
   createDocument,
   updateDocumentSummary,
   generateDocumentSummary,
+  searchDocuments,
+  aiSearchDocuments,
   deleteDocument,
 } = require("../controllers/documentController");
+
+const { authMiddleware } = require("../middleware/authMiddleware");
 
 const upload = require("../middleware/documentUpload");
 
 const router = express.Router();
+
+// All document routes are protected
+router.use(authMiddleware);
+
+// Search routes must be defined before /:id
+router.get("/search", searchDocuments);
+router.get("/ai-search", aiSearchDocuments);
 
 // Get all documents
 router.get("/", getDocuments);
@@ -42,7 +53,7 @@ router.post(
   createDocument
 );
 
-// Generate  document summary
+// Generate document summary
 router.post("/:id/summary", generateDocumentSummary);
 
 // Update AI summary

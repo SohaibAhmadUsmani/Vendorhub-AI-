@@ -141,6 +141,24 @@ export const updateInvoice = async (
   return data;
 };
 
+// Initiate a card payment (Stripe PaymentIntent) for an order
+export const initiatePayment = async (orderId) => {
+  const response = await fetch(`${API_URL}/${orderId}/payment-intent`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || 'Failed to initiate payment'
+    );
+  }
+
+  return data;
+};
+
 // Update payment
 export const updatePayment = async (
   orderId,
