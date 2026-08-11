@@ -1339,16 +1339,22 @@ export const INITIAL_PRODUCTS_DATA = [
 ];
 
 function getLocalProductsStore() {
+  const base = INITIAL_PRODUCTS_DATA;
   try {
     const cached = localStorage.getItem('vendorhub_products_cache');
     if (cached) {
       const parsed = JSON.parse(cached);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        // Find custom products (ones not in base)
+        const baseIds = new Set(base.map(p => p.id));
+        const customProducts = parsed.filter(p => !baseIds.has(p.id));
+        return [...customProducts, ...base];
+      }
     }
   } catch (e) {
     console.error('Error reading products cache:', e);
   }
-  return INITIAL_PRODUCTS_DATA;
+  return base;
 }
 
 function saveLocalProductsStore(list) {
