@@ -18,6 +18,7 @@ const messageRoutes = require('./routes/messageRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
 const Message = require('./models/Message');
 const Conversation = require('./models/Conversation');
+const analyticsRoutes = require('./routes/analyticsRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -46,6 +47,7 @@ app.use('/api/quotes', quoteRoutes);
 app.use('/api/negotiation', negotiationRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // Module 11 — Real-time Messaging (Socket.io)
 io.on('connection', (socket) => {

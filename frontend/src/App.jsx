@@ -7,6 +7,7 @@ import RFQGeneratorPage from "./pages/RFQGeneratorPage";
 import VendorProfileView from "./components/vendor/VendorProfileView";
 import ProductCatalogView from "./components/catalog/ProductCatalogView";
 import AnalyticsPage from "./pages/AnalyticsPage";
+import AIInsightsPage from "./pages/AIInsightsPage";
 import QuotesPage from "./pages/QuotesPage";
 import MessagesPage from "./pages/MessagesPage";
 import NotificationsPage from "./pages/NotificationsPage";
@@ -27,7 +28,9 @@ function App() {
 
           {/* Muzammil's Module 5 & Module 6 Views */}
           <Route path="vendors" element={<VendorProfileView />} />
+          <Route path="vendors/:id" element={<VendorProfileView />} />
           <Route path="product-catalog" element={<ProductCatalogView />} />
+          <Route path="product-catalog/:id" element={<ProductCatalogView />} />
 
           <Route path="saved-vendors" element={<TeammateModulePlaceholder pageTitle="Saved Vendors" />} />
           <Route path="messages" element={<MessagesPage />} />
@@ -35,8 +38,7 @@ function App() {
           <Route path="contracts" element={<TeammateModulePlaceholder pageTitle="Contracts" />} />
           <Route path="documents" element={<TeammateModulePlaceholder pageTitle="Documents" />} />
           <Route path="analytics" element={<AnalyticsPage />} />
-          <Route path="ai-insights" element={<TeammateModulePlaceholder pageTitle="AI Insights" />} />
-          <Route path="notifications" element={<TeammateModulePlaceholder pageTitle="Notifications" />} />
+          <Route path="ai-insights" element={<AIInsightsPage />} />
           <Route path="vendor-analytics" element={<TeammateModulePlaceholder pageTitle="Vendor Analytics" />} />
           <Route path="spend-summary" element={<TeammateModulePlaceholder pageTitle="Spend Summary" />} />
           <Route path="settings" element={<TeammateModulePlaceholder pageTitle="Settings" />} />

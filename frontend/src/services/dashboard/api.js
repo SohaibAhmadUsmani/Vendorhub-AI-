@@ -17,6 +17,7 @@ import { getData, httpClient } from "../httpClient";
      getProductPerformance(range)  -> /api/vendor/dashboard/product-performance?range=
      getAdvancedAnalytics()        -> /api/vendor/dashboard/advanced-analytics
      getRecentActivity()           -> /api/vendor/dashboard/recent-activity
+     getAIInsightsSummary(range)   -> /api/vendor/dashboard/ai-insights?range=
      getAIInsights()               -> /api/vendor/insights + /recommendations
      getQuickActions()             -> navigation config (UI, no backend call)
    -------------------------------------------------------------------------- */
@@ -31,6 +32,7 @@ const ENDPOINTS = {
   productPerformance: "/api/vendor/dashboard/product-performance",
   advancedAnalytics: "/api/vendor/dashboard/advanced-analytics",
   recentActivity: "/api/vendor/dashboard/recent-activity",
+  aiInsights: "/api/vendor/dashboard/ai-insights",
   insights: "/api/vendor/insights",
   recommendations: "/api/vendor/recommendations",
   metricDetails: (key) => `/api/vendor/dashboard/metric-details/${key}`,
@@ -98,6 +100,23 @@ export function getAdvancedAnalytics() {
 /** Recent vendor events (RFQs, quotes, orders, products, reviews, certs). */
 export function getRecentActivity() {
   return getData(ENDPOINTS.recentActivity);
+}
+
+/**
+ * Full AI Insights page payload for a range (7d | 30d | 90d). When a session
+ * token exists it is attached so the backend can scope the analysis to the
+ * authenticated vendor; `refresh` forces a fresh AI generation (server cache
+ * bypassed).
+ */
+export function getAIInsightsSummary(range, { refresh = false } = {}) {
+  const params = {};
+  if (range) params.range = range;
+  if (refresh) params.refresh = 1;
+  const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+  return getData(ENDPOINTS.aiInsights, {
+    params,
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  });
 }
 
 /** AI insights + recommendations combined in one call for the rail card. */

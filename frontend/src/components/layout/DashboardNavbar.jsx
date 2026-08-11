@@ -143,7 +143,7 @@ export default function DashboardNavbar({ onToggleSidebar }) {
         {/* ------------------------------ Center ------------------------------ */}
         <div className="hidden min-w-0 flex-1 justify-center px-2 md:flex">
           <form onSubmit={submitSearch} role="search" className="w-full max-w-xl">
-            <div className="group flex h-12 items-center gap-2.5 rounded-2xl border border-[#EEF1F6] bg-white px-4 shadow-[0_1px_2px_rgba(16,24,40,0.03)] transition-all duration-200 focus-within:border-[var(--primary-purple)] focus-within:shadow-[0_0_0_4px_rgba(108,99,255,0.12)]">
+            <div className="group flex h-12 items-center gap-2.5 rounded-2xl border border-[#EEF1F6] bg-white px-4 shadow-[0_1px_2px_rgba(16,24,40,0.03)] transition-all duration-200 focus-within:border-[var(--primary-purple)] focus-within:ring-4 focus-within:ring-[var(--primary-purple)]/20">
               <Search
                 size={17}
                 className="shrink-0 text-[var(--text-muted)] transition-colors group-focus-within:text-[var(--primary-purple)]"
@@ -158,7 +158,16 @@ export default function DashboardNavbar({ onToggleSidebar }) {
                 aria-label="Search suppliers, products, RFQs"
                 className="w-full min-w-0 bg-transparent text-[13px] font-medium text-[var(--text-primary)] outline-none placeholder:text-[var(--text-light)]"
               />
-              <kbd className="hidden shrink-0 rounded-md border border-[#EEF1F6] bg-white px-1.5 py-0.5 font-mono text-[10px] font-semibold text-[var(--text-light)] lg:block">
+              {query && (
+                <button
+                  type="button"
+                  onClick={() => setQuery("")}
+                  className="text-[var(--text-muted)] hover:text-[var(--text-primary)] p-1 rounded-md text-xs"
+                >
+                  ✕
+                </button>
+              )}
+              <kbd className="hidden shrink-0 rounded-md border border-[#EEF1F6] bg-[#F8FAFC] px-2 py-0.5 font-mono text-[10px] font-semibold text-[var(--text-light)] lg:block">
                 Ctrl /
               </kbd>
             </div>
@@ -200,30 +209,60 @@ export default function DashboardNavbar({ onToggleSidebar }) {
             <AnimatePresence>
               {bellOpen && (
                 <motion.div
-                  initial={{ opacity: 0, y: 8, scale: 0.97 }}
+                  initial={{ opacity: 0, y: 10, scale: 0.96 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 6, scale: 0.98 }}
-                  transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                  exit={{ opacity: 0, y: 8, scale: 0.97 }}
+                  transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
                   role="menu"
                   aria-label="Notifications menu"
-                  className="absolute right-0 mt-2 w-[min(360px,calc(100vw-2rem))] origin-top-right overflow-hidden rounded-2xl border border-[#EEF1F6] bg-white shadow-2xl shadow-black/10"
+                  className="absolute right-0 mt-2.5 w-[min(380px,calc(100vw-2rem))] origin-top-right overflow-hidden rounded-2xl border border-[#EEF1F6] bg-white shadow-2xl shadow-black/15 z-50"
                 >
-                  <div className="flex items-center justify-between border-b border-[#EEF1F6] px-4 py-3">
-                    <p className="font-heading text-sm font-bold text-[var(--text-primary)]">
-                      Notifications
-                    </p>
-                    {notificationCount > 0 && (
-                      <span className="rounded-full bg-[var(--primary-purple-light)] px-2 py-0.5 text-[10px] font-bold text-[var(--primary-purple)]">
-                        {notificationCount} unread
-                      </span>
-                    )}
+                  {/* Premium Dark Header Banner */}
+                  <div 
+                    className="relative px-5 py-4 text-white overflow-hidden"
+                    style={{
+                      background: 'linear-gradient(135deg, #1A1838 0%, #151D30 60%, #0B1021 100%)',
+                      borderBottom: '1px solid rgba(255,255,255,0.08)'
+                    }}
+                  >
+                    {/* Dot Grid overlay */}
+                    <div 
+                      className="absolute inset-0 pointer-events-none"
+                      style={{
+                        backgroundSize: '16px 16px',
+                        backgroundImage: 'radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px)'
+                      }} 
+                    />
+                    
+                    <div className="relative z-10 flex items-center justify-between">
+                      <div className="flex items-center gap-2.5">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/10 backdrop-blur-md border border-white/15">
+                          <Bell size={16} className="text-[#A78BFA]" />
+                        </div>
+                        <div>
+                          <p className="font-heading text-sm font-extrabold text-white tracking-tight">
+                            Activity Feed & Alerts
+                          </p>
+                          <p className="text-[11px] text-white/60 font-mono">
+                            Real-time platform notifications
+                          </p>
+                        </div>
+                      </div>
+                      {notificationCount > 0 && (
+                        <span className="flex items-center gap-1.5 rounded-full bg-[#6C5CE7]/30 border border-[#6C5CE7]/50 px-2.5 py-0.5 text-[10px] font-bold text-[#C4B5FD]">
+                          <span className="h-1.5 w-1.5 rounded-full bg-[#A78BFA] animate-pulse" />
+                          {notificationCount} Unread
+                        </span>
+                      )}
+                    </div>
                   </div>
 
-                  <div className="max-h-[320px] overflow-y-auto">
+                  {/* Notification List Container */}
+                  <div className="max-h-[340px] overflow-y-auto bg-white">
                     {notificationsQ.status === "loading" && (
-                      <div className="space-y-2 p-4">
+                      <div className="space-y-2.5 p-4">
                         {Array.from({ length: 4 }).map((_, i) => (
-                          <div key={i} className="skeleton-block h-12 w-full rounded-xl" />
+                          <div key={i} className="skeleton-block h-14 w-full rounded-xl" />
                         ))}
                       </div>
                     )}
@@ -235,34 +274,55 @@ export default function DashboardNavbar({ onToggleSidebar }) {
                     )}
 
                     {notificationsQ.status === "success" && feed.length === 0 && (
-                      <p className="px-4 py-8 text-center text-xs font-medium text-[var(--text-muted)]">
-                        You're all caught up. 🎉
-                      </p>
+                      <div className="px-4 py-10 text-center">
+                        <Sparkles size={24} className="mx-auto text-[var(--primary-purple)]/60 mb-2" />
+                        <p className="text-xs font-semibold text-[var(--text-primary)]">
+                          You're all caught up!
+                        </p>
+                        <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
+                          No pending alerts or messages.
+                        </p>
+                      </div>
                     )}
 
                     {notificationsQ.status === "success" && feed.length > 0 && (
-                      <ul className="divide-y divide-[#EEF1F6]/80">
+                      <ul className="divide-y divide-[#EEF1F6]">
                         {feed.map((n) => {
                           const Icon = NOTIFICATION_ICONS[n.type] ?? Sparkles;
+                          const colorRail = n.type === 'rfq' 
+                            ? '#6C5CE7' 
+                            : n.type === 'order' 
+                            ? '#0EA5E9' 
+                            : n.type === 'message' 
+                            ? '#10B981' 
+                            : '#F59E0B';
+                            
                           return (
                             <li
                               key={n.id}
-                              className="flex items-start gap-3 px-4 py-3 transition-colors hover:bg-[var(--primary-purple-light)]/40"
+                              style={{ borderLeft: `3.5px solid ${colorRail}` }}
+                              className="flex items-start gap-3 px-4 py-3.5 transition-all hover:bg-[#F8FAFC]"
                             >
-                              <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[var(--primary-purple-light)] text-[var(--primary-purple)]">
-                                <Icon size={15} strokeWidth={2} />
+                              <span 
+                                className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl"
+                                style={{
+                                  backgroundColor: `${colorRail}15`,
+                                  color: colorRail
+                                }}
+                              >
+                                <Icon size={15} strokeWidth={2.2} />
                               </span>
                               <span className="min-w-0 flex-1">
                                 <span className="flex items-center justify-between gap-2">
-                                  <span className="truncate text-[13px] font-semibold text-[var(--text-primary)]">
+                                  <span className="truncate text-[13px] font-bold text-[var(--text-primary)]">
                                     {n.title}
                                   </span>
-                                  <span className="shrink-0 text-[10px] font-medium text-[var(--text-muted)]">
+                                  <span className="shrink-0 font-mono text-[10px] font-medium text-[var(--text-muted)]">
                                     {timeAgo(n.time)}
                                   </span>
                                 </span>
                                 {n.message && (
-                                  <span className="mt-0.5 line-clamp-2 block text-xs leading-5 text-[var(--text-muted)]">
+                                  <span className="mt-0.5 line-clamp-2 block text-xs leading-relaxed text-[var(--text-muted)]">
                                     {n.message}
                                   </span>
                                 )}
@@ -280,13 +340,14 @@ export default function DashboardNavbar({ onToggleSidebar }) {
                     )}
                   </div>
 
-                  <div className="border-t border-[#EEF1F6] px-4 py-2.5">
+                  {/* Clean Footer Link */}
+                  <div className="border-t border-[#EEF1F6] bg-[#F8FAFC] px-4 py-3 text-center">
                     <Link
                       to="/buyer/messages"
                       onClick={() => setBellOpen(false)}
-                      className="block text-center text-xs font-bold text-[var(--primary-purple)] transition-opacity hover:opacity-80"
+                      className="inline-flex items-center justify-center gap-1.5 text-xs font-bold text-[var(--primary-purple)] hover:underline"
                     >
-                      Open inbox
+                      View All Activity & Messages →
                     </Link>
                   </div>
                 </motion.div>

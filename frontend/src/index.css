@@ -16,11 +16,48 @@
 }
 
 /* ==========================================================================
+   AI EXECUTIVE SUMMARY MASCOT — subtle friendly idle shake.
+   The mascot gently sways a few pixels left/right with a tiny rotation so it
+   feels alive without being distracting. Transform-only animation (no layout
+   shifts), and it is disabled entirely for users who prefer reduced motion.
+   ========================================================================== */
+
+@keyframes ai-mascot-idle {
+  0%,
+  100% {
+    transform: translateX(-3px) rotate(-1.5deg);
+  }
+  50% {
+    transform: translateX(3px) rotate(1.5deg);
+  }
+}
+
+.ai-mascot-idle {
+  animation: ai-mascot-idle 3.8s ease-in-out infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-mascot-idle {
+    animation: none;
+  }
+}
+
+/* ==========================================================================
    VENDORHUB AI GLOBAL CSS CUSTOM PROPERTIES & DESIGN SYSTEM TOKENS
    Author: Muzammil Tanveer (Frontend Lead) & Khadija (Auth/Dashboard)
    ========================================================================== */
 
 :root {
+  /* --- 8px Spatial Grid System Tokens --- */
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-5: 40px;
+  --space-6: 48px;
+  --space-8: 64px;
+
   /* --- Brand & Primary Colors --- */
   --primary-purple: #6C63FF;
   --primary-purple-hover: #5851E8;
@@ -104,6 +141,28 @@
   --accent: #6C63FF;
   --accent-bg: rgba(108, 99, 255, 0.1);
   --accent-border: rgba(108, 99, 255, 0.5);
+
+  /* --- Aiman's Notification Center Color Tokens --- */
+  --plum: #5B4B8A;
+  --plum-tint: rgba(91, 75, 138, 0.1);
+  --plum-ink: #3A2F5C;
+
+  --rust: #B23A2E;
+  --rust-tint: rgba(178, 58, 46, 0.1);
+  --rust-ink: #8B2E24;
+
+  --ochre: #8C8672;
+  --ochre-tint: rgba(140, 134, 114, 0.1);
+  --ochre-ink: #5C5748;
+
+  --moss: #3F6B4F;
+  --moss-tint: rgba(63, 107, 79, 0.1);
+  --moss-ink: #2D4D38;
+
+  --card: #FFFFFF;
+  --line: #E2E8F0;
+  --ink-soft: #475569;
+  --ink-faint: #94A3B8;
 
   font-family: var(--font-body);
   color: var(--text-primary);
@@ -693,14 +752,19 @@ html, body, #root {
   background: transparent !important;
 }
 
-/* Dark containers (sidebar) get a dark-tuned scrollbar */
-aside ::-webkit-scrollbar-thumb,
-.sidebar-scroll ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.12) !important;
+/* Dark containers (sidebar) hide scrollbars visually while maintaining full scroll functionality */
+aside,
+.sidebar-scroll {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
 }
-aside ::-webkit-scrollbar-thumb:hover,
-.sidebar-scroll ::-webkit-scrollbar-thumb:hover {
-  background: rgba(108, 92, 231, 0.4) !important;
+aside::-webkit-scrollbar,
+.sidebar-scroll::-webkit-scrollbar,
+aside ::-webkit-scrollbar,
+.sidebar-scroll ::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 /* Modal Pop & Fade Entrance Animation */

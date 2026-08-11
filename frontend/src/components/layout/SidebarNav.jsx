@@ -60,12 +60,13 @@ export default function SidebarNav({ currentView, setCurrentView }) {
                   borderRadius: '10px',
                   backgroundColor: isActive ? '#6C5CE7' : 'transparent',
                   color: isActive ? '#FFFFFF' : '#94A3B8',
+                  boxShadow: isActive ? '0 4px 12px rgba(108, 92, 231, 0.3)' : 'none',
                   border: 'none',
                   cursor: 'pointer',
                   fontFamily: 'var(--font-heading)',
                   fontSize: '0.875rem',
                   fontWeight: isActive ? 700 : 500,
-                  transition: 'all 0.15s ease',
+                  transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
                   textAlign: 'left',
                   minHeight: '44px'
                 }}
