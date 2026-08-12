@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createRFQ } from '../../services/rfqService'
 
 export default function RFQForm() {
   const [form, setForm] = useState({
@@ -32,11 +33,26 @@ export default function RFQForm() {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     if (!validate()) return
-    console.log('RFQ Submitted (mock):', form)
-    alert('RFQ ready to send!')
+    try {
+      await createRFQ(form)
+      alert('RFQ submitted successfully!')
+      setForm({
+        product: '',
+        quantity: '',
+        material: '',
+        budget: '',
+        deliveryDate: '',
+        paymentTerms: '',
+        shippingMethod: '',
+        attachments: null,
+      })
+    } catch (err) {
+      console.error(err)
+      alert('Failed to submit RFQ')
+    }
   }
 
   const inputStyle = {

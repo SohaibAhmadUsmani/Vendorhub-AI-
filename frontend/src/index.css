@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 /* View mode switch smooth animation */
 @keyframes viewSwitchFadeIn {
@@ -97,9 +98,9 @@
 
   /* --- Typography Colors (Light Mode) --- */
   --text-primary: #0F172A;
-  --text-secondary: #475569;
-  --text-muted: #64748B;
-  --text-light: #94A3B8;
+  --text-secondary: #1E293B;
+  --text-muted: #334155;
+  --text-light: #475569;
 
   /* --- Status Badges --- */
   --status-active-bg: #DCFCE7;

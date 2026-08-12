@@ -227,6 +227,11 @@ const NAV_GROUPS_BY_ROLE = {
           icon: Users,
         },
         {
+          label: "All Vendors",
+          path: "/admin/all-vendors",
+          icon: Users,
+        },
+        {
           label: "Verify Vendors",
           path: "/admin/vendors",
           icon: UserRound,
@@ -337,7 +342,7 @@ export default function DashboardSidebar({
       console.error("Failed to read logged-in user:", error);
     }
   }, []);
-  const role = user?.role || "buyer";
+  const role = user?.role ? String(user.role).toLowerCase() : "buyer";
   const profilePath = {
   buyer: "/buyer/vendors",
   vendor: "/vendor/profile",

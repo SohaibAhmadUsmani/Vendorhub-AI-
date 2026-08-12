@@ -52,41 +52,49 @@ function handleOAuthCallback(req, res) {
  * Register a new user and send an email verification link.
  */
 const signup = async (req, res) => {
-    const { name, email, password, role } = req.body;
+    try {
+        const { name, email, password, role } = req.body;
 
-    if (!name || !email || !password || !role) {
-        return res.status(400).json({
+        if (!name || !email || !password || !role) {
+            return res.status(400).json({
+                success: false,
+                message: "All fields are required."
+            });
+        }
+
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(409).json({
+                success: false,
+                message: "Email already exists"
+            });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const token = generateToken();
+
+        const user = new User({
+            name,
+            email,
+            password: hashedPassword,
+            role,
+            verificationToken: token,
+            verificationTokenExpires: new Date(Date.now() + 60 * 60 * 1000)
+        });
+        await user.save();
+        await sendVerificationEmail(user.name, user.email, token);
+
+        return res.status(201).json({
+            success: true,
+            message: "Account created successfully. Please verify your email."
+        });
+    } catch (error) {
+        console.error("Signup error:", error);
+        return res.status(500).json({
             success: false,
-            message: "All fields are required."
+            message: "Server error during registration. Please try again."
         });
     }
-
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-        return res.status(409).json({
-            success: false,
-            message: "Email already exists"
-        });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const token = generateToken();
-
-    const user = new User({
-        name,
-        email,
-        password: hashedPassword,
-        role,
-        verificationToken: token,
-        verificationTokenExpires: new Date(Date.now() + 60 * 60 * 1000)
-    });
-    await user.save();
-    await sendVerificationEmail(user.name, user.email, token);
-
-    return res.status(201).json({
-        success: true,
-        message: "Account created successfully. Please verify your email."
-    });
 };
 
 /**

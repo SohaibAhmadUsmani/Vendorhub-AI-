@@ -68,7 +68,7 @@ export default function DashboardNavbar({ onToggleSidebar }) {
   const { notifications, loading, error, unreadCount, markRead, markAllRead, refreshNotifications } = useNotifications();
 
   const [user, setUser] = useState(null);
-  const role = user?.role;
+  const role = user?.role ? String(user.role).toLowerCase() : "buyer";
   const PROFILE_MENU_BY_ROLE = {
     buyer: [
       {
@@ -111,6 +111,7 @@ export default function DashboardNavbar({ onToggleSidebar }) {
   };
   const PROFILE_MENU =
     PROFILE_MENU_BY_ROLE[role] || PROFILE_MENU_BY_ROLE.buyer;
+
   useEffect(() => {
     try {
       const storedUser = localStorage.getItem("user");
@@ -159,11 +160,11 @@ export default function DashboardNavbar({ onToggleSidebar }) {
     setMobileSearchOpen(false);
 
     if (role === "buyer") {
-      navigate(
-        q
-          ? `/buyer/ai-search?q=${encodeURIComponent(q)}`
-          : "/buyer/ai-search"
-      );
+      navigate(q ? `/buyer/ai-search?q=${encodeURIComponent(q)}` : "/buyer/ai-search");
+    } else if (role === "admin") {
+      navigate(q ? `/admin/search?q=${encodeURIComponent(q)}` : "/admin/search");
+    } else if (role === "vendor") {
+      navigate(q ? `/vendor/ai-search?q=${encodeURIComponent(q)}` : "/vendor/ai-search");
     }
   };
   /* ------------------------------ Dropdowns ----------------------------- */
@@ -187,18 +188,25 @@ export default function DashboardNavbar({ onToggleSidebar }) {
       navigate('/buyer/notifications');
     }
   };
-   function handleSignOut() {
-  localStorage.removeItem("token");
-  localStorage.removeItem("user");
 
-  setProfileOpen(false);
+  function handleSignOut() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setProfileOpen(false);
+    navigate("/login", { replace: true });
+  }
 
-  navigate("/login", { replace: true });
-}
-  
+  const handleLogout = handleSignOut;
+
   const messagesPath = {
     buyer: "/buyer/messages",
     vendor: "/vendor/messages",
+    admin: "/admin/dashboard",
+  }[role];
+
+  const notificationsPath = {
+    buyer: "/buyer/notifications",
+    vendor: "/vendor/notifications",
     admin: "/admin/dashboard",
   }[role];
 
@@ -323,7 +331,7 @@ export default function DashboardNavbar({ onToggleSidebar }) {
                           <p className="font-heading text-sm font-extrabold text-white tracking-tight">
                             Activity Feed & Alerts
                           </p>
-                          <p className="text-[11px] text-white/60 font-mono">
+                          <p className="text-[11px] text-white/85 font-mono">
                             Real-time platform notifications
                           </p>
                         </div>
@@ -432,12 +440,11 @@ export default function DashboardNavbar({ onToggleSidebar }) {
                   {/* Clean Footer Link */}
                   <div className="border-t border-[#EEF1F6] bg-[#F8FAFC] px-4 py-3 text-center">
                     <Link
-                      to={messagesPath}
-                      to="/buyer/notifications"
+                      to={notificationsPath}
                       onClick={() => setBellOpen(false)}
                       className="inline-flex items-center justify-center gap-1.5 text-xs font-bold text-[var(--primary-purple)] hover:underline"
                     >
-                      View All Activity →
+                      View All Activity & Notifications →
                     </Link>
                   </div>
                 </motion.div>
@@ -476,35 +483,33 @@ export default function DashboardNavbar({ onToggleSidebar }) {
             <AnimatePresence>
               {profileOpen && (
                 <motion.div
-                  initial={{ opacity: 0, y: 8, scale: 0.97 }}
+                  initial={{ opacity: 0, y: 8, scale: 0.96 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 6, scale: 0.98 }}
-                  transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                  exit={{ opacity: 0, y: 6, scale: 0.96 }}
+                  transition={{ duration: 0.15, ease: "easeOut" }}
+                  className="absolute right-0 top-full mt-2 w-56 rounded-2xl border border-[#EEF1F6] bg-white p-1.5 shadow-xl shadow-slate-200/50"
                   role="menu"
-                  aria-label="Profile menu"
-                  className="absolute right-0 mt-2 w-56 origin-top-right overflow-hidden rounded-2xl border border-[#EEF1F6] bg-white p-1.5 shadow-2xl shadow-black/10"
                 >
-                  {user && (
-                    <div className="border-b border-[#EEF1F6] px-3 py-2.5">
-                      <p className="truncate text-[13px] font-bold text-[var(--text-primary)]">
-                        {user.name}
-                      </p>
-                      {user.email && (
-                        <p className="mt-0.5 truncate text-[11px] text-[var(--text-muted)]">
-                          {user.email}
-                        </p>
-                      )}
-                    </div>
-                  )}
+                  <div className="border-b border-[#EEF1F6] px-3 py-2">
+                    <p className="truncate text-xs font-semibold text-[var(--text-primary)]">
+                      {user?.name ?? "Logged-in User"}
+                    </p>
+                    <p className="truncate text-[11px] text-[var(--text-muted)]">
+                      {user?.email ?? ""}
+                    </p>
+                  </div>
                   {PROFILE_MENU.map((item) => (
                     <Link
                       key={item.path}
                       to={item.path}
                       role="menuitem"
                       onClick={() => setProfileOpen(false)}
-                      className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-[13px] font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--primary-purple-light)] hover:text-[var(--primary-purple)]"
+                      className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-[13px] font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--bg-main)]"
                     >
-                      <item.icon size={15} strokeWidth={2} />
+                      <item.icon
+                        size={15}
+                        className="text-[var(--text-muted)]"
+                      />
                       {item.label}
                     </Link>
                   ))}
@@ -512,7 +517,7 @@ export default function DashboardNavbar({ onToggleSidebar }) {
                     type="button"
                     role="menuitem"
                     onClick={handleSignOut}
-                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-[13px] font-medium text-[#DC2626] transition-colors hover:bg-red-50"
+                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-[13px] font-medium text-[#DC2626] transition-colors hover:bg-red-50 cursor-pointer"
                   >
                     <LogOut size={15} strokeWidth={2} />
                     Sign out

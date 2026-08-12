@@ -4,8 +4,11 @@ import {
     ArrowRight,
     Clock3,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { getRoleRoute } from "../../utils/routeUtils";
 
 export default function PendingQuotes() {
+    const navigate = useNavigate();
     const quotes = [];
 
     if (quotes.length === 0) {
@@ -33,7 +36,8 @@ export default function PendingQuotes() {
 
                     <button
                         type="button"
-                        className="inline-flex shrink-0 items-center gap-1 text-[12px] font-bold text-[var(--primary-purple)] transition-opacity hover:opacity-75"
+                        onClick={() => navigate(getRoleRoute("quotes"))}
+                        className="inline-flex shrink-0 items-center gap-1 text-[12px] font-bold text-[var(--primary-purple)] transition-opacity hover:opacity-75 cursor-pointer"
                     >
                         View All
                         <ArrowRight className="h-3.5 w-3.5" />
@@ -86,7 +90,8 @@ export default function PendingQuotes() {
 
                 <button
                     type="button"
-                    className="inline-flex items-center gap-1 text-[12px] font-bold text-[var(--primary-purple)]"
+                    onClick={() => navigate(getRoleRoute("quotes"))}
+                    className="inline-flex items-center gap-1 text-[12px] font-bold text-[var(--primary-purple)] cursor-pointer"
                 >
                     View All
                     <ArrowRight className="h-3.5 w-3.5" />

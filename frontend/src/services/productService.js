@@ -2,9 +2,10 @@
  * productService.js — Enterprise REST API & 60+ Product Catalog Dataset Service
  */
 
-const API_BASE_URL = 'http://localhost:5000/api/products';
+import httpClient from './httpClient';
 
-export const INITIAL_PRODUCTS_DATA = [
+const API_BASE_URL = '/api/products';
+const INITIAL_PRODUCTS_DATA = [
   // --- 1. Sialkot Sports Limited (10 Products) ---
   {
     id: "p-ss-101",
@@ -1339,16 +1340,22 @@ export const INITIAL_PRODUCTS_DATA = [
 ];
 
 function getLocalProductsStore() {
+  const base = INITIAL_PRODUCTS_DATA;
   try {
     const cached = localStorage.getItem('vendorhub_products_cache');
     if (cached) {
       const parsed = JSON.parse(cached);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        // Find custom products (ones not in base)
+        const baseIds = new Set(base.map(p => p.id));
+        const customProducts = parsed.filter(p => !baseIds.has(p.id));
+        return [...customProducts, ...base];
+      }
     }
   } catch (e) {
     console.error('Error reading products cache:', e);
   }
-  return INITIAL_PRODUCTS_DATA;
+  return base;
 }
 
 function saveLocalProductsStore(list) {
@@ -1359,46 +1366,46 @@ function saveLocalProductsStore(list) {
   }
 }
 
+function normalizeProduct(p) {
+  if (!p) return null;
+  return {
+    id: p._id || p.id,
+    _id: p._id || p.id,
+    sku: p.sku || `SKU-${Math.floor(1000 + Math.random() * 9000)}`,
+    vendorId: p.vendor || p.vendorId,
+    vendorName: p.vendorName || "Unknown Vendor",
+    title: p.name || p.title || "Untitled Product",
+    category: p.category || "Uncategorized",
+    rating: p.rating || 0,
+    priceMin: p.price || p.priceMin || 0,
+    priceMax: p.price || p.priceMax || 0,
+    priceDisplay: `$${p.price || p.priceMin || 0}`,
+    unit: p.unit || "piece",
+    moq: p.moq || 1,
+    leadTimeDays: p.leadTimeDays || 14,
+    leadTimeDisplay: typeof p.leadTime === 'string' ? p.leadTime : `${p.leadTimeDays || 14} days`,
+    availableStock: p.stockQuantity || p.availableStock || 0,
+    stockStatus: p.inStock ? "In Stock" : (p.stockStatus || "Out of Stock"),
+    isVerified: p.isVerified !== undefined ? p.isVerified : true,
+    tags: p.tags || [],
+    specifications: p.description || p.specifications || "",
+    imageUrl: p.image || p.imageUrl || "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800&auto=format&fit=crop&q=80",
+    multiImages: p.images || p.multiImages || (p.image ? [p.image] : [])
+  };
+}
+
 export async function fetchProducts(filters = {}) {
-  try {
-    const queryParams = new URLSearchParams();
-    if (filters.category && filters.category !== 'All') queryParams.append('category', filters.category);
-    if (filters.searchQuery) queryParams.append('search', filters.searchQuery);
-    if (filters.stockStatus && filters.stockStatus !== 'All') queryParams.append('stockStatus', filters.stockStatus);
-    if (filters.vendorId) queryParams.append('vendorId', filters.vendorId);
+  const queryParams = new URLSearchParams();
+  if (filters.category && filters.category !== 'All') queryParams.append('category', filters.category);
+  if (filters.searchQuery) queryParams.append('search', filters.searchQuery);
+  if (filters.stockStatus && filters.stockStatus !== 'All') queryParams.append('stockStatus', filters.stockStatus);
+  if (filters.vendorId) queryParams.append('vendorId', filters.vendorId);
+  queryParams.append('limit', 1000); // Fetch all for client-side pagination
 
-    const url = `${API_BASE_URL}?${queryParams.toString()}`;
-    const res = await fetch(url);
-    if (res.ok) {
-      const json = await res.json();
-      let products = (json.data || []).map(normalizeProduct);
-      if (products.length === 0) {
-        products = filterLocalProducts(getLocalProductsStore(), filters);
-      } else {
-        if (filters.vendorId) {
-          const targetId = String(filters.vendorId).toLowerCase();
-          products = products.filter(p => {
-            const pVId = String(p.vendorId || '').toLowerCase();
-            const pVName = String(p.vendorName || '').toLowerCase();
-            if (pVId === targetId) return true;
-            if (targetId.includes('sialkot') && pVName.includes('sialkot')) return true;
-            if (targetId.includes('atlas') && pVName.includes('atlas')) return true;
-            if (targetId.includes('precision') && pVName.includes('precision')) return true;
-            if (targetId.includes('apex') && pVName.includes('apex')) return true;
-            if (targetId.includes('empire') && pVName.includes('empire')) return true;
-            if (targetId.includes('eurotech') && pVName.includes('eurotech')) return true;
-            return false;
-          });
-        }
-      }
-      return products;
-    }
-
-    return filterLocalProducts(getLocalProductsStore(), filters);
-  } catch (error) {
-    console.warn('Backend API unavailable for products, serving full local catalog:', error);
-    return filterLocalProducts(getLocalProductsStore(), filters);
-  }
+  const url = `${API_BASE_URL}?${queryParams.toString()}`;
+  const res = await httpClient.get(url);
+  const data = res.data?.data || res.data;
+  return (data || []).map(normalizeProduct);
 }
 
 function filterLocalProducts(list, filters) {

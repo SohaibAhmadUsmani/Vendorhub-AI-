@@ -26,6 +26,12 @@ import OrdersPage from "./pages/OrdersPage";
 import RiskAnalysisPage from "./pages/RiskAnalysisPage";
 import DocumentsPage from "./pages/DocumentsPage";
 
+import SettingsPage from "./pages/SettingsPage";
+import CertificationsPage from "./pages/CertificationsPage";
+import AdminUsersPage from "./pages/AdminUsersPage";
+import AdminVendorsPage from "./pages/AdminVendorsPage";
+import SavedVendorsPage from "./pages/SavedVendorsPage";
+
 import Signup from "./pages/auth/Signup";
 import Login from "./pages/auth/Login";
 import ForgotPassword from "./pages/auth/ForgotPassword";
@@ -127,11 +133,7 @@ function App() {
             {/* AI Negotiation */}
             <Route
               path="negotiation"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="AI Negotiation"
-                />
-              }
+              element={<QuotesPage />}
             />
 
             {/* Orders */}
@@ -143,11 +145,7 @@ function App() {
             {/* Saved Vendors */}
             <Route
               path="saved-vendors"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Saved Vendors"
-                />
-              }
+              element={<SavedVendorsPage />}
             />
 
             {/* Messages */}
@@ -159,11 +157,7 @@ function App() {
             {/* Contracts */}
             <Route
               path="contracts"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Contracts"
-                />
-              }
+              element={<DocumentsPage />}
             />
 
             {/* Documents */}
@@ -186,11 +180,7 @@ function App() {
             {/* Reviews */}
             <Route
               path="reviews"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Reviews & Ratings"
-                />
-              }
+              element={<VendorProfileView />}
             />
 
             {/* Notifications */}
@@ -214,31 +204,19 @@ function App() {
             {/* Vendor Analytics */}
             <Route
               path="vendor-analytics"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Vendor Analytics"
-                />
-              }
+              element={<AnalyticsPage />}
             />
 
             {/* Spend Summary */}
             <Route
               path="spend-summary"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Spend Summary"
-                />
-              }
+              element={<AnalyticsPage />}
             />
 
             {/* Settings */}
             <Route
               path="settings"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Settings"
-                />
-              }
+              element={<SettingsPage />}
             />
 
           </Route>
@@ -264,51 +242,41 @@ function App() {
             {/* Company Profile */}
             <Route
               path="profile"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Company Profile"
-                />
-              }
+              element={<VendorProfileView />}
             />
 
-            {/* Products */}
+            {/* Vendors View */}
+            <Route
+              path="vendors"
+              element={<VendorProfileView />}
+            />
+
+            {/* Products & Catalog */}
             <Route
               path="products"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Products"
-                />
-              }
+              element={<ProductCatalogView />}
+            />
+            <Route
+              path="product-catalog"
+              element={<ProductCatalogView />}
             />
 
             {/* Certifications */}
             <Route
               path="certifications"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Certifications"
-                />
-              }
+              element={<CertificationsPage />}
             />
 
             {/* Pricing */}
             <Route
               path="pricing"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Pricing"
-                />
-              }
+              element={<AnalyticsPage />}
             />
 
             {/* Received RFQs */}
             <Route
               path="rfqs"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Received RFQs"
-                />
-              }
+              element={<RFQGeneratorPage />}
             />
 
             {/* Quotations */}
@@ -326,17 +294,21 @@ function App() {
             {/* Messages */}
             <Route
               path="messages"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Messages"
-                />
-              }
+              element={<MessagesPage />}
             />
 
-            {/* Analytics */}
+            {/* Analytics & Insights */}
             <Route
               path="analytics"
               element={<AnalyticsPage />}
+            />
+            <Route
+              path="ai-insights"
+              element={<AIInsightsPage />}
+            />
+            <Route
+              path="ai-search"
+              element={<VendorMatchingPage />}
             />
 
             {/* Documents */}
@@ -349,17 +321,18 @@ function App() {
             <Route
               path="notifications"
               element={<NotificationsPage />}
+            />
 
+            {/* Risk Analysis */}
+            <Route
+              path="risk-analysis"
+              element={<RiskAnalysisPage />}
             />
 
             {/* Settings */}
             <Route
               path="settings"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Settings"
-                />
-              }
+              element={<SettingsPage />}
             />
 
           </Route>
@@ -379,91 +352,125 @@ function App() {
             {/* Admin Dashboard */}
             <Route
               path="dashboard"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Admin Dashboard"
-                />
-              }
+              element={<Dashboard />}
             />
 
             {/* Manage Users */}
             <Route
               path="users"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Manage Users"
-                />
-              }
+              element={<AdminUsersPage />}
             />
 
             {/* Verify Vendors */}
             <Route
               path="vendors"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Verify Vendors"
-                />
-              }
+              element={<AdminVendorsPage />}
             />
 
-            {/* Categories */}
+            {/* All Vendors */}
+            <Route
+              path="all-vendors"
+              element={<VendorProfileView />}
+            />
+
+            {/* Admin Search */}
+            <Route
+              path="search"
+              element={<VendorMatchingPage />}
+            />
+
+            {/* Product Catalog & Categories */}
             <Route
               path="categories"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Categories"
-                />
-              }
+              element={<ProductCatalogView />}
+            />
+            <Route
+              path="product-catalog"
+              element={<ProductCatalogView />}
+            />
+            <Route
+              path="products"
+              element={<ProductCatalogView />}
+            />
+
+            {/* RFQs */}
+            <Route
+              path="rfqs"
+              element={<RFQGeneratorPage />}
+            />
+
+            {/* Quotes */}
+            <Route
+              path="quotes"
+              element={<QuotesPage />}
+            />
+
+            {/* Orders */}
+            <Route
+              path="orders"
+              element={<OrdersPage />}
+            />
+
+            {/* Messages */}
+            <Route
+              path="messages"
+              element={<MessagesPage />}
+            />
+
+            {/* Documents */}
+            <Route
+              path="documents"
+              element={<DocumentsPage />}
+            />
+
+            {/* Notifications */}
+            <Route
+              path="notifications"
+              element={<NotificationsPage />}
+            />
+
+            {/* AI Insights & Sourcing */}
+            <Route
+              path="ai-insights"
+              element={<AIInsightsPage />}
+            />
+            <Route
+              path="ai-search"
+              element={<VendorMatchingPage />}
             />
 
             {/* Reports */}
             <Route
               path="reports"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Reports"
-                />
-              }
+              element={<AnalyticsPage />}
             />
 
             {/* Subscription Plans */}
             <Route
               path="subscriptions"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Subscription Plans"
-                />
-              }
+              element={<AnalyticsPage />}
             />
 
-            {/* Fraud Monitoring */}
+            {/* Fraud Monitoring & Risk Analysis */}
             <Route
               path="fraud-monitoring"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Fraud Monitoring"
-                />
-              }
+              element={<RiskAnalysisPage />}
+            />
+            <Route
+              path="risk-analysis"
+              element={<RiskAnalysisPage />}
             />
 
             {/* Platform Analytics */}
             <Route
               path="analytics"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Platform Analytics"
-                />
-              }
+              element={<AnalyticsPage />}
             />
 
             {/* Settings */}
             <Route
               path="settings"
-              element={
-                <TeammateModulePlaceholder
-                  pageTitle="Settings"
-                />
-              }
+              element={<SettingsPage />}
             />
 
           </Route>

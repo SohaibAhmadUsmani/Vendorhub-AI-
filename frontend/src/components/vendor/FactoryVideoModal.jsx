@@ -114,7 +114,7 @@ export default function FactoryVideoModal({ isOpen, onClose, videoUrl, videoTitl
           .fvm-close-btn {
             background: transparent;
             border: 1px solid rgba(255,255,255,0.1);
-            color: rgba(255,255,255,0.7);
+            color: rgba(255,255,255,0.9);
             border-radius: var(--radius-md, 6px);
             display: flex;
             align-items: center;
@@ -210,7 +210,7 @@ export default function FactoryVideoModal({ isOpen, onClose, videoUrl, videoTitl
                 <div style={{
                   fontFamily: 'var(--font-mono, "Fira Code", monospace)',
                   fontSize: '0.75rem',
-                  color: 'rgba(255,255,255,0.5)',
+                  color: 'rgba(255,255,255,0.85)',
                   marginTop: '4px',
                   display: 'flex',
                   alignItems: 'center',
@@ -261,7 +261,7 @@ export default function FactoryVideoModal({ isOpen, onClose, videoUrl, videoTitl
                 />
               )
             ) : (
-              <div style={{ color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>
+              <div style={{ color: 'rgba(255,255,255,0.85)', fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>
                 No video source provided.
               </div>
             )}
@@ -276,7 +276,7 @@ export default function FactoryVideoModal({ isOpen, onClose, videoUrl, videoTitl
               padding: '16px 20px'
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'rgba(255,255,255,0.6)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'rgba(255,255,255,0.9)' }}>
               <Film size={16} />
               <span style={{ 
                 fontFamily: 'var(--font-mono, "Fira Code", monospace)', 
@@ -298,7 +298,7 @@ export default function FactoryVideoModal({ isOpen, onClose, videoUrl, videoTitl
                     display: 'flex',
                     alignItems: 'center',
                     gap: '6px',
-                    color: 'rgba(255,255,255,0.7)',
+                    color: 'rgba(255,255,255,0.9)',
                     fontSize: '0.875rem',
                     textDecoration: 'none',
                     transition: 'color 0.2s',
@@ -306,7 +306,7 @@ export default function FactoryVideoModal({ isOpen, onClose, videoUrl, videoTitl
                     borderRadius: '4px'
                   }}
                   onMouseOver={(e) => e.currentTarget.style.color = '#fff'}
-                  onMouseOut={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.7)'}
+                  onMouseOut={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.9)'}
                 >
                   <ExternalLink size={14} />
                   <span>Open in New Tab</span>

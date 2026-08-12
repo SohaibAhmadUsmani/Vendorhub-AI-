@@ -16,6 +16,7 @@ const userSchema = new mongoose.Schema({
   resetPasswordTokenExpires: { type: Date, default: null },
   twoFactorCode: { type: String, default: null },
   twoFactorCodeExpires: { type: Date, default: null },
+  status: { type: String, enum: ['active', 'suspended'], default: 'active' },
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

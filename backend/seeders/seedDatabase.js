@@ -6,6 +6,8 @@ dns.setServers(['8.8.8.8', '8.8.4.4']); // Use Google Public DNS to guarantee SR
 const mongoose = require('mongoose');
 const Vendor = require('../models/Vendor');
 const Product = require('../models/Product');
+const User = require('../models/User');
+const bcrypt = require('bcryptjs');
 
 const seedData = async () => {
   try {
@@ -17,10 +19,25 @@ const seedData = async () => {
     // Clear existing Vendor and Product collections
     await Vendor.deleteMany({});
     await Product.deleteMany({});
-    console.log('Cleared existing Vendor and Product collections.');
+    await User.deleteMany({});
+    console.log('Cleared existing Vendor, Product and User collections.');
+
+    const defaultPasswordHash = await bcrypt.hash('Vendor@1234', 10);
+    const testPasswordHash = await bcrypt.hash('Test@12345', 10);
+
+    // Standard Test Accounts (as requested by user)
+    console.log('Creating standard test accounts...');
+    await User.create([
+      { name: 'Admin Test', email: 'admin.test@vendorhub.com', password: testPasswordHash, role: 'admin', isVerified: true },
+      { name: 'Buyer Test', email: 'buyer.test@vendorhub.com', password: testPasswordHash, role: 'buyer', isVerified: true },
+      { name: 'Vendor Test', email: 'vendor.test@vendorhub.com', password: testPasswordHash, role: 'vendor', isVerified: true }
+    ]);
+
 
     // 1. Sialkot Sports Limited
+    const sialkotUser = await User.create({ name: 'Sialkot Sports Limited', email: 'sialkotsportslimited@gmail.com', password: defaultPasswordHash, role: 'vendor', isVerified: true });
     const sialkotSports = await Vendor.create({
+      userId: sialkotUser._id,
       name: 'Sialkot Sports Limited',
       tagline: 'Premier FIFA-grade match ball & activewear manufacturer',
       logo: 'https://images.unsplash.com/photo-1517466787929-bc90951d0974?auto=format&fit=crop&w=300&q=80',
@@ -50,6 +67,12 @@ const seedData = async () => {
         { name: 'FIFA Quality Pro', issuer: 'FIFA Laboratory', year: '2024', verified: true },
         { name: 'BSCI Social Audit', issuer: 'Amfori', year: '2023', verified: true }
       ],
+      exportCountries: [
+        { country: "Germany", code: "DE", flag: "🇩🇪", percent: 40 },
+        { country: "United States", code: "US", flag: "🇺🇸", percent: 35 },
+        { country: "United Arab Emirates", code: "AE", flag: "🇦🇪", percent: 15 },
+        { country: "United Kingdom", code: "GB", flag: "🇬🇧", percent: 10 }
+      ],
       team: [
         { name: 'Tariq Mehmood', role: 'Managing Director', email: 'tariq@sialkotsports.com', phone: '+92-300-8611122', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&q=80' },
         { name: 'Usman Ali', role: 'Head of Quality Assurance', email: 'usman.qa@sialkotsports.com', phone: '+92-300-8611123', avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=150&q=80' }
@@ -72,7 +95,9 @@ const seedData = async () => {
     ]);
 
     // 2. Atlas Industrial Corp
+    const atlasUser = await User.create({ name: 'Atlas Industrial Corp', email: 'atlasindustrial@gmail.com', password: defaultPasswordHash, role: 'vendor', isVerified: true });
     const atlasIndustrial = await Vendor.create({
+      userId: atlasUser._id,
       name: 'Atlas Industrial Corp',
       tagline: 'Heavy-duty industrial pumps, valves & precision casting',
       logo: 'https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?auto=format&fit=crop&w=300&q=80',
@@ -98,6 +123,12 @@ const seedData = async () => {
         { name: 'ISO 14001:2015', issuer: 'TÜV Rheinland', year: '2023', verified: true },
         { name: 'API 6D Specification', issuer: 'American Petroleum Institute', year: '2024', verified: true }
       ],
+      exportCountries: [
+        { country: "Saudi Arabia", code: "SA", flag: "🇸🇦", percent: 45 },
+        { country: "United Arab Emirates", code: "AE", flag: "🇦🇪", percent: 30 },
+        { country: "Qatar", code: "QA", flag: "🇶🇦", percent: 15 },
+        { country: "Oman", code: "OM", flag: "🇴🇲", percent: 10 }
+      ],
       team: [
         { name: 'Khurram Shahzad', role: 'Chief Technical Officer', email: 'khurram@atlasind.com', phone: '+92-321-4455667', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80' }
       ],
@@ -119,7 +150,9 @@ const seedData = async () => {
     ]);
 
     // 3. Precision Gear Co
+    const precisionUser = await User.create({ name: 'Precision Gear Co', email: 'precisiongearco@gmail.com', password: defaultPasswordHash, role: 'vendor', isVerified: true });
     const precisionGear = await Vendor.create({
+      userId: precisionUser._id,
       name: 'Precision Gear Co',
       tagline: 'High-precision CNC machined gears & transmission components',
       logo: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=300&q=80',
@@ -136,6 +169,11 @@ const seedData = async () => {
       employeeCount: '100-250 Employees',
       factoryDetails: { area: '45,000 sq ft', productionLines: 6, annualOutput: '800,000 gear assemblies', videoTourUrl: 'https://www.youtube.com/embed/kJQP7kiw5Fk' },
       certifications: [{ name: 'IATF 16949 Automotive', issuer: 'Bureau Veritas', year: '2023', verified: true }],
+      exportCountries: [
+        { country: "Japan", code: "JP", flag: "🇯🇵", percent: 40 },
+        { country: "Germany", code: "DE", flag: "🇩🇪", percent: 35 },
+        { country: "United States", code: "US", flag: "🇺🇸", percent: 25 }
+      ],
       team: [{ name: 'Hamza Niaz', role: 'Head of Engineering', email: 'hamza@precisiongear.pk' }],
       riskBreakdown: { overallScore: 94, complianceRisk: 'Low', operationalRisk: 'Low', financialRisk: 'Low' },
       contact: { email: 'info@precisiongear.pk', phone: '+92-42-35889900', address: 'Sundar Industrial Estate, Lahore, Pakistan' }
@@ -155,7 +193,9 @@ const seedData = async () => {
     ]);
 
     // 4. Apex Textiles
+    const apexUser = await User.create({ name: 'Apex Textiles', email: 'apextextiles@gmail.com', password: defaultPasswordHash, role: 'vendor', isVerified: true });
     const apexTextiles = await Vendor.create({
+      userId: apexUser._id,
       name: 'Apex Textiles',
       tagline: 'OEKO-TEX certified 100% organic cotton fabrics & home textiles',
       logo: 'https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?auto=format&fit=crop&w=300&q=80',
@@ -174,6 +214,12 @@ const seedData = async () => {
       certifications: [
         { name: 'GOTS Organic Certified', issuer: 'Control Union', year: '2024', verified: true },
         { name: 'OEKO-TEX Standard 100', issuer: 'Hohenstein', year: '2024', verified: true }
+      ],
+      exportCountries: [
+        { country: "United States", code: "US", flag: "🇺🇸", percent: 50 },
+        { country: "United Kingdom", code: "GB", flag: "🇬🇧", percent: 25 },
+        { country: "France", code: "FR", flag: "🇫🇷", percent: 15 },
+        { country: "Italy", code: "IT", flag: "🇮🇹", percent: 10 }
       ],
       team: [{ name: 'Salman Ahmed', role: 'Export Director', email: 'salman@apextextiles.com' }],
       riskBreakdown: { overallScore: 98, complianceRisk: 'Low', operationalRisk: 'Low', financialRisk: 'Low' },
@@ -194,7 +240,9 @@ const seedData = async () => {
     ]);
 
     // 5. Empire Mills
+    const empireUser = await User.create({ name: 'Empire Mills', email: 'empiremills@gmail.com', password: defaultPasswordHash, role: 'vendor', isVerified: true });
     const empireMills = await Vendor.create({
+      userId: empireUser._id,
       name: 'Empire Mills',
       tagline: 'Structural steel fabrication & heavy industrial mill products',
       logo: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=300&q=80',
@@ -211,6 +259,11 @@ const seedData = async () => {
       employeeCount: '250-500 Employees',
       factoryDetails: { area: '180,000 sq ft', productionLines: 4, annualOutput: '50,000 metric tons steel', videoTourUrl: 'https://www.youtube.com/embed/1vR_sW5h140' },
       certifications: [{ name: 'ASTM A615 Grade 60', issuer: 'PCSIR', year: '2023', verified: true }],
+      exportCountries: [
+        { country: "United Arab Emirates", code: "AE", flag: "🇦🇪", percent: 50 },
+        { country: "Oman", code: "OM", flag: "🇴🇲", percent: 30 },
+        { country: "Bahrain", code: "BH", flag: "🇧🇭", percent: 20 }
+      ],
       team: [{ name: 'Bilal Chaudhry', role: 'Operations Manager', email: 'bilal@empiremills.pk' }],
       riskBreakdown: { overallScore: 91, complianceRisk: 'Low', operationalRisk: 'Medium', financialRisk: 'Low' },
       contact: { email: 'info@empiremills.pk', phone: '+92-55-4223344', address: 'GT Road, Gujranwala, Pakistan' }
@@ -230,7 +283,9 @@ const seedData = async () => {
     ]);
 
     // 6. EuroTech
+    const euroTechUser = await User.create({ name: 'EuroTech', email: 'eurotech@gmail.com', password: defaultPasswordHash, role: 'vendor', isVerified: true });
     const euroTech = await Vendor.create({
+      userId: euroTechUser._id,
       name: 'EuroTech',
       tagline: 'Smart IoT controllers & industrial automation electronics',
       logo: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=300&q=80',
@@ -249,6 +304,11 @@ const seedData = async () => {
       certifications: [
         { name: 'CE Mark Compliance', issuer: 'Eurofins', year: '2024', verified: true },
         { name: 'RoHS Directive', issuer: 'SGS', year: '2023', verified: true }
+      ],
+      exportCountries: [
+        { country: "Germany", code: "DE", flag: "🇩🇪", percent: 45 },
+        { country: "Netherlands", code: "NL", flag: "🇳🇱", percent: 35 },
+        { country: "Sweden", code: "SE", flag: "🇸🇪", percent: 20 }
       ],
       team: [{ name: 'Dr. Shahbaz Khan', role: 'Head of Embedded Systems', email: 'shahbaz@eurotech.io' }],
       riskBreakdown: { overallScore: 97, complianceRisk: 'Low', operationalRisk: 'Low', financialRisk: 'Low' },

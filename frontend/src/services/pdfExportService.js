@@ -5,13 +5,8 @@
 
 export async function exportVendorCatalogPDF(vendorData, products = []) {
   try {
-    // Check if html2pdf is available globally or dynamically import
-    let html2pdfModule;
-    try {
-      html2pdfModule = (await import('html2pdf.js')).default;
-    } catch (e) {
-      console.warn("html2pdf.js not installed via npm, using print fallback", e);
-    }
+    // Using native browser print for PDF Export
+
 
     const container = document.createElement('div');
     container.style.padding = '30px';
@@ -78,26 +73,15 @@ export async function exportVendorCatalogPDF(vendorData, products = []) {
       </div>
     `;
 
-    if (html2pdfModule) {
-      const opt = {
-        margin: 0.5,
-        filename: `${(vendorData.name || 'Vendor_Catalog').replace(/[^a-z0-9]/gi, '_')}_Catalog.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-      };
-      await html2pdfModule().set(opt).from(container).save();
-    } else {
-      // Fallback: Open print dialog in hidden iframe/window
-      const printWindow = window.open('', '_blank');
-      printWindow.document.write(`<html><head><title>${vendorData.name} Catalog</title></head><body>${container.innerHTML}</body></html>`);
-      printWindow.document.close();
-      printWindow.focus();
-      setTimeout(() => {
-        printWindow.print();
-        printWindow.close();
-      }, 500);
-    }
+    // Open print dialog in hidden iframe/window using native browser print
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`<html><head><title>${vendorData.name} Catalog</title></head><body>${container.innerHTML}</body></html>`);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 500);
     return true;
   } catch (error) {
     console.error("Error generating catalog PDF:", error);

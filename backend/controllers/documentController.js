@@ -1,6 +1,7 @@
 const Document = require("../models/Document");
 const { groqChat } = require("../services/groqClient");
 const cloudinary = require("../config/cloudinary");
+const Tesseract = require("tesseract.js");
 
 const DOCUMENT_TYPES = [
   "contract",
@@ -130,6 +131,16 @@ const createDocument = async (req, res) => {
 
     const keywords = deriveKeywords(name, type, description, tags);
 
+    let extractedText = "";
+    if (req.file.mimetype.startsWith("image/")) {
+      try {
+        const { data: { text } } = await Tesseract.recognize(req.file.path, "eng");
+        extractedText = text;
+      } catch (ocrError) {
+        console.warn("OCR failed:", ocrError.message);
+      }
+    }
+
     const document = await Document.create({
       name: name.trim(),
       type,
@@ -142,6 +153,7 @@ const createDocument = async (req, res) => {
       size: req.file.size,
       cloudinaryId: req.file.filename,
       uploadedBy: req.user?.id,
+      extractedText,
     });
 
     res.status(201).json({
@@ -249,6 +261,7 @@ Document type: ${document.type}
 File name: ${document.fileName || "Not provided"}
 Description: ${document.description || "Not provided"}
 Tags: ${(document.tags || []).join(", ") || "None"}
+Extracted Text (OCR): ${document.extractedText ? document.extractedText.slice(0, 2000) : "None"}
 
 Return ONLY valid JSON with exactly this structure:
 {

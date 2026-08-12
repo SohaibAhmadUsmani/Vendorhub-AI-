@@ -7,12 +7,18 @@ function PasswordInput({ label, name, value, placeholder, onChange, error, disab
     
     return (
         <>
-            <label className="mt-1 mb-2 text-sm font-medium text-[var(--text-h)]">
-                {label}
-            </label>
+            {label && (
+                <label
+                    htmlFor={name}
+                    className="mt-1 mb-2 text-sm font-semibold text-slate-900"
+                >
+                    {label}
+                </label>
+            )}
             <div className="relative">
 
   <input
+    id={name}
     type={showPassword ? "text" : "password"}
     name={name}
     value={value}
@@ -23,16 +29,18 @@ function PasswordInput({ label, name, value, placeholder, onChange, error, disab
       w-full
       rounded-xl
       border
-      border-gray-200
+      border-[#CBD5E1]
       bg-white
       px-4
       pr-12
       text-base
+      font-medium
+      text-slate-900
       outline-none
-      placeholder:text-gray-400
+      placeholder:text-slate-500
       focus:border-[var(--primary-purple)]
       focus:ring-2
-      focus:ring-[var(--primary-purple)]/10
+      focus:ring-[var(--primary-purple)]/20
     "
   />
 
@@ -45,8 +53,8 @@ function PasswordInput({ label, name, value, placeholder, onChange, error, disab
       right-4
       top-1/2
       -translate-y-1/2
-      text-gray-400
-      hover:text-[var(--primary-purple)]
+      text-slate-500
+      hover:text-slate-700
     "
   >
     {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}

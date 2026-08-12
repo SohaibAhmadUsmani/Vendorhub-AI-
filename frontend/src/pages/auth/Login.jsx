@@ -12,6 +12,7 @@ import { login, verify2FA } from "../../services/authService";
 import { useAuthForm } from "../hooks/useAuthForm";
 import { LeftPanel } from "../../components/auth/LeftPanel";
 import { getDashboardRoute } from "../../utils/authRedirect";
+import VendorHubLogo from "../../components/layout/VendorHubLogo";
 
 const STEP = {
   LOGIN: "login",
@@ -107,13 +108,17 @@ function Login() {
             <div className="flex w-full flex-col">
 
               {/* Heading */}
-              <div>
-                <h2 className=" flex justify-center font-heading text-3xl font-bold tracking-tight text-[var(--text-primary)]">
+              <div className="flex flex-col items-center justify-center text-center">
+                <div className="mb-3 flex justify-center">
+                  <VendorHubLogo size="medium" showTagline={false} lightMode />
+                </div>
+
+                <h2 className="font-heading text-3xl font-bold tracking-tight text-[var(--text-primary)]">
                   Welcome Back
                 </h2>
 
-                <p className=" flex justify-center mt-2 text-base text-[var(--text-secondary)]">
-                  Login to your VendorHub AI account
+                <p className="mt-1.5 text-base font-medium text-slate-600">
+                  Login to your account to manage sourcing & vendors
                 </p>
               </div>
 
@@ -131,7 +136,7 @@ function Login() {
                 />
 
                 <div className="mb-2 mt-5 flex items-center justify-between">
-                  <label className="text-sm font-medium text-[var(--text-h)]">
+                  <label className="text-sm font-medium text-[var(--text-primary)]">
                     Password
                   </label>
 
@@ -205,7 +210,7 @@ function Login() {
                   </Link>
                 </div>
 
-                <p className="mt-6 text-xs text-gray-400">
+                <p className="mt-6 text-xs text-slate-500">
                   Protected by VendorHub AI
                 </p>
               </div>

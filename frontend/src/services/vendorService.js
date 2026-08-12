@@ -2,7 +2,9 @@
  * vendorService.js — Enterprise REST API & High-Fidelity Dataset Service
  */
 
-const API_BASE_URL = 'http://localhost:5000/api/vendors';
+import httpClient from './httpClient';
+
+const API_BASE_URL = '/api/vendors';
 
 export const INITIAL_VENDORS_DATA = [
   {
@@ -374,7 +376,7 @@ function normalizeVendor(v) {
       cncMachines: `${v.factoryDetails?.productionLines || 12} Automated Lines`,
       automatedLines: `${v.factoryDetails?.productionLines || 12} Assembly Lines`
     },
-    exportCountries: v.exportCountries || [
+    exportCountries: (Array.isArray(v.exportCountries) && v.exportCountries.length > 0) ? v.exportCountries : [
       { country: "Germany", code: "DE", flag: "🇩🇪", percent: 40 },
       { country: "United States", code: "US", flag: "🇺🇸", percent: 35 },
       { country: "United Arab Emirates", code: "AE", flag: "🇦🇪", percent: 15 },
@@ -410,103 +412,44 @@ function normalizeVendor(v) {
 }
 
 export async function fetchAllVendorProfiles() {
-  try {
-    const res = await fetch(API_BASE_URL);
-    if (!res.ok) throw new Error('Failed to fetch vendors from API');
-    const json = await res.json();
-    if (Array.isArray(json.data) && json.data.length > 0) {
-      return json.data.map(normalizeVendor);
-    }
-    return INITIAL_VENDORS_DATA;
-  } catch (error) {
-    console.warn('Backend API unavailable, serving high-fidelity initial vendor datasets:', error);
-    return INITIAL_VENDORS_DATA;
+  const res = await httpClient.get(API_BASE_URL);
+  const data = res.data?.data || res.data;
+  if (Array.isArray(data) && data.length > 0) {
+    return data.map(normalizeVendor);
   }
+  return [];
 }
 
 export async function fetchVendorProfile(vendorId) {
-  try {
-    const res = await fetch(`${API_BASE_URL}/${vendorId}`);
-    if (res.ok) {
-      const json = await res.json();
-      if (json.data) return normalizeVendor(json.data);
-    }
-    const localMatch = INITIAL_VENDORS_DATA.find(v => v.id === vendorId || v._id === vendorId);
-    if (localMatch) return localMatch;
-    const list = await fetchAllVendorProfiles();
-    return list[0] || INITIAL_VENDORS_DATA[0];
-  } catch (error) {
-    console.warn('Error fetching vendor profile from API, fallback to local match:', error);
-    const localMatch = INITIAL_VENDORS_DATA.find(v => v.id === vendorId || v._id === vendorId);
-    return localMatch || INITIAL_VENDORS_DATA[0];
-  }
+  const res = await httpClient.get(`${API_BASE_URL}/${vendorId}`);
+  const data = res.data?.data || res.data;
+  if (data) return normalizeVendor(data);
+  throw new Error('Vendor not found');
 }
 
-function getAuthHeaders() {
-  const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
-  const headers = { 'Content-Type': 'application/json' };
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-  return headers;
+export async function fetchMyVendorProfile() {
+  const res = await httpClient.get(`${API_BASE_URL}/me`);
+  const data = res.data?.data || res.data;
+  if (data) return normalizeVendor(data);
+  throw new Error('Profile not found');
 }
 
 export async function updateVendorProfile(vendorId, updateData) {
-  try {
-    const res = await fetch(`${API_BASE_URL}/${vendorId}`, {
-      method: 'PUT',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(updateData)
-    });
-    if (!res.ok) throw new Error('Failed to update vendor');
-    const json = await res.json();
-    return normalizeVendor(json.data);
-  } catch (error) {
-    console.warn('Error updating vendor profile on API, updating local data:', error);
-    const idx = INITIAL_VENDORS_DATA.findIndex(v => v.id === vendorId || v._id === vendorId);
-    if (idx !== -1) {
-      INITIAL_VENDORS_DATA[idx] = {
-        ...INITIAL_VENDORS_DATA[idx],
-        ...updateData,
-        logoImage: updateData.logoImage || INITIAL_VENDORS_DATA[idx].logoImage,
-        coverImage: updateData.coverImage || INITIAL_VENDORS_DATA[idx].coverImage
-      };
-      return INITIAL_VENDORS_DATA[idx];
-    }
-    return updateData;
-  }
+  const res = await httpClient.put(`${API_BASE_URL}/${vendorId}`, updateData);
+  const data = res.data?.data || res.data;
+  return normalizeVendor(data);
 }
 
 export async function submitVendorReview(vendorId, reviewData) {
-  try {
-    const res = await fetch(`${API_BASE_URL}/${vendorId}/reviews`, {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(reviewData)
-    });
-    if (!res.ok) throw new Error('Failed to submit review');
-    const json = await res.json();
-    return normalizeVendor(json.data);
-  } catch (error) {
-    console.error('Error submitting vendor review:', error);
-    return null;
-  }
+  const res = await httpClient.post(`${API_BASE_URL}/${vendorId}/reviews`, reviewData);
+  const data = res.data?.data || res.data;
+  return normalizeVendor(data);
 }
 
 export async function updateVendorRiskScore(vendorId, riskData) {
-  try {
-    const res = await fetch(`${API_BASE_URL}/${vendorId}/risk`, {
-      method: 'PUT',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(riskData)
-    });
-    if (!res.ok) throw new Error('Failed to update risk score');
-    const json = await res.json();
-    return normalizeVendor(json.data);
-  } catch (error) {
-    console.error('Error updating vendor risk score:', error);
-    return null;
-  }
+  const res = await httpClient.put(`${API_BASE_URL}/${vendorId}/risk`, riskData);
+  const data = res.data?.data || res.data;
+  return normalizeVendor(data);
 }
 
 export async function toggleSaveVendor(vendorId, isSaved) {

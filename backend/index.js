@@ -25,6 +25,7 @@ const documentRoutes = require("./routes/documentRoutes");
 const Notification = require('./models/Notification');
 const analyticsRoutes = require('./routes/analyticsRoutes');
 const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
 const passport = require('./config/passport');
 
 const app = express();
@@ -48,6 +49,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // API Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/vendors', vendorRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/match', matchRoutes);

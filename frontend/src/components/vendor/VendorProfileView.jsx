@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams, useParams } from 'react-router-dom';
+import { useSearchParams, useParams, useNavigate } from 'react-router-dom';
+import { getRoleRoute } from '../../utils/routeUtils';
 import ProductCatalogView from '../catalog/ProductCatalogView';
 import VendorProfileForm from './VendorProfileForm';
 import VendorTeamCard from './VendorTeamCard';
@@ -8,16 +9,28 @@ import VendorReviewModal from './VendorReviewModal';
 import ContactTeamMemberModal from './ContactTeamMemberModal';
 import FactoryVideoModal from './FactoryVideoModal';
 import CertificationViewerModal from './CertificationViewerModal';
-import { fetchVendorProfile, fetchAllVendorProfiles, updateVendorProfile, submitVendorReview, toggleSaveVendor } from '../../services/vendorService';
+import { fetchVendorProfile, fetchAllVendorProfiles, updateVendorProfile, submitVendorReview, toggleSaveVendor, fetchMyVendorProfile } from '../../services/vendorService';
 
 /**
  * VendorProfileView — Module 5 (Vendor Profiles) 100% Completion View
  * Interactive 6-Vendor Switcher Dropdown, Centered Glassmorphic Edit Modal, 6 Tabs
  */
 export default function VendorProfileView({ initialVendorId = "v-sialkot-101" }) {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const routeParams = useParams();
   const queryVendorId = routeParams.id || searchParams.get('id');
+  
+  let currentUser = null;
+  try {
+    const userStr = localStorage.getItem('user');
+    if (userStr && userStr !== 'undefined') {
+      currentUser = JSON.parse(userStr);
+    }
+  } catch (e) {
+    console.error('Error parsing user from localStorage:', e);
+  }
+  const isVendorUser = currentUser?.role === 'vendor';
 
   const [selectedVendorId, setSelectedVendorId] = useState(queryVendorId || initialVendorId);
   const [allVendors, setAllVendors] = useState([]);
@@ -43,20 +56,35 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
   // Load Vendor List & Active Profile
   useEffect(() => {
     async function loadAll() {
-      const list = await fetchAllVendorProfiles();
-      setAllVendors(list);
+      if (!isVendorUser) {
+        const list = await fetchAllVendorProfiles();
+        setAllVendors(list);
+      }
     }
     loadAll();
-  }, []);
+  }, [isVendorUser]);
 
   useEffect(() => {
     async function loadData() {
       setLoading(true);
-      const data = await fetchVendorProfile(selectedVendorId);
+      let data;
+      if (isVendorUser) {
+        data = await fetchMyVendorProfile();
+        if (data && (data._id || data.id) && (data._id || data.id) !== selectedVendorId) {
+          setSelectedVendorId(data._id || data.id);
+        }
+      } else {
+        data = await fetchVendorProfile(selectedVendorId);
+      }
       setVendorData(data);
       
-      const savedVendors = JSON.parse(localStorage.getItem('saved_vendors') || '[]');
-      setIsSaved(savedVendors.includes(selectedVendorId));
+      let savedVendors = [];
+      try {
+        savedVendors = JSON.parse(localStorage.getItem('saved_vendors') || '[]');
+      } catch {
+        savedVendors = [];
+      }
+      setIsSaved(Array.isArray(savedVendors) && savedVendors.includes(selectedVendorId));
       
       setLoading(false);
     }
@@ -129,57 +157,59 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
   return (
     <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '1rem' }}>
       
-      {/* 6-VENDOR PROFILE SELECTOR BAR (100% Feature) */}
-      <div 
-        className="card-surface" 
-        style={{ 
-          padding: '0.85rem 1.25rem', 
-          marginBottom: '1.25rem', 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'space-between',
-          backgroundColor: 'var(--bg-card)',
-          border: '1px solid var(--border-card)',
-          flexWrap: 'wrap',
-          gap: '1rem'
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <div>
-            <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontFamily: 'var(--font-heading)' }}>
-              Select Active Vendor Profile (6 Profiles Available)
-            </strong>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>
-              Switch between global verified manufacturers to preview complete profiles & catalogs.
-            </span>
-          </div>
-        </div>
-
-        <select
-          value={selectedVendorId}
-          onChange={(e) => setSelectedVendorId(e.target.value)}
-          style={{
-            padding: '0.55rem 1.15rem',
-            borderRadius: 'var(--radius-md)',
-            border: '1.5px solid var(--primary-purple)',
-            backgroundColor: 'var(--bg-main)',
-            color: 'var(--text-primary)',
-            fontSize: '0.85rem',
-            fontWeight: 700,
-            cursor: 'pointer',
-            outline: 'none',
-            minWidth: '250px',
-            boxShadow: '0 2px 8px rgba(108,92,231,0.15)',
-            transition: 'all 0.2s ease'
+      {/* Vendor Profile Switcher Dropdown (Admin/Buyer Only) */}
+      {!isVendorUser && (
+        <div 
+          className="card-surface" 
+          style={{ 
+            padding: '0.85rem 1.25rem', 
+            marginBottom: '1.25rem', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'space-between',
+            backgroundColor: 'var(--bg-card)',
+            border: '1px solid var(--border-card)',
+            flexWrap: 'wrap',
+            gap: '1rem'
           }}
         >
-          {allVendors.map((v) => (
-            <option key={v.id} value={v.id}>
-              {v.name} ({v.location})
-            </option>
-          ))}
-        </select>
-      </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div>
+              <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontFamily: 'var(--font-heading)' }}>
+                Select Active Vendor Profile ({allVendors.length} Profiles Available)
+              </strong>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>
+                Switch between global verified manufacturers to preview complete profiles & catalogs.
+              </span>
+            </div>
+          </div>
+
+          <select
+            value={selectedVendorId}
+            onChange={(e) => setSelectedVendorId(e.target.value)}
+            style={{
+              padding: '0.55rem 1.15rem',
+              borderRadius: 'var(--radius-md)',
+              border: '1.5px solid var(--primary-purple)',
+              backgroundColor: 'var(--bg-main)',
+              color: 'var(--text-primary)',
+              fontSize: '0.85rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              outline: 'none',
+              minWidth: '250px',
+              boxShadow: '0 2px 8px rgba(108,92,231,0.15)',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            {allVendors.map((v) => (
+              <option key={v.id || v._id} value={v.id || v._id}>
+                {v.name} ({v.location})
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {/* Main Vendor Profile Content Wrapper with Smooth Switch Animation */}
       <div key={selectedVendorId} style={{ animation: 'vpvVendorFade 0.35s cubic-bezier(0.16, 1, 0.3, 1)' }}>
@@ -262,13 +292,15 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
 
           {/* Right Action Buttons */}
           <div className="profile-hero-actions" style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-            <button 
-              className="btn-purple-primary" 
-              style={{ minHeight: '48px', padding: '0.6rem 1.5rem', borderRadius: '12px' }}
-              onClick={() => setShowEditModal(true)}
-            >
-              Edit Profile
-            </button>
+            {currentUser?.role !== 'buyer' && (
+              <button 
+                className="btn-purple-primary" 
+                style={{ minHeight: '48px', padding: '0.6rem 1.5rem', borderRadius: '12px' }}
+                onClick={() => setShowEditModal(true)}
+              >
+                Edit Profile
+              </button>
+            )}
             <button 
               className="btn-outline-secondary" 
               style={{ minHeight: '48px', padding: '0.6rem 1.5rem', borderRadius: '12px' }}
@@ -366,7 +398,7 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
 
             {/* Company Background */}
             <div className="card-surface">
-              <h3 className="font-heading" style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '0.75rem' }}>
+              <h3 className="font-heading text-slate-900 text-lg font-extrabold mb-3">
                 Company Background & Executive Summary
               </h3>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.925rem', lineHeight: '1.65', marginBottom: '1.25rem' }}>
@@ -375,31 +407,36 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
                 <div style={{ padding: '1rem', backgroundColor: 'var(--bg-main)', borderRadius: 'var(--radius-md)' }}>
-                  <span className="font-mono" style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', textTransform: 'uppercase' }}>FOUNDED</span>
-                  <strong className="font-heading" style={{ fontSize: '1.25rem', color: 'var(--text-primary)' }}>{vendorData.founded}</strong>
+                  <span className="font-mono text-slate-700 text-[12px] font-bold block uppercase tracking-wider mb-1">FOUNDED</span>
+                  <strong className="font-heading text-slate-900 text-xl font-extrabold">{vendorData.founded}</strong>
                 </div>
                 <div style={{ padding: '1rem', backgroundColor: 'var(--bg-main)', borderRadius: 'var(--radius-md)' }}>
-                  <span className="font-mono" style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', textTransform: 'uppercase' }}>STAFF</span>
-                  <strong className="font-heading" style={{ fontSize: '1.25rem', color: 'var(--text-primary)' }}>{vendorData.staff}</strong>
+                  <span className="font-mono text-slate-700 text-[12px] font-bold block uppercase tracking-wider mb-1">STAFF</span>
+                  <strong className="font-heading text-slate-900 text-xl font-extrabold">{vendorData.staff}</strong>
                 </div>
                 <div style={{ padding: '1rem', backgroundColor: 'var(--bg-main)', borderRadius: 'var(--radius-md)' }}>
-                  <span className="font-mono" style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', textTransform: 'uppercase' }}>FACILITY SIZE</span>
-                  <strong className="font-heading" style={{ fontSize: '1.25rem', color: 'var(--text-primary)' }}>{vendorData.manufacturingCapabilities?.factoryArea || "120,000 sq ft"}</strong>
+                  <span className="font-mono text-slate-700 text-[12px] font-bold block uppercase tracking-wider mb-1">FACILITY SIZE</span>
+                  <strong className="font-heading text-slate-900 text-xl font-extrabold">{vendorData.manufacturingCapabilities?.factoryArea || "120,000 sq ft"}</strong>
                 </div>
               </div>
             </div>
 
             {/* Export Countries */}
             <div className="card-surface">
-              <h3 className="font-heading" style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '0.75rem' }}>
+              <h3 className="font-heading text-slate-900 text-lg font-extrabold mb-3">
                 🌍 Export Countries & Regional Volume Breakdown
               </h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
-                {vendorData.exportCountries?.map((exp, idx) => (
+                {((vendorData.exportCountries && vendorData.exportCountries.length > 0) ? vendorData.exportCountries : [
+                  { country: "Germany", code: "DE", flag: "🇩🇪", percent: 40 },
+                  { country: "United States", code: "US", flag: "🇺🇸", percent: 35 },
+                  { country: "United Arab Emirates", code: "AE", flag: "🇦🇪", percent: 15 },
+                  { country: "United Kingdom", code: "GB", flag: "🇬🇧", percent: 10 }
+                ]).map((exp, idx) => (
                   <div 
                     key={idx}
                     style={{
-                      padding: '0.85rem',
+                      padding: '0.85rem 1.1rem',
                       backgroundColor: 'var(--bg-main)',
                       borderRadius: 'var(--radius-md)',
                       border: '1px solid var(--border-color)',
@@ -408,11 +445,11 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
                       justifyContent: 'space-between'
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <span style={{ fontSize: '1.4rem' }}>{exp.flag}</span>
-                      <span style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)' }}>{exp.country}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                      <span style={{ fontSize: '1.4rem' }}>{exp.flag || '🌍'}</span>
+                      <span className="text-slate-900 font-bold text-sm">{exp.country}</span>
                     </div>
-                    <span className="font-mono" style={{ fontWeight: 700, color: 'var(--primary-purple)' }}>
+                    <span className="font-mono text-xs font-extrabold text-[#6C63FF] bg-[#F0EEFF] px-2.5 py-1 rounded-md border border-[#D8D2FF]">
                       {exp.percent}%
                     </span>
                   </div>
@@ -422,25 +459,25 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
 
             {/* Detailed Plant Capabilities */}
             <div className="card-surface">
-              <h3 className="font-heading" style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '1rem' }}>
+              <h3 className="font-heading text-slate-900 text-lg font-extrabold mb-3">
                 ⚙️ Manufacturing Plant Capabilities
               </h3>
               <div className="profile-grid-3col" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '1rem' }}>
                 <div style={{ padding: '0.85rem', backgroundColor: 'var(--bg-main)', borderRadius: 'var(--radius-md)' }}>
-                  <span className="font-mono" style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>MONTHLY CAPACITY</span>
-                  <strong style={{ fontSize: '0.95rem', color: 'var(--text-primary)' }}>{vendorData.manufacturingCapabilities.capacity}</strong>
+                  <span className="font-mono text-slate-700 text-[12px] font-bold block uppercase tracking-wider mb-1">MONTHLY CAPACITY</span>
+                  <strong className="text-slate-900 text-sm font-bold">{vendorData.manufacturingCapabilities.capacity}</strong>
                 </div>
                 <div style={{ padding: '0.85rem', backgroundColor: 'var(--bg-main)', borderRadius: 'var(--radius-md)' }}>
-                  <span className="font-mono" style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>SAMPLE LEAD TIME</span>
-                  <strong style={{ fontSize: '0.95rem', color: 'var(--text-primary)' }}>{vendorData.manufacturingCapabilities.leadTime}</strong>
+                  <span className="font-mono text-slate-700 text-[12px] font-bold block uppercase tracking-wider mb-1">SAMPLE LEAD TIME</span>
+                  <strong className="text-slate-900 text-sm font-bold">{vendorData.manufacturingCapabilities.leadTime}</strong>
                 </div>
                 <div style={{ padding: '0.85rem', backgroundColor: 'var(--bg-main)', borderRadius: 'var(--radius-md)' }}>
-                  <span className="font-mono" style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>CNC MACHINERY</span>
-                  <strong style={{ fontSize: '0.95rem', color: 'var(--text-primary)' }}>{vendorData.manufacturingCapabilities.cncMachines || "45 Haas Units"}</strong>
+                  <span className="font-mono text-slate-700 text-[12px] font-bold block uppercase tracking-wider mb-1">CNC MACHINERY</span>
+                  <strong className="text-slate-900 text-sm font-bold">{vendorData.manufacturingCapabilities.cncMachines || "45 Haas Units"}</strong>
                 </div>
                 <div style={{ padding: '0.85rem', backgroundColor: 'var(--bg-main)', borderRadius: 'var(--radius-md)' }}>
-                  <span className="font-mono" style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>AUTOMATED LINES</span>
-                  <strong style={{ fontSize: '0.95rem', color: 'var(--text-primary)' }}>{vendorData.manufacturingCapabilities.automatedLines || "6 Assembly Lines"}</strong>
+                  <span className="font-mono text-slate-700 text-[12px] font-bold block uppercase tracking-wider mb-1">AUTOMATED LINES</span>
+                  <strong className="text-slate-900 text-sm font-bold">{vendorData.manufacturingCapabilities.automatedLines || "6 Assembly Lines"}</strong>
                 </div>
               </div>
             </div>
@@ -462,10 +499,10 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
               <div style={{ fontSize: '3rem', fontWeight: 800, fontFamily: 'var(--font-heading)', lineHeight: 1, margin: '0.5rem 0' }}>
                 {vendorData.matchScore}%
               </div>
-              <p style={{ fontSize: '0.85rem', margin: '0.75rem 0 1.25rem', opacity: 0.9, lineHeight: '1.5' }}>
+              <p style={{ fontSize: '0.85rem', margin: '0.75rem 0 1.25rem', color: '#FFFFFF', lineHeight: '1.5' }}>
                 {vendorData.matchReason}
               </p>
-              <div style={{ borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: '0.75rem', fontSize: '0.8rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+              <div style={{ borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: '0.75rem', fontSize: '0.8rem', color: '#FFFFFF', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span>Lead Time Match:</span>
                   <strong>{vendorData.leadTimeMatch}</strong>
@@ -478,7 +515,11 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
             </div>
 
             <div className="card-surface" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              <button className="btn-purple-primary" style={{ width: '100%', justifyContent: 'center', minHeight: '48px' }}>
+              <button 
+                onClick={() => navigate(getRoleRoute("rfqs"), { state: { vendorId: selectedVendorId, vendorName: vendorData.name } })}
+                className="btn-purple-primary" 
+                style={{ width: '100%', justifyContent: 'center', minHeight: '48px', cursor: 'pointer' }}
+              >
                 Submit RFQ
               </button>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
@@ -489,7 +530,13 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
                 >
                   Contact
                 </a>
-                <button className="btn-outline-secondary" style={{ justifyContent: 'center', minHeight: '44px' }}>Live Chat</button>
+                <button 
+                  onClick={() => navigate(getRoleRoute("messages"), { state: { recipientId: selectedVendorId, recipientName: vendorData.name } })}
+                  className="btn-outline-secondary" 
+                  style={{ justifyContent: 'center', minHeight: '44px', cursor: 'pointer' }}
+                >
+                  Live Chat
+                </button>
               </div>
               <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center', marginTop: '0.25rem' }}>
                 Typical response time: <strong>{vendorData.responseTime}</strong>
