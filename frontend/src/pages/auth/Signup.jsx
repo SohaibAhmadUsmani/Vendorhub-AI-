@@ -8,8 +8,7 @@ import AuthInput from "../../components/auth/AuthInput";
 import PasswordInput from "../../components/auth/PasswordInput";
 import { signup } from "../../services/authService";
 import { useAuthForm } from "../hooks/useAuthForm";
-import { LeftPanel } from "../../components/auth/LeftPanel";
-import { useEmailVerification } from "../hooks/useEmailVerification";
+import { LeftPanel, Dots } from "../../components/auth/LeftPanel";import { useEmailVerification } from "../hooks/useEmailVerification";
 
 const SIGNUP_FIELDS = ["fullname", "email", "password", "confirmPassword"];
 
