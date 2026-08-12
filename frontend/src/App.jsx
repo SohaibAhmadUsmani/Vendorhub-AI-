@@ -49,6 +49,7 @@ function App() {
         ========================================================= */}
 
         <Route path="/signup" element={<Signup />} />
+        <Route path="/verify-email" element={<Signup />} />
 
         <Route path="/login" element={<Login />} />
 
