@@ -3,17 +3,23 @@ import { motion } from "framer-motion";
 import { Award, Plus, CheckCircle2, Clock, XCircle, FileText } from "lucide-react";
 import DashboardEmptyState from "../components/dashboard/DashboardEmptyState";
 import { fetchMyVendorProfile } from "../services/vendorService";
+import UploadCertificationModal from "../components/vendor/UploadCertificationModal";
 
 export default function CertificationsPage() {
   const [certifications, setCertifications] = useState([]);
+  const [vendor, setVendor] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     async function loadData() {
       try {
-        const vendor = await fetchMyVendorProfile();
-        if (vendor && vendor.certifications) {
-          setCertifications(vendor.certifications);
+        const vendorData = await fetchMyVendorProfile();
+        if (vendorData) {
+          setVendor(vendorData);
+          if (vendorData.certifications) {
+            setCertifications(vendorData.certifications);
+          }
         }
       } catch (err) {
         console.error("Failed to load certifications:", err);
@@ -48,7 +54,10 @@ export default function CertificationsPage() {
             Manage your compliance documents and quality standards
           </p>
         </div>
-        <button className="btn-purple-primary flex items-center justify-center gap-2 w-full md:w-auto">
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="btn-purple-primary flex items-center justify-center gap-2 w-full md:w-auto"
+        >
           <Plus className="h-4 w-4" /> Upload Certification
         </button>
       </div>
@@ -98,11 +107,23 @@ export default function CertificationsPage() {
             icon={<FileText className="h-6 w-6" />}
             title="No Certifications Found"
             hint="Upload your ISO, CE, or other compliance certificates to build trust with buyers."
-            action={{ label: "Upload First Certificate" }}
+            action={{ label: "Upload First Certificate", onClick: () => setIsModalOpen(true) }}
           />
         )}
       </div>
       )}
+
+      <UploadCertificationModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)}
+        vendor={vendor}
+        onUploadSuccess={(updatedVendor) => {
+          setVendor(updatedVendor);
+          if (updatedVendor.certifications) {
+            setCertifications(updatedVendor.certifications);
+          }
+        }}
+      />
     </div>
   );
 }

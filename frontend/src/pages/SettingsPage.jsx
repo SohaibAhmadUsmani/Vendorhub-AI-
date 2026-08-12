@@ -64,9 +64,12 @@ export default function SettingsPage() {
     setSaveMessage("");
     try {
       if (role === 'vendor' && vendorData) {
-        await updateVendorProfile(vendorData.id, vendorData);
+        await updateVendorProfile(vendorData._id || vendorData.id, vendorData);
+        setSaveMessage("Company Profile updated successfully!");
+      } else if (role === 'admin') {
+        // Admin update can be handled by User API in the future
+        setSaveMessage("Admin Profile updated successfully!");
       }
-      setSaveMessage("Profile updated successfully!");
       setTimeout(() => setSaveMessage(""), 3000);
     } catch (err) {
       console.error(err);
@@ -95,8 +98,8 @@ export default function SettingsPage() {
             Manage your account preferences and configurations
           </p>
         </div>
-        <button className="btn-purple-primary flex items-center justify-center gap-2 w-full md:w-auto">
-          <Save className="h-4 w-4" /> Save Changes
+        <button onClick={handleSaveProfile} disabled={isSaving} className="btn-purple-primary flex items-center justify-center gap-2 w-full md:w-auto">
+          <Save className="h-4 w-4" /> {isSaving ? "Saving..." : "Save Changes"}
         </button>
       </div>
 

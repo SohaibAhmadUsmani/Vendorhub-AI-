@@ -7,9 +7,16 @@ const Notification = require('../models/Notification');
  * Each handler aggregates live data — loading/empty/error handled on the UI.
  */
 
+const getVendorIdForRequest = async (req) => {
+  if (req.user && req.user.role === 'admin') return 'admin';
+  const vendor = await dashboardService.resolveVendorForRequest(req);
+  return vendor ? vendor._id : null;
+};
+
 const getOverview = async (req, res) => {
   try {
-    const data = await dashboardService.buildOverview(req.query.vendorId);
+    const vendorId = await getVendorIdForRequest(req);
+    const data = await dashboardService.buildOverview(vendorId);
     res.status(200).json({ success: true, data });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -19,7 +26,8 @@ const getOverview = async (req, res) => {
 /** GET /api/dashboard/overview — greeting + current date + four KPI metrics. */
 const getOverviewMetrics = async (req, res) => {
   try {
-    const data = await dashboardService.buildOverviewMetrics(req.query.vendorId);
+    const vendorId = await getVendorIdForRequest(req);
+    const data = await dashboardService.buildOverviewMetrics(vendorId);
     res.status(200).json({ success: true, data });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -28,7 +36,8 @@ const getOverviewMetrics = async (req, res) => {
 
 const getAnalytics = async (req, res) => {
   try {
-    const data = await dashboardService.buildAnalytics(req.query.vendorId, req.query.range);
+    const vendorId = await getVendorIdForRequest(req);
+    const data = await dashboardService.buildAnalytics(vendorId, req.query.range);
     res.status(200).json({ success: true, data });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -37,7 +46,8 @@ const getAnalytics = async (req, res) => {
 
 const getRfqs = async (req, res) => {
   try {
-    const data = await dashboardService.buildRfqs();
+    const vendorId = await getVendorIdForRequest(req);
+    const data = await dashboardService.buildRfqs(vendorId);
     res.status(200).json({ success: true, data });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -46,7 +56,8 @@ const getRfqs = async (req, res) => {
 
 const getCustomerRequests = async (req, res) => {
   try {
-    const data = await dashboardService.buildCustomerRequests(req.query.vendorId);
+    const vendorId = await getVendorIdForRequest(req);
+    const data = await dashboardService.buildCustomerRequests(vendorId);
     res.status(200).json({ success: true, data });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -55,7 +66,8 @@ const getCustomerRequests = async (req, res) => {
 
 const getProductPerformance = async (req, res) => {
   try {
-    const data = await dashboardService.buildProductPerformance(req.query.vendorId, req.query.range);
+    const vendorId = await getVendorIdForRequest(req);
+    const data = await dashboardService.buildProductPerformance(vendorId, req.query.range);
     res.status(200).json({ success: true, data });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -64,7 +76,8 @@ const getProductPerformance = async (req, res) => {
 
 const getNotifications = async (req, res) => {
   try {
-    const data = await dashboardService.buildNotifications();
+    const vendorId = await getVendorIdForRequest(req);
+    const data = await dashboardService.buildNotifications(vendorId);
     res.status(200).json({ success: true, data });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -114,7 +127,8 @@ const markNotificationRead = async (req, res) => {
 
 const markAllNotificationsRead = async (req, res) => {
   try {
-    const result = await Notification.updateMany({ read: false }, { read: true });
+    const vendorId = await getVendorIdForRequest(req);
+    const result = await Notification.updateMany({ vendor: vendorId, read: false }, { read: true });
     req.app.get('notificationIo')?.to('vendorhub:notifications').emit('vendorhub:notifications:updated', {
       unreadCount: 0,
       count: result.modifiedCount,
@@ -127,7 +141,8 @@ const markAllNotificationsRead = async (req, res) => {
 
 const getAdvancedAnalytics = async (req, res) => {
   try {
-    const data = await dashboardService.buildAdvancedAnalytics(req.query.vendorId);
+    const vendorId = await getVendorIdForRequest(req);
+    const data = await dashboardService.buildAdvancedAnalytics(vendorId);
     res.status(200).json({ success: true, data });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -136,7 +151,8 @@ const getAdvancedAnalytics = async (req, res) => {
 
 const getRecentActivity = async (req, res) => {
   try {
-    const data = await dashboardService.buildRecentActivities(req.query.vendorId);
+    const vendorId = await getVendorIdForRequest(req);
+    const data = await dashboardService.buildRecentActivity(vendorId);
     res.status(200).json({ success: true, data });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -145,7 +161,8 @@ const getRecentActivity = async (req, res) => {
 
 const getInsights = async (req, res) => {
   try {
-    const data = await dashboardService.buildInsights(req.query.vendorId);
+    const vendorId = await getVendorIdForRequest(req);
+    const data = await dashboardService.buildInsights(vendorId);
     res.status(200).json({ success: true, data });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -154,7 +171,8 @@ const getInsights = async (req, res) => {
 
 const getVendorHealth = async (req, res) => {
   try {
-    const data = await dashboardService.buildVendorHealth(req.query.vendorId);
+    const vendorId = await getVendorIdForRequest(req);
+    const data = await dashboardService.buildVendorHealth(vendorId);
     res.status(200).json({ success: true, data });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -163,7 +181,8 @@ const getVendorHealth = async (req, res) => {
 
 const getTasks = async (req, res) => {
   try {
-    const data = await dashboardService.buildTasks(req.query.vendorId);
+    const vendorId = await getVendorIdForRequest(req);
+    const data = await dashboardService.buildTasks(vendorId);
     res.status(200).json({ success: true, data });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -254,7 +273,14 @@ function mapAIRecommendations(items, generatedAt) {
  */
 const getAISummary = async (req, res) => {
   try {
-    const vendor = await dashboardService.resolveVendorForRequest(req);
+    const vendorId = await getVendorIdForRequest(req);
+    // Let dashboardService fetch vendor internally if needed, or pass isGlobal
+    // Wait, buildAISummary takes 'vendor' object natively?
+    // Let's pass vendorId to it and modify buildAISummary to handle vendorId
+    let vendor = null;
+    if (vendorId !== 'admin') {
+       vendor = await dashboardService.resolveVendor(vendorId);
+    }
     const data = await dashboardService.buildAISummary(vendor, req.query.range);
 
     if (data.kpis) {
@@ -310,7 +336,11 @@ const getAISummary = async (req, res) => {
 /** GET /api/vendor/dashboard/metric-details/:key — live detail payload for one metric. */
 const getMetricDetails = async (req, res) => {
   try {
-    const data = await dashboardService.buildMetricDetails(req.params.key, req.query.vendorId);
+    const vendorId = await getVendorIdForRequest(req);
+    const { key } = req.params;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 15;
+    const data = await dashboardService.buildMetricDetails(vendorId, key, page, limit);
     if (!data) {
       return res.status(404).json({ success: false, message: `Unknown metric: ${req.params.key}` });
     }
@@ -323,12 +353,14 @@ const getMetricDetails = async (req, res) => {
 /** GET /api/vendor/dashboard/metric-export/:key — real-record CSV download. */
 const getMetricExport = async (req, res) => {
   try {
-    const report = await dashboardService.buildMetricReport(req.params.key, req.query.vendorId);
+    const vendorId = await getVendorIdForRequest(req);
+    const { key } = req.params;
+    const report = await dashboardService.buildMetricReport(key, vendorId);
     if (!report) {
-      return res.status(404).json({ success: false, message: `Unknown metric: ${req.params.key}` });
+      return res.status(404).json({ success: false, message: `Unknown metric: ${key}` });
     }
     const csv = dashboardService.serializeCsv(report.headers, report.rows);
-    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', `attachment; filename="${report.filename}"`);
     res.status(200).send(csv);
   } catch (error) {

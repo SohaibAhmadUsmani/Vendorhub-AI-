@@ -201,14 +201,14 @@ export default function DashboardNavbar({ onToggleSidebar }) {
   const messagesPath = {
     buyer: "/buyer/messages",
     vendor: "/vendor/messages",
-    admin: "/admin/dashboard",
-  }[role];
+    admin: "/admin/messages",
+  }[role] || "/dashboard";
 
   const notificationsPath = {
     buyer: "/buyer/notifications",
     vendor: "/vendor/notifications",
-    admin: "/admin/dashboard",
-  }[role];
+    admin: "/admin/notifications",
+  }[role] || "/dashboard";
 
   return (
     <header className="sticky top-0 z-30 h-[74px] shrink-0 border-b border-[#EEF1F6] bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04)]">

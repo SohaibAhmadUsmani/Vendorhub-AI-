@@ -399,7 +399,7 @@ function normalizeVendor(v) {
       missingCerts: 0,
       financialHealth: "A+ Rated"
     },
-    videoUrl: v.factoryDetails?.videoTourUrl || v.videoUrl || "https://www.youtube.com/embed/5qap5aO4i9A",
+    videoUrl: v.factoryDetails?.videoTourUrl || v.videoUrl || "https://www.youtube.com/embed/5XAxHI8sItI",
     videoTitle: v.videoTitle || `${v.name} Plant Walkthrough`,
     contactDetails: v.contactDetails || {
       address: v.contact?.address || v.location,

@@ -101,8 +101,12 @@ const updateVendor = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Vendor not found' });
     }
 
-    if (req.user.role === 'vendor' && vendor.userId.toString() !== req.user._id) {
-      return res.status(403).json({ success: false, message: 'Access denied: You can only update your own vendor profile' });
+    if (req.user.role === 'vendor') {
+      const isOwnerById = vendor.userId && vendor.userId.toString() === req.user.id;
+      const isOwnerByEmail = vendor.contact && vendor.contact.email === req.user.email;
+      if (!isOwnerById && !isOwnerByEmail) {
+        return res.status(403).json({ success: false, message: 'Access denied: You can only update your own vendor profile' });
+      }
     }
 
     const updatedVendor = await Vendor.findByIdAndUpdate(vendor._id, req.body, { new: true, runValidators: true });

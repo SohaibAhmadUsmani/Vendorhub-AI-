@@ -4,6 +4,7 @@ import {
   analyzeVendorRisk,
   analyzeAllVendorsRisk,
 } from "../services/riskAnalysisService";
+import { getRoleRoute } from "../utils/routeUtils";
 
 const getRiskColor = (level) => {
   switch (level) {
@@ -447,14 +448,14 @@ export default function RiskAnalysisPage() {
     return (
       <RiskDetailView
         vendorId={vendorId}
-        onBack={() => navigate("/buyer/risk-analysis")}
+        onBack={() => navigate(getRoleRoute("risk-analysis"))}
       />
     );
   }
 
   return (
     <RiskListView
-      onSelect={(id) => navigate(`/buyer/risk-analysis/${id}`)}
+      onSelect={(id) => navigate(`${getRoleRoute("risk-analysis")}/${id}`)}
     />
   );
 }

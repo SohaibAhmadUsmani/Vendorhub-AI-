@@ -170,6 +170,25 @@ export async function downloadMetricReport(key) {
 import { getRoleRoute } from "../../utils/routeUtils";
 
 export function getQuickActions() {
+  let userRole = 'buyer';
+  try {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      if (user && user.role) userRole = user.role.toLowerCase();
+    }
+  } catch (err) {}
+
+  if (userRole === 'admin') {
+    return [
+      { id: "manage-users", label: "Manage Users", route: "/admin/users", icon: "Users" },
+      { id: "verify-vendors", label: "Verify Vendors", route: "/admin/vendors", icon: "BadgeCheck" },
+      { id: "all-vendors", label: "All Vendors", route: "/admin/vendors", icon: "Building2" },
+      { id: "ai-search", label: "AI Search", route: "/admin/ai-search", icon: "Sparkles" },
+      { id: "system-settings", label: "System Settings", route: "/admin/settings", icon: "Settings" },
+    ];
+  }
+
   return [
     { id: "add-product", label: "Add Product", route: getRoleRoute("product-catalog"), icon: "PackagePlus" },
     { id: "generate-quote", label: "Generate Quote", route: getRoleRoute("quotes"), icon: "FilePlus2" },

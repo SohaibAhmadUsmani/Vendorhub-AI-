@@ -87,8 +87,11 @@ async function resolveVendorForRequest(req) {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       if (decoded?.id) {
         const user = await UserModel.findById(decoded.id).lean();
-        if (user?.email && user.role === 'vendor') {
-          const owned = await Vendor.findOne({ 'contact.email': user.email });
+        if (user?.role === 'vendor') {
+          let owned = await Vendor.findOne({ userId: user._id });
+          if (!owned && user.email) {
+            owned = await Vendor.findOne({ 'contact.email': user.email });
+          }
           if (owned) return owned;
         }
       }
@@ -440,7 +443,7 @@ async function buildCustomerRequests(vendorId) {
   const vendor = await resolveVendor(vendorId);
   if (!vendor) return [];
 
-  const list = await CustomerRequest.find({ vendor: vendor._id })
+  const list = await CustomerRequest.find((vendor._id === 'admin' ? {} : { vendor: vendor._id }))
     .sort({ createdAt: -1 })
     .limit(8)
     .populate('buyer', 'name email')
@@ -886,12 +889,12 @@ async function buildRecentActivities(vendorId) {
 
   const [rfqs, orders, products] = await Promise.all([
     RFQ.find({}).sort({ createdAt: -1 }).limit(4).populate('buyer', 'name email').lean(),
-    Order.find({ vendor: vendor._id })
+    Order.find((vendor._id === 'admin' ? {} : { vendor: vendor._id }))
       .sort({ createdAt: -1 })
       .limit(4)
       .populate('buyer', 'name email')
       .lean(),
-    Product.find({ vendorId: vendor._id }).sort({ createdAt: -1 }).limit(3).lean(),
+    Product.find((vendor._id === 'admin' ? {} : { vendorId: vendor._id })).sort({ createdAt: -1 }).limit(3).lean(),
   ]);
 
   const activities = [];
@@ -1153,8 +1156,8 @@ async function buildVendorHealth(vendorId) {
   if (!vendor) return empty;
 
   const [orders, products] = await Promise.all([
-    Order.find({ vendor: vendor._id }).lean(),
-    Product.find({ vendorId: vendor._id }).lean(),
+    Order.find((vendor._id === 'admin' ? {} : { vendor: vendor._id })).lean(),
+    Product.find((vendor._id === 'admin' ? {} : { vendorId: vendor._id })).lean(),
   ]);
   const total = orders.length;
   const delivered = orders.filter((o) => o.status === 'delivered');
@@ -1576,7 +1579,7 @@ async function buildTasks(vendorId) {
 
   const [rfqs, orders] = await Promise.all([
     RFQ.find({}).lean(),
-    Order.find({ vendor: vendor._id }).lean(),
+    Order.find((vendor._id === 'admin' ? {} : { vendor: vendor._id })).lean(),
   ]);
 
   const tasks = [];
@@ -1650,7 +1653,7 @@ async function buildRecentOrders(vendorId) {
   const vendor = await resolveVendor(vendorId);
   if (!vendor) return [];
 
-  const list = await Order.find({ vendor: vendor._id })
+  const list = await Order.find((vendor._id === 'admin' ? {} : { vendor: vendor._id }))
     .sort({ createdAt: -1 })
     .limit(8)
     .populate('buyer', 'name email')
@@ -1673,7 +1676,7 @@ async function buildRecentMessages(vendorId) {
   const vendor = await resolveVendor(vendorId);
   if (!vendor) return [];
 
-  const list = await CustomerRequest.find({ vendor: vendor._id })
+  const list = await CustomerRequest.find((vendor._id === 'admin' ? {} : { vendor: vendor._id }))
     .sort({ createdAt: -1 })
     .limit(8)
     .populate('buyer', 'name email')
