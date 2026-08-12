@@ -23,6 +23,16 @@ const seedData = async () => {
     console.log('Cleared existing Vendor, Product and User collections.');
 
     const defaultPasswordHash = await bcrypt.hash('Vendor@1234', 10);
+    const testPasswordHash = await bcrypt.hash('Test@12345', 10);
+
+    // Standard Test Accounts (as requested by user)
+    console.log('Creating standard test accounts...');
+    await User.create([
+      { name: 'Admin Test', email: 'admin.test@vendorhub.com', password: testPasswordHash, role: 'admin', isVerified: true },
+      { name: 'Buyer Test', email: 'buyer.test@vendorhub.com', password: testPasswordHash, role: 'buyer', isVerified: true },
+      { name: 'Vendor Test', email: 'vendor.test@vendorhub.com', password: testPasswordHash, role: 'vendor', isVerified: true }
+    ]);
+
 
     // 1. Sialkot Sports Limited
     const sialkotUser = await User.create({ name: 'Sialkot Sports Limited', email: 'sialkotsportslimited@gmail.com', password: defaultPasswordHash, role: 'vendor', isVerified: true });

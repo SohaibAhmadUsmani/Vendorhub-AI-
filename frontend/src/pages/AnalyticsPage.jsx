@@ -27,7 +27,7 @@ import {
   Sparkles,
   ArrowUpRight,
 } from "lucide-react";
-import api from "../services/api";
+import httpClient from "../services/httpClient";
 
 const defaultMonthlySpending = [
   { month: "Jan", amount: 82000 },
@@ -113,7 +113,7 @@ export default function AnalyticsPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await api.get(`/analytics/${role}`);
+        const res = await httpClient.get(`/api/analytics/${role}`);
         setData(res.data.data);
         setAiInsights(res.data.aiInsights);
       } catch (err) {

@@ -9,7 +9,7 @@ import VendorReviewModal from './VendorReviewModal';
 import ContactTeamMemberModal from './ContactTeamMemberModal';
 import FactoryVideoModal from './FactoryVideoModal';
 import CertificationViewerModal from './CertificationViewerModal';
-import { fetchVendorProfile, fetchAllVendorProfiles, updateVendorProfile, submitVendorReview, toggleSaveVendor } from '../../services/vendorService';
+import { fetchVendorProfile, fetchAllVendorProfiles, updateVendorProfile, submitVendorReview, toggleSaveVendor, fetchMyVendorProfile } from '../../services/vendorService';
 
 /**
  * VendorProfileView — Module 5 (Vendor Profiles) 100% Completion View
@@ -20,6 +20,10 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
   const [searchParams, setSearchParams] = useSearchParams();
   const routeParams = useParams();
   const queryVendorId = routeParams.id || searchParams.get('id');
+  
+  const userStr = localStorage.getItem('user');
+  const currentUser = userStr ? JSON.parse(userStr) : null;
+  const isVendorUser = currentUser?.role === 'vendor';
 
   const [selectedVendorId, setSelectedVendorId] = useState(queryVendorId || initialVendorId);
   const [allVendors, setAllVendors] = useState([]);
@@ -45,16 +49,23 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
   // Load Vendor List & Active Profile
   useEffect(() => {
     async function loadAll() {
-      const list = await fetchAllVendorProfiles();
-      setAllVendors(list);
+      if (!isVendorUser) {
+        const list = await fetchAllVendorProfiles();
+        setAllVendors(list);
+      }
     }
     loadAll();
-  }, []);
+  }, [isVendorUser]);
 
   useEffect(() => {
     async function loadData() {
       setLoading(true);
-      const data = await fetchVendorProfile(selectedVendorId);
+      let data;
+      if (isVendorUser) {
+        data = await fetchMyVendorProfile();
+      } else {
+        data = await fetchVendorProfile(selectedVendorId);
+      }
       setVendorData(data);
       
       let savedVendors = [];
@@ -136,57 +147,59 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
   return (
     <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '1rem' }}>
       
-      {/* 6-VENDOR PROFILE SELECTOR BAR (100% Feature) */}
-      <div 
-        className="card-surface" 
-        style={{ 
-          padding: '0.85rem 1.25rem', 
-          marginBottom: '1.25rem', 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'space-between',
-          backgroundColor: 'var(--bg-card)',
-          border: '1px solid var(--border-card)',
-          flexWrap: 'wrap',
-          gap: '1rem'
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <div>
-            <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontFamily: 'var(--font-heading)' }}>
-              Select Active Vendor Profile (6 Profiles Available)
-            </strong>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>
-              Switch between global verified manufacturers to preview complete profiles & catalogs.
-            </span>
-          </div>
-        </div>
-
-        <select
-          value={selectedVendorId}
-          onChange={(e) => setSelectedVendorId(e.target.value)}
-          style={{
-            padding: '0.55rem 1.15rem',
-            borderRadius: 'var(--radius-md)',
-            border: '1.5px solid var(--primary-purple)',
-            backgroundColor: 'var(--bg-main)',
-            color: 'var(--text-primary)',
-            fontSize: '0.85rem',
-            fontWeight: 700,
-            cursor: 'pointer',
-            outline: 'none',
-            minWidth: '250px',
-            boxShadow: '0 2px 8px rgba(108,92,231,0.15)',
-            transition: 'all 0.2s ease'
+      {/* Vendor Profile Switcher Dropdown (Admin/Buyer Only) */}
+      {!isVendorUser && (
+        <div 
+          className="card-surface" 
+          style={{ 
+            padding: '0.85rem 1.25rem', 
+            marginBottom: '1.25rem', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'space-between',
+            backgroundColor: 'var(--bg-card)',
+            border: '1px solid var(--border-card)',
+            flexWrap: 'wrap',
+            gap: '1rem'
           }}
         >
-          {allVendors.map((v) => (
-            <option key={v.id} value={v.id}>
-              {v.name} ({v.location})
-            </option>
-          ))}
-        </select>
-      </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div>
+              <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontFamily: 'var(--font-heading)' }}>
+                Select Active Vendor Profile ({allVendors.length} Profiles Available)
+              </strong>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>
+                Switch between global verified manufacturers to preview complete profiles & catalogs.
+              </span>
+            </div>
+          </div>
+
+          <select
+            value={selectedVendorId}
+            onChange={(e) => setSelectedVendorId(e.target.value)}
+            style={{
+              padding: '0.55rem 1.15rem',
+              borderRadius: 'var(--radius-md)',
+              border: '1.5px solid var(--primary-purple)',
+              backgroundColor: 'var(--bg-main)',
+              color: 'var(--text-primary)',
+              fontSize: '0.85rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              outline: 'none',
+              minWidth: '250px',
+              boxShadow: '0 2px 8px rgba(108,92,231,0.15)',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            {allVendors.map((v) => (
+              <option key={v.id || v._id} value={v.id || v._id}>
+                {v.name} ({v.location})
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {/* Main Vendor Profile Content Wrapper with Smooth Switch Animation */}
       <div key={selectedVendorId} style={{ animation: 'vpvVendorFade 0.35s cubic-bezier(0.16, 1, 0.3, 1)' }}>
