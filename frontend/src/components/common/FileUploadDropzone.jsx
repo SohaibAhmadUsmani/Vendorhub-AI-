@@ -54,7 +54,7 @@ export default function FileUploadDropzone({
 
   return (
     <div className="space-y-2">
-      <label className="block text-xs font-mono font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+      <label className="block text-xs font-mono font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">
         {label}
       </label>
 

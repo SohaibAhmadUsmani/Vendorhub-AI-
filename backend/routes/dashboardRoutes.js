@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { authMiddleware, roleMiddleware } = require('../middleware/authMiddleware');
 const {
   getOverview,
   getOverviewMetrics,
@@ -8,6 +9,9 @@ const {
   getCustomerRequests,
   getProductPerformance,
   getNotifications,
+  deleteNotification,
+  markNotificationRead,
+  markAllNotificationsRead,
   getAdvancedAnalytics,
   getRecentActivity,
   getInsights,
@@ -19,12 +23,18 @@ const {
 } = require('../controllers/dashboardController');
 
 // Module 3 — Vendor Dashboard routes
+router.use(authMiddleware);
+router.use(roleMiddleware('vendor'));
+
 router.get('/overview', getOverview);
 router.get('/analytics', getAnalytics);
 router.get('/rfqs', getRfqs);
 router.get('/customer-requests', getCustomerRequests);
 router.get('/product-performance', getProductPerformance);
 router.get('/notifications', getNotifications);
+router.delete('/notifications/:id', deleteNotification);
+router.patch('/notifications/:id/read', markNotificationRead);
+router.patch('/notifications/read-all', markAllNotificationsRead);
 router.get('/advanced-analytics', getAdvancedAnalytics);
 router.get('/recent-activity', getRecentActivity);
 router.get('/insights', getInsights);
@@ -36,6 +46,8 @@ router.get('/metric-export/:key', getMetricExport);
 
 // Phase 1 — Dashboard Overview module (mounted separately at /api/dashboard)
 const overviewRouter = express.Router();
+overviewRouter.use(authMiddleware);
+overviewRouter.use(roleMiddleware('vendor'));
 overviewRouter.get('/overview', getOverviewMetrics);
 
 module.exports = router;

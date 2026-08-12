@@ -1,19 +1,12 @@
 import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { BrainCircuit, ArrowUpRight } from "lucide-react";
+import { getRoleRoute } from "../../utils/routeUtils";
 import { useVendorInsightsFeed, getInsightsFeed } from "../../services/dashboard/insightsService";
 import AIInsightItem from "./AIInsightItem";
 import AIInsightEmptyState from "./AIInsightEmptyState";
 import AIInsightSkeleton from "./AIInsightSkeleton";
 import DashboardErrorState from "./DashboardErrorState";
-
-/* --------------------------------------------------------------------------
-   AIInsightsCard — right-rail intelligence feed. Shows the three most recent
-   AI-generated insights (icon, title, description, timestamp, priority).
-   "View All" deep-links to the dedicated AI Insights page. Everything is
-   backend-driven via /api/vendor/insights (React Query); loading skeletons,
-   inline error + retry, and an empty state keep the widget always visible.
-   -------------------------------------------------------------------------- */
 
 const MAX_INSIGHTS = 5;
 
@@ -24,6 +17,8 @@ export default function AIInsightsCard() {
     () => (isSuccess ? getInsightsFeed(data).slice(0, MAX_INSIGHTS) : []),
     [data, isSuccess],
   );
+
+  const targetPath = getRoleRoute("ai-insights");
 
   return (
     <section
@@ -43,13 +38,13 @@ export default function AIInsightsCard() {
             <h2 className="truncate font-heading text-[20px] font-bold tracking-tight text-white">
               AI Insights
             </h2>
-            <p className="truncate text-[13px] font-medium text-white/70">
+            <p className="truncate text-[13px] font-medium text-white/90">
               Business recommendations powered by live data
             </p>
           </div>
         </div>
         <Link
-          to="/buyer/ai-insights"
+          to={targetPath}
           className="group inline-flex shrink-0 items-center gap-1 rounded-full border border-white/40 bg-white/15 px-3 py-1.5 text-[11px] font-bold text-white backdrop-blur transition hover:border-white/70 hover:bg-white/25"
           aria-label="View all AI insights"
         >

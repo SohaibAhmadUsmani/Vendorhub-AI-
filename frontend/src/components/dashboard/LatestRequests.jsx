@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Mail, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { getRoleRoute } from "../../utils/routeUtils";
 import { useVendorCustomerRequests, getCustomerRequests } from "../../services/dashboard/dashboardService";
 import { SkeletonRows } from "./DashboardSkeleton";
 import DashboardErrorState from "./DashboardErrorState";
@@ -99,7 +100,7 @@ export default function LatestRequests() {
         </div>
         <button
           type="button"
-          onClick={() => navigate("/buyer/messages")}
+          onClick={() => navigate(getRoleRoute("messages"))}
           aria-label="Open inbox"
           className="flex h-9 cursor-pointer items-center justify-center rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] px-3 text-xs font-semibold text-[var(--text-secondary)] transition hover:border-[var(--primary-purple)] hover:text-[var(--primary-purple)]"
         >
@@ -125,7 +126,7 @@ export default function LatestRequests() {
             icon={<Mail className="h-6 w-6" strokeWidth={2} />}
             title="No customer requests yet"
             hint="Buyer messages and inquiries will appear here."
-            action={{ label: "Open inbox", to: "/buyer/messages" }}
+            action={{ label: "Open inbox", to: getRoleRoute("messages") }}
             compact
           />
         )}

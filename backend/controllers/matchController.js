@@ -1,4 +1,4 @@
-const { explainMatch } = require('../services/matchExplainer');
+const { groqChat } = require('../services/groqClient');
 const Vendor = require('../models/Vendor');
 
 /**
@@ -30,42 +30,50 @@ const calculateMatch = async (req, res) => {
       return res.status(200).json({ success: true, results: [] });
     }
 
-    const weights = {
-      price: 0.15, quality: 0.2, deliveryTime: 0.15, reviews: 0.15,
-      location: 0.1, capacity: 0.1, certifications: 0.1, pastPerformance: 0.05,
-    };
+    const vendorData = realVendors.map(v => ({
+      id: v._id.toString(),
+      name: v.name,
+      rating: v.rating,
+      certifications: v.certifications,
+      location: v.location,
+      overview: v.overview
+    }));
+
+    const prompt = `You are a B2B sourcing expert.
+Requirement: "${requirement || 'general sourcing need'}"
+
+Vendors available:
+${JSON.stringify(vendorData, null, 2)}
+
+Analyze the vendors against the requirement. Rank them by giving a matchScore (0-100) and a brief 1-2 sentence explanation of why they match or don't match.
+Return ONLY a JSON object with a "results" array containing objects with "id", "matchScore", and "explanation".`;
+
+    let aiResults = [];
+    try {
+      const response = await groqChat(
+        [{ role: 'user', content: prompt }],
+        { model: 'llama-3.3-70b-versatile', temperature: 0.2, response_format: { type: 'json_object' } }
+      );
+      const parsed = JSON.parse(response);
+      aiResults = parsed.results || [];
+    } catch (err) {
+      console.error('Groq matching failed:', err);
+      // Fallback to basic scoring if AI fails
+      aiResults = realVendors.map(v => ({
+        id: v._id.toString(),
+        matchScore: 75,
+        explanation: 'AI ranking unavailable, fallback score applied.'
+      }));
+    }
 
     const scored = realVendors.map((v) => {
-      const vendorObj = v.toObject();
-      // Derive factors from real fields
-      const priceFactor = 8;
-      const qualityFactor = Math.min(10, Math.round((v.rating || 4.5) * 2));
-      const reviewsFactor = Math.min(10, Math.round((v.rating || 4.5) * 2));
-      const certsFactor = Math.min(10, (v.certifications?.length || 1) * 3);
-      
-      const score = (
-        priceFactor * weights.price +
-        qualityFactor * weights.quality +
-        8 * weights.deliveryTime +
-        reviewsFactor * weights.reviews +
-        8 * weights.location +
-        8 * weights.capacity +
-        certsFactor * weights.certifications +
-        8 * weights.pastPerformance
-      );
-      
+      const aiData = aiResults.find(r => r.id === v._id.toString()) || { matchScore: 70, explanation: 'Unscored' };
       return {
-        ...vendorObj,
-        matchScore: Math.min(99, Math.max(70, Math.round(score * 10)))
+        ...v.toObject(),
+        matchScore: aiData.matchScore,
+        explanation: aiData.explanation
       };
     }).sort((a, b) => b.matchScore - a.matchScore);
-
-    try {
-      const explanation = await explainMatch(scored[0], requirement || 'general sourcing need');
-      scored[0].explanation = explanation;
-    } catch (err) {
-      scored[0].explanation = 'AI explanation unavailable (GROQ key not configured yet).';
-    }
 
     res.status(200).json({ success: true, results: scored });
   } catch (error) {

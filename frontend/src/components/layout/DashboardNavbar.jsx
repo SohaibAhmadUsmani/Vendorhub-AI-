@@ -22,8 +22,9 @@ import {
   fetchOverview,
   selectOverview,
   selectNotificationCount,
+  selectOverviewUser,
 } from "../../redux/dashboardSlice";
-import { useApi, NOTIFICATIONS_PATH, getNotifications } from "../../services/dashboardService";
+import { useNotifications } from "../../contexts/NotificationContext";
 import useClickOutside from "../../hooks/useClickOutside";
 
 /* --------------------------------------------------------------------------
@@ -63,9 +64,11 @@ export default function DashboardNavbar({ onToggleSidebar }) {
   const navigate = useNavigate();
   const overview = useSelector(selectOverview);
   const notificationCount = useSelector(selectNotificationCount);
+  const overviewUser = useSelector(selectOverviewUser);
+  const { notifications, loading, error, unreadCount, markRead, markAllRead, refreshNotifications } = useNotifications();
 
   const [user, setUser] = useState(null);
-  const role = user?.role;
+  const role = user?.role ? String(user.role).toLowerCase() : "buyer";
   const PROFILE_MENU_BY_ROLE = {
     buyer: [
       {
@@ -108,6 +111,7 @@ export default function DashboardNavbar({ onToggleSidebar }) {
   };
   const PROFILE_MENU =
     PROFILE_MENU_BY_ROLE[role] || PROFILE_MENU_BY_ROLE.buyer;
+
   useEffect(() => {
     try {
       const storedUser = localStorage.getItem("user");
@@ -156,11 +160,11 @@ export default function DashboardNavbar({ onToggleSidebar }) {
     setMobileSearchOpen(false);
 
     if (role === "buyer") {
-      navigate(
-        q
-          ? `/buyer/ai-search?q=${encodeURIComponent(q)}`
-          : "/buyer/ai-search"
-      );
+      navigate(q ? `/buyer/ai-search?q=${encodeURIComponent(q)}` : "/buyer/ai-search");
+    } else if (role === "admin") {
+      navigate(q ? `/admin/search?q=${encodeURIComponent(q)}` : "/admin/search");
+    } else if (role === "vendor") {
+      navigate(q ? `/vendor/ai-search?q=${encodeURIComponent(q)}` : "/vendor/ai-search");
     }
   };
   /* ------------------------------ Dropdowns ----------------------------- */
@@ -171,24 +175,38 @@ export default function DashboardNavbar({ onToggleSidebar }) {
   useClickOutside(bellRef, () => setBellOpen(false), bellOpen);
   useClickOutside(profileRef, () => setProfileOpen(false), profileOpen);
 
-  const notificationsQ = useApi(NOTIFICATIONS_PATH);
-  const notifications = useMemo(
-    () => (notificationsQ.status === "success" ? getNotifications(notificationsQ.data) : []),
-    [notificationsQ.status, notificationsQ.data],
-  );
   const feed = notifications.slice(0, 5);
-   function handleSignOut() {
-  localStorage.removeItem("token");
-  localStorage.removeItem("user");
 
-  setProfileOpen(false);
+  const handleNotificationSelect = async (item) => {
+    setBellOpen(false);
+    if (item.unread) {
+      await markRead(item.id);
+    }
+    if (item.link) {
+      navigate(item.link);
+    } else {
+      navigate('/buyer/notifications');
+    }
+  };
 
-  navigate("/login", { replace: true });
-}
-  
+  function handleSignOut() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setProfileOpen(false);
+    navigate("/login", { replace: true });
+  }
+
+  const handleLogout = handleSignOut;
+
   const messagesPath = {
     buyer: "/buyer/messages",
     vendor: "/vendor/messages",
+    admin: "/admin/dashboard",
+  }[role];
+
+  const notificationsPath = {
+    buyer: "/buyer/notifications",
+    vendor: "/vendor/notifications",
     admin: "/admin/dashboard",
   }[role];
 
@@ -269,9 +287,9 @@ export default function DashboardNavbar({ onToggleSidebar }) {
               className="relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl text-[var(--text-muted)] transition-colors hover:bg-[var(--primary-purple-light)] hover:text-[var(--primary-purple)]"
             >
               <Bell size={20} />
-              {notificationCount > 0 && (
+              {unreadCount > 0 && (
                 <span className="absolute top-1 right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-gradient-to-r from-[var(--primary-purple)] to-[var(--accent-cyan)] px-1 text-[9px] font-bold text-white shadow-sm">
-                  {notificationCount > 99 ? "99+" : notificationCount}
+                  {unreadCount > 99 ? "99+" : unreadCount}
                 </span>
               )}
             </button>
@@ -313,15 +331,15 @@ export default function DashboardNavbar({ onToggleSidebar }) {
                           <p className="font-heading text-sm font-extrabold text-white tracking-tight">
                             Activity Feed & Alerts
                           </p>
-                          <p className="text-[11px] text-white/60 font-mono">
+                          <p className="text-[11px] text-white/85 font-mono">
                             Real-time platform notifications
                           </p>
                         </div>
                       </div>
-                      {notificationCount > 0 && (
+                      {unreadCount > 0 && (
                         <span className="flex items-center gap-1.5 rounded-full bg-[#6C5CE7]/30 border border-[#6C5CE7]/50 px-2.5 py-0.5 text-[10px] font-bold text-[#C4B5FD]">
                           <span className="h-1.5 w-1.5 rounded-full bg-[#A78BFA] animate-pulse" />
-                          {notificationCount} Unread
+                          {unreadCount} Unread
                         </span>
                       )}
                     </div>
@@ -329,7 +347,7 @@ export default function DashboardNavbar({ onToggleSidebar }) {
 
                   {/* Notification List Container */}
                   <div className="max-h-[340px] overflow-y-auto bg-white">
-                    {notificationsQ.status === "loading" && (
+                    {loading && (
                       <div className="space-y-2.5 p-4">
                         {Array.from({ length: 4 }).map((_, i) => (
                           <div key={i} className="skeleton-block h-14 w-full rounded-xl" />
@@ -337,13 +355,13 @@ export default function DashboardNavbar({ onToggleSidebar }) {
                       </div>
                     )}
 
-                    {notificationsQ.status === "error" && (
+                    {error && (
                       <p className="px-4 py-8 text-center text-xs font-medium text-[var(--text-muted)]">
                         Couldn't load notifications.
                       </p>
                     )}
 
-                    {notificationsQ.status === "success" && feed.length === 0 && (
+                    {!loading && !error && feed.length === 0 && (
                       <div className="px-4 py-10 text-center">
                         <Sparkles size={24} className="mx-auto text-[var(--primary-purple)]/60 mb-2" />
                         <p className="text-xs font-semibold text-[var(--text-primary)]">
@@ -355,7 +373,7 @@ export default function DashboardNavbar({ onToggleSidebar }) {
                       </div>
                     )}
 
-                    {notificationsQ.status === "success" && feed.length > 0 && (
+                    {!loading && !error && feed.length > 0 && (
                       <ul className="divide-y divide-[#EEF1F6]">
                         {feed.map((n) => {
                           const Icon = NOTIFICATION_ICONS[n.type] ?? Sparkles;
@@ -370,8 +388,17 @@ export default function DashboardNavbar({ onToggleSidebar }) {
                           return (
                             <li
                               key={n.id}
+                              role="button"
+                              tabIndex={0}
+                              onClick={() => handleNotificationSelect(n)}
+                              onKeyDown={(event) => {
+                                if (event.key === 'Enter' || event.key === ' ') {
+                                  event.preventDefault();
+                                  handleNotificationSelect(n);
+                                }
+                              }}
                               style={{ borderLeft: `3.5px solid ${colorRail}` }}
-                              className="flex items-start gap-3 px-4 py-3.5 transition-all hover:bg-[#F8FAFC]"
+                              className="flex cursor-pointer items-start gap-3 px-4 py-3.5 transition-all hover:bg-[#F8FAFC]"
                             >
                               <span 
                                 className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl"
@@ -413,11 +440,11 @@ export default function DashboardNavbar({ onToggleSidebar }) {
                   {/* Clean Footer Link */}
                   <div className="border-t border-[#EEF1F6] bg-[#F8FAFC] px-4 py-3 text-center">
                     <Link
-                      to={messagesPath}
+                      to={notificationsPath}
                       onClick={() => setBellOpen(false)}
                       className="inline-flex items-center justify-center gap-1.5 text-xs font-bold text-[var(--primary-purple)] hover:underline"
                     >
-                      View All Activity & Messages →
+                      View All Activity & Notifications →
                     </Link>
                   </div>
                 </motion.div>
@@ -456,35 +483,33 @@ export default function DashboardNavbar({ onToggleSidebar }) {
             <AnimatePresence>
               {profileOpen && (
                 <motion.div
-                  initial={{ opacity: 0, y: 8, scale: 0.97 }}
+                  initial={{ opacity: 0, y: 8, scale: 0.96 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 6, scale: 0.98 }}
-                  transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                  exit={{ opacity: 0, y: 6, scale: 0.96 }}
+                  transition={{ duration: 0.15, ease: "easeOut" }}
+                  className="absolute right-0 top-full mt-2 w-56 rounded-2xl border border-[#EEF1F6] bg-white p-1.5 shadow-xl shadow-slate-200/50"
                   role="menu"
-                  aria-label="Profile menu"
-                  className="absolute right-0 mt-2 w-56 origin-top-right overflow-hidden rounded-2xl border border-[#EEF1F6] bg-white p-1.5 shadow-2xl shadow-black/10"
                 >
-                  {user && (
-                    <div className="border-b border-[#EEF1F6] px-3 py-2.5">
-                      <p className="truncate text-[13px] font-bold text-[var(--text-primary)]">
-                        {user.name}
-                      </p>
-                      {user.email && (
-                        <p className="mt-0.5 truncate text-[11px] text-[var(--text-muted)]">
-                          {user.email}
-                        </p>
-                      )}
-                    </div>
-                  )}
+                  <div className="border-b border-[#EEF1F6] px-3 py-2">
+                    <p className="truncate text-xs font-semibold text-[var(--text-primary)]">
+                      {user?.name ?? "Logged-in User"}
+                    </p>
+                    <p className="truncate text-[11px] text-[var(--text-muted)]">
+                      {user?.email ?? ""}
+                    </p>
+                  </div>
                   {PROFILE_MENU.map((item) => (
                     <Link
                       key={item.path}
                       to={item.path}
                       role="menuitem"
                       onClick={() => setProfileOpen(false)}
-                      className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-[13px] font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--primary-purple-light)] hover:text-[var(--primary-purple)]"
+                      className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-[13px] font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--bg-main)]"
                     >
-                      <item.icon size={15} strokeWidth={2} />
+                      <item.icon
+                        size={15}
+                        className="text-[var(--text-muted)]"
+                      />
                       {item.label}
                     </Link>
                   ))}
@@ -492,7 +517,7 @@ export default function DashboardNavbar({ onToggleSidebar }) {
                     type="button"
                     role="menuitem"
                     onClick={handleSignOut}
-                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-[13px] font-medium text-[#DC2626] transition-colors hover:bg-red-50"
+                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-[13px] font-medium text-[#DC2626] transition-colors hover:bg-red-50 cursor-pointer"
                   >
                     <LogOut size={15} strokeWidth={2} />
                     Sign out

@@ -69,11 +69,14 @@ async function sendVerificationEmail(name, email, token) {
         `
     }
     try {
+        if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+            console.warn("[emailService] SMTP_USER or SMTP_PASS missing in .env. Verification email skipped.");
+            return;
+        }
         await transporter.sendMail(mailOptions);
         console.log("Verification email sent successfully.");
     } catch (error) {
-        console.error("Error sending verification email:", error);
-        throw error;
+        console.error("Error sending verification email (non-fatal):", error.message);
     }
 }
 async function sendPasswordResetEmail(name, email, token) {
@@ -119,11 +122,14 @@ async function sendPasswordResetEmail(name, email, token) {
     </p>`
     }
     try {
+        if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+            console.warn("[emailService] SMTP credentials missing in .env. Password reset email skipped.");
+            return;
+        }
         await transporter.sendMail(mailOptions);
         console.log(`Password reset email sent to ${email}`);
     } catch (error) {
-        console.error(`Failed to send password reset email to ${email}`, error);
-        throw error;
+        console.error(`Failed to send password reset email to ${email}:`, error.message);
     }
 }
 async function sendOtpMail(name, email, otp) {
@@ -176,11 +182,14 @@ async function sendOtpMail(name, email, otp) {
     };
 
     try {
+        if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+            console.warn("[emailService] SMTP credentials missing in .env. OTP email skipped.");
+            return;
+        }
         await transporter.sendMail(mailOptions);
         console.log(`OTP email sent to ${email}`);
     } catch (error) {
-        console.error(`Failed to send OTP email to ${email}`, error);
-        throw error;
+        console.error(`Failed to send OTP email to ${email}:`, error.message);
     }
 }
 

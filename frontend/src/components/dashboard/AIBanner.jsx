@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Sparkles } from "lucide-react";
 import robotPng from "../../assets/images/robot.png";
+import { getRoleRoute } from "../../utils/routeUtils";
 
 /* --------------------------------------------------------------------------
    AIBanner — bottom-of-page AI growth CTA. Default: robot mascot on the
@@ -18,35 +19,22 @@ export default function AIBanner() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       className="relative mx-auto w-full max-w-[1150px] overflow-hidden rounded-[24px] border border-[#C9C2F2] bg-gradient-to-br from-[#D5C9FF] via-[#E3DCFF] to-[#C3D4FF] p-6 sm:p-8"
-      aria-label="AI growth banner"
+      aria-label="AI Features"
     >
-      <div className="pointer-events-none absolute -right-16 -top-24 h-72 w-72 rounded-full bg-[#6C63FF]/15 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-24 left-10 h-60 w-60 rounded-full bg-[#0EA5E9]/15 blur-3xl" />
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-gradient-to-br from-[#6C63FF]/20 to-[#0EA5E9]/20 blur-3xl"
+      />
 
-      <div className="relative flex flex-col items-start gap-6 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-start gap-4 sm:items-center">
-          <motion.div
-            initial={{ scale: 0.9 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.2, type: "spring", stiffness: 200, damping: 16 }}
-            className="group relative flex shrink-0 items-center justify-center"
-            aria-hidden="true"
-          >
-            <span className="absolute h-28 w-28 rounded-full bg-[#6C63FF]/20 blur-3xl" />
-            <span className="float-y relative inline-block">
-              <img
-                src={robotPng}
-                alt=""
-                draggable={false}
-                className="h-[120px] w-auto cursor-pointer select-none object-contain transition-all duration-300 group-hover:scale-105 group-hover:drop-shadow-[0_12px_24px_rgba(108,99,255,0.55)] sm:h-[140px]"
-              />
-            </span>
-            <Sparkles className="absolute -right-1 top-2 h-6 w-6 text-[#FBBF24]" strokeWidth={2.4} fill="currentColor" />
-          </motion.div>
+      <div className="relative flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
+        <div className="flex items-start gap-4">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#6C63FF] to-[#0EA5E9] text-white shadow-md shadow-[#6C63FF]/25">
+            <Sparkles className="h-6 w-6" strokeWidth={2} />
+          </span>
 
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--primary-purple)]">
-              VendorHub Intelligence
+            <p className="font-mono text-xs font-bold uppercase tracking-wider text-[#6C63FF]">
+              AI Procurement Engine
             </p>
             <h2 className="mt-1 font-heading text-2xl font-extrabold leading-tight tracking-tight text-[var(--text-primary)] sm:text-3xl">
               Let AI work for your business.
@@ -60,7 +48,7 @@ export default function AIBanner() {
 
         <button
           type="button"
-          onClick={() => navigate("/buyer/ai-search")}
+          onClick={() => navigate(getRoleRoute("ai-search"))}
           className="group inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-2xl bg-gradient-to-r from-[#6C63FF] to-[#0EA5E9] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-[#6C63FF]/30 transition-transform hover:scale-[1.03] active:scale-95"
         >
           Explore AI Tools

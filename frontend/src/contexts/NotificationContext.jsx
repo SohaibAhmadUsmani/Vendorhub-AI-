@@ -1,101 +1,164 @@
-import { createContext, useContext, useState } from 'react';
-import { ReceiptText, TrendingUp, PackageCheck, MessageSquareText, ShieldAlert, Clock3 } from 'lucide-react';
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { io } from 'socket.io-client';
 
 const NotificationContext = createContext(null);
+const API_BASE_URL = 'http://localhost:5000';
 
-const initialNotifications = [
-  {
-    id: 1,
-    type: 'RFQ received',
-    title: 'New RFQ received from Northwind Foods',
-    description: 'Procurement team requested 120 units of stainless steel containers.',
-    time: '2 min ago',
-    accent: 'from-cyan-500 to-sky-600',
-    icon: ReceiptText,
-    unread: true,
-  },
-  {
-    id: 2,
-    type: 'New quotation',
-    title: 'Quotation submitted by BluePeak Supplies',
-    description: 'Competitive pricing received for 3 SKUs with 8% discount.',
-    time: '18 min ago',
-    accent: 'from-violet-500 to-indigo-600',
-    icon: TrendingUp,
-    unread: true,
-  },
-  {
-    id: 3,
-    type: 'Order shipped',
-    title: 'Shipment update for order #VHB-2048',
-    description: 'Your order is now in transit and expected tomorrow.',
-    time: '45 min ago',
-    accent: 'from-emerald-500 to-green-600',
-    icon: PackageCheck,
-    unread: false,
-  },
-  {
-    id: 4,
-    type: 'Message received',
-    title: 'New message from Aster Manufacturing',
-    description: 'Vendor confirmed revised delivery schedule for the current order.',
-    time: '1 hr ago',
-    accent: 'from-amber-500 to-orange-600',
-    icon: MessageSquareText,
-    unread: false,
-  },
-  {
-    id: 5,
-    type: 'Contract expiring',
-    title: 'Contract with Meridian Parts expires in 7 days',
-    description: 'Renewal review is recommended to avoid service disruption.',
-    time: '3 hrs ago',
-    accent: 'from-rose-500 to-red-600',
-    icon: ShieldAlert,
-    unread: false,
-  },
-  {
-    id: 6,
-    type: 'Payment reminder',
-    title: 'Invoice payment due this week',
-    description: 'Payment for invoice INV-8824 is due on Friday.',
-    time: '5 hrs ago',
-    accent: 'from-slate-500 to-slate-700',
-    icon: Clock3,
-    unread: false,
-  },
-];
+function normalizeNotification(item) {
+  const time = item?.time ?? item?.createdAt ?? new Date().toISOString();
+  return {
+    id: item?.id ?? item?._id ?? `${item?.title ?? 'notification'}-${time}`,
+    title: item?.title ?? 'Notification',
+    message: item?.message ?? '',
+    type: item?.type ?? 'system',
+    time,
+    unread: Boolean(item?.unread ?? item?.read === false),
+    link: item?.link ?? null,
+  };
+}
+
+function sortNotifications(items) {
+  return [...items].sort((a, b) => new Date(b.time) - new Date(a.time));
+}
 
 export function NotificationProvider({ children }) {
-  const [notifications, setNotifications] = useState(initialNotifications);
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const socketRef = useRef(null);
 
-  function addNotification(payload) {
-    const id = Date.now();
-    const item = {
-      id,
-      time: payload.time ?? 'just now',
-      unread: true,
-      ...payload,
+  const fetchNotifications = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/api/vendor/dashboard/notifications`);
+      const payload = await response.json();
+      const data = Array.isArray(payload?.data) ? payload.data : payload?.data?.data ?? [];
+      setNotifications(sortNotifications(data.map(normalizeNotification)));
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  useEffect(() => {
+    if (socketRef.current) return undefined;
+
+    const socket = io(`${API_BASE_URL}/notifications`, { transports: ['websocket'] });
+    socketRef.current = socket;
+
+    const onConnect = () => {
+      socket.emit('vendorhub:join_notifications');
     };
-    setNotifications((prev) => [item, ...prev]);
-    return id;
-  }
 
-  function markAllRead() {
-    setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
-  }
+    const onNewNotification = (payload) => {
+      const item = normalizeNotification(payload);
+      setNotifications((prev) => sortNotifications([item, ...prev.filter((entry) => entry.id !== item.id)]));
+    };
 
-  function markRead(id) {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, unread: false } : n)));
-  }
+    const onUpdatedNotification = (payload) => {
+      const id = payload?.id;
+      if (!id) return;
+      setNotifications((prev) =>
+        sortNotifications(
+          prev.map((entry) => (entry.id === id ? { ...entry, unread: Boolean(payload.unread ?? entry.unread) } : entry)),
+        ),
+      );
+    };
 
-  const unreadCount = notifications.filter((n) => n.unread).length;
+    const onDeletedNotification = (payload) => {
+      const id = payload?.id;
+      if (!id) return;
+      setNotifications((prev) => prev.filter((entry) => entry.id !== String(id)));
+    };
 
-  return (
-    <NotificationContext.Provider value={{ notifications, addNotification, markAllRead, markRead, unreadCount }}>
-      {children}
-    </NotificationContext.Provider>
+    const onNotificationsUpdated = () => {
+      setNotifications((prev) => prev.map((entry) => ({ ...entry, unread: false })));
+    };
+
+    socket.on('connect', onConnect);
+    socket.on('vendorhub:notification:new', onNewNotification);
+    socket.on('vendorhub:notification:updated', onUpdatedNotification);
+    socket.on('vendorhub:notification:deleted', onDeletedNotification);
+    socket.on('vendorhub:notifications:updated', onNotificationsUpdated);
+
+    return () => {
+      socket.off('connect', onConnect);
+      socket.off('vendorhub:notification:new', onNewNotification);
+      socket.off('vendorhub:notification:updated', onUpdatedNotification);
+      socket.off('vendorhub:notification:deleted', onDeletedNotification);
+      socket.off('vendorhub:notifications:updated', onNotificationsUpdated);
+      socket.emit('vendorhub:leave_notifications');
+      socket.disconnect();
+      socketRef.current = null;
+    };
+  }, []);
+
+  const addNotification = async (payload) => {
+    const item = normalizeNotification(payload);
+    setNotifications((prev) => sortNotifications([item, ...prev]));
+    try {
+      await fetch(`${API_BASE_URL}/api/vendor/dashboard/notifications`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+    } catch (err) {
+      console.error(err);
+    }
+    return item.id;
+  };
+
+  const markAllRead = async () => {
+    try {
+      await fetch(`${API_BASE_URL}/api/vendor/dashboard/notifications/read-all`, { method: 'PATCH' });
+      setNotifications((prev) => prev.map((item) => ({ ...item, unread: false })));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const markRead = async (id) => {
+    try {
+      await fetch(`${API_BASE_URL}/api/vendor/dashboard/notifications/${id}/read`, { method: 'PATCH' });
+      setNotifications((prev) => prev.map((item) => (item.id === id ? { ...item, unread: false } : item)));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const deleteNotification = async (id) => {
+    try {
+      await fetch(`${API_BASE_URL}/api/vendor/dashboard/notifications/${id}`, { method: 'DELETE' });
+      setNotifications((prev) => prev.filter((item) => item.id !== id));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const unreadCount = notifications.filter((item) => item.unread).length;
+
+  const value = useMemo(
+    () => ({
+      notifications,
+      loading,
+      error,
+      refreshNotifications: fetchNotifications,
+      addNotification,
+      markAllRead,
+      markRead,
+      deleteNotification,
+      unreadCount,
+    }),
+    [notifications, loading, error, unreadCount],
   );
+
+  return <NotificationContext.Provider value={value}>{children}</NotificationContext.Provider>;
 }
 
 export function useNotifications() {

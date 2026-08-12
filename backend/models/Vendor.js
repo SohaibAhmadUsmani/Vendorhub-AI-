@@ -24,21 +24,8 @@ const teamMemberSchema = new mongoose.Schema({
   languages: { type: String }
 });
 
-const reviewSchema = new mongoose.Schema({
-  reviewerName: { type: String, required: true },
-  reviewerCompany: { type: String },
-  rating: { type: Number, required: true, min: 1, max: 5 },
-  categories: {
-    productQuality: { type: Number, default: 5 },
-    communication: { type: Number, default: 5 },
-    deliverySpeed: { type: Number, default: 5 },
-    valueForMoney: { type: Number, default: 5 }
-  },
-  comment: { type: String, required: true },
-  date: { type: Date, default: Date.now }
-});
-
 const vendorSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   name: { type: String, required: true, unique: true },
   tagline: { type: String },
   logo: { type: String },
@@ -62,6 +49,21 @@ const vendorSchema = new mongoose.Schema({
   businessType: { type: String },
   industryRank: { type: String },
   compliance: { type: String },
+  exportCountries: [{
+    country: { type: String },
+    code: { type: String },
+    flag: { type: String },
+    percent: { type: Number }
+  }],
+  manufacturingCapabilities: {
+    capacity: { type: String },
+    leadTime: { type: String },
+    rndDept: { type: String },
+    customTooling: { type: String },
+    factoryArea: { type: String },
+    cncMachines: { type: String },
+    automatedLines: { type: String }
+  },
   factoryDetails: {
     area: { type: String },
     productionLines: { type: Number },
@@ -86,7 +88,7 @@ const vendorSchema = new mongoose.Schema({
     address: { type: String },
     whatsApp: { type: String }
   },
-  reviews: [reviewSchema]
+  reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Review' }],
 }, { timestamps: true });
 
 vendorSchema.pre('save', function(next) {

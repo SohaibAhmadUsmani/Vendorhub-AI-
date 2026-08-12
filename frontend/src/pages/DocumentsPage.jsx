@@ -267,7 +267,7 @@ export default function DocumentsPage() {
             Documents
           </h1>
 
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-slate-600 dark:text-slate-400">
             Upload, manage and AI-search your procurement documents.
           </p>
         </div>
@@ -294,7 +294,7 @@ export default function DocumentsPage() {
             Upload Document
           </h2>
 
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
             Upload contracts, certifications, purchase orders,
             invoices or shipping documents.
           </p>
@@ -346,7 +346,7 @@ export default function DocumentsPage() {
           <div>
             <label className="mb-2 block text-sm font-semibold text-gray-700">
               Description{" "}
-              <span className="font-normal text-gray-400">(optional)</span>
+              <span className="font-normal text-slate-500">(optional)</span>
             </label>
 
             <input
@@ -362,7 +362,7 @@ export default function DocumentsPage() {
           <div>
             <label className="mb-2 block text-sm font-semibold text-gray-700">
               Tags{" "}
-              <span className="font-normal text-gray-400">(optional, comma separated)</span>
+              <span className="font-normal text-slate-500">(optional, comma separated)</span>
             </label>
 
             <input
@@ -392,13 +392,13 @@ export default function DocumentsPage() {
             />
 
             {file && (
-              <p className="mt-2 text-xs text-gray-500">
+              <p className="mt-2 text-xs text-slate-600">
                 Selected:{" "}
                 <span className="font-semibold text-[#6C63FF]">
                   {file.name}
                 </span>
                 {formatSize(file.size) && (
-                  <span className="text-gray-400">
+                  <span className="text-slate-500">
                     {" "}({formatSize(file.size)})
                   </span>
                 )}
@@ -427,7 +427,7 @@ export default function DocumentsPage() {
             AI Document Search
           </h2>
 
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
             Ask in plain language, e.g. "find certificates that expire soon".
           </p>
         </div>
@@ -466,14 +466,14 @@ export default function DocumentsPage() {
         </div>
 
         {aiSearching && (
-          <p className="mt-3 text-xs text-gray-400">
+          <p className="mt-3 text-xs text-slate-600 dark:text-slate-400">
             AI is searching...
           </p>
         )}
 
         {!aiSearching && searchKeywords.length > 0 && (
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <span className="text-xs text-gray-400">AI keywords:</span>
+            <span className="text-xs text-slate-600 dark:text-slate-400">AI keywords:</span>
             {searchKeywords.map((keyword) => (
               <span
                 key={keyword}
@@ -507,7 +507,7 @@ export default function DocumentsPage() {
               Your Documents
             </h2>
 
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
               {filteredCount !== null
                 ? `${filteredCount} result${filteredCount !== 1 ? "s" : ""} for "${searchQuery}"`
                 : `${documents.length} document${documents.length !== 1 ? "s" : ""}`}
@@ -517,7 +517,7 @@ export default function DocumentsPage() {
 
         {/* Loading */}
         {loadingDocuments && (
-          <div className="py-12 text-center text-sm text-gray-500">
+          <div className="py-12 text-center text-sm text-slate-600 dark:text-slate-400">
             Loading documents...
           </div>
         )}
@@ -533,7 +533,7 @@ export default function DocumentsPage() {
               {searchQuery ? "No matching documents" : "No documents found"}
             </h3>
 
-            <p className="mt-1 text-sm text-gray-400">
+            <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
               {searchQuery
                 ? "Try a different search phrase or clear the filters."
                 : "Upload your first procurement document above."}
@@ -564,7 +564,7 @@ export default function DocumentsPage() {
                         {document.name}
                       </h3>
 
-                      <div className="mt-1 flex flex-wrap gap-2 text-xs text-gray-500">
+                      <div className="mt-1 flex flex-wrap gap-2 text-xs text-slate-600 dark:text-slate-400">
                         <span className="rounded-full bg-gray-100 px-2 py-1">
                           {getTypeLabel(document.type)}
                         </span>

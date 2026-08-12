@@ -1,5 +1,6 @@
 const dashboardService = require('../services/dashboardService');
 const aiInsightService = require('../services/aiInsightService');
+const Notification = require('../models/Notification');
 
 /**
  * Vendor Dashboard controller (Module 3).
@@ -67,6 +68,60 @@ const getNotifications = async (req, res) => {
     res.status(200).json({ success: true, data });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+const deleteNotification = async (req, res) => {
+  try {
+    const notification = await Notification.findByIdAndDelete(req.params.id);
+    if (!notification) {
+      return res.status(404).json({ success: false, message: 'Notification not found' });
+    }
+
+    req.app.get('notificationIo')?.to('vendorhub:notifications').emit('vendorhub:notification:deleted', {
+      id: String(req.params.id),
+    });
+
+    return res.status(200).json({ success: true, data: { id: String(req.params.id) } });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+const markNotificationRead = async (req, res) => {
+  try {
+    const notification = await Notification.findByIdAndUpdate(
+      req.params.id,
+      { read: true },
+      { new: true },
+    );
+
+    if (!notification) {
+      return res.status(404).json({ success: false, message: 'Notification not found' });
+    }
+
+    req.app.get('notificationIo')?.to('vendorhub:notifications').emit('vendorhub:notification:updated', {
+      id: String(notification._id),
+      unread: false,
+      read: true,
+    });
+
+    return res.status(200).json({ success: true, data: notification });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+const markAllNotificationsRead = async (req, res) => {
+  try {
+    const result = await Notification.updateMany({ read: false }, { read: true });
+    req.app.get('notificationIo')?.to('vendorhub:notifications').emit('vendorhub:notifications:updated', {
+      unreadCount: 0,
+      count: result.modifiedCount,
+    });
+    return res.status(200).json({ success: true, data: { count: result.modifiedCount } });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -289,6 +344,9 @@ module.exports = {
   getCustomerRequests,
   getProductPerformance,
   getNotifications,
+  deleteNotification,
+  markNotificationRead,
+  markAllNotificationsRead,
   getAdvancedAnalytics,
   getRecentActivity,
   getInsights,

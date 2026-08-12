@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { HeartPulse, ArrowUpRight } from "lucide-react";
+import { getRoleRoute } from "../../utils/routeUtils";
 import { useVendorHealth, getVendorHealth } from "../../services/dashboard/dashboardService";
 import VendorHealthMetric from "./VendorHealthMetric";
 import VendorHealthSkeleton from "./VendorHealthSkeleton";
@@ -38,7 +39,7 @@ export default function VendorHealthCard() {
           </div>
         </div>
         <Link
-          to="/buyer/vendor-analytics"
+          to={getRoleRoute("analytics")}
           className="group inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-bold text-[var(--accent-cyan)] transition hover:bg-[var(--accent-cyan-light)]"
           aria-label="View vendor health details"
         >

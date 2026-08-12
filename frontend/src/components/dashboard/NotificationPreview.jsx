@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, Bell, FileText, Mail, ShoppingCart, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
+import { getRoleRoute } from "../../utils/routeUtils";
 import {
   useVendorNotifications,
   getNotifications,
@@ -110,7 +111,7 @@ export default function NotificationPreview() {
           </div>
         </div>
         <Link
-          to="/buyer/notifications"
+          to={getRoleRoute("notifications")}
           className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-1.5 text-xs font-semibold text-[var(--text-secondary)] transition hover:border-[var(--primary-purple)] hover:text-[var(--primary-purple)]"
         >
           View All

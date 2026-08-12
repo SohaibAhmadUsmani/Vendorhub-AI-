@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { getRoleRoute } from "../../utils/routeUtils";
 import {
   FileQuestion,
   DollarSign,
@@ -71,7 +72,7 @@ const InsightItem = React.memo(function InsightItem({ item, index }) {
   const time = timeAgo(item.timestamp);
   const navigate = useNavigate();
 
-  const open = () => navigate("/buyer/ai-insights");
+  const open = () => navigate(getRoleRoute("ai-insights"));
 
   return (
     <motion.article

@@ -85,7 +85,7 @@ export default function InsightsTrendCard({ page }) {
                   ticks={ticks}
                   tickLine={false}
                   axisLine={false}
-                  tick={{ fill: "var(--text-muted)", fontSize: 10, fontWeight: 600 }}
+                  tick={{ fill: "var(--text-muted)", fontSize: 11, fontWeight: 600 }}
                   interval={0}
                 />
                 <YAxis
@@ -93,7 +93,7 @@ export default function InsightsTrendCard({ page }) {
                   axisLine={false}
                   allowDecimals={false}
                   width={32}
-                  tick={{ fill: "var(--text-muted)", fontSize: 10, fontWeight: 600 }}
+                  tick={{ fill: "var(--text-muted)", fontSize: 11, fontWeight: 600 }}
                 />
                 <Tooltip cursor={{ stroke: "rgba(108,99,255,0.35)", strokeDasharray: "4 4" }} content={<TrendTooltip />} />
                 <Area
@@ -124,7 +124,7 @@ export default function InsightsTrendCard({ page }) {
         <ul className="flex items-center gap-x-4 gap-y-3 md:flex-col md:justify-center md:gap-y-4 md:border-l md:border-[#E9ECF2] md:pl-5 dark:md:border-white/10">
           {COUNTS_META.map((meta) => (
             <li key={meta.key} className="flex min-w-0 items-center justify-between gap-2">
-              <span className="inline-flex min-w-0 items-center gap-1.5 text-[11px] font-semibold text-[var(--text-muted)]">
+              <span className="inline-flex min-w-0 items-center gap-1.5 text-[12px] font-semibold text-[var(--text-muted)]">
                 <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: meta.color }} />
                 <span className="truncate">{meta.label}</span>
               </span>

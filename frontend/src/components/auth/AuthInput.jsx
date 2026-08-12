@@ -11,7 +11,7 @@ function AuthInput({
     <div className="flex flex-col gap-2">
       <label
         htmlFor={name}
-        className="mt-1 text-sm font-medium text-[var(--text-h)]"
+        className="mt-1 text-sm font-semibold text-slate-900"
       >
         {label}
       </label>
@@ -28,17 +28,18 @@ function AuthInput({
           w-full
           rounded-xl
           border
-          border-gray-200
+          border-[#CBD5E1]
           bg-white
           px-4
           text-base
-          text-[var(--text-primary)]
+          font-medium
+          text-slate-900
           outline-none
           transition
-          placeholder:text-gray-400
+          placeholder:text-slate-500
           focus:border-[var(--primary-purple)]
           focus:ring-2
-          focus:ring-[var(--primary-purple)]/10
+          focus:ring-[var(--primary-purple)]/20
         "
       />
 

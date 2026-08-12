@@ -97,7 +97,7 @@ function RiskListView({ onSelect }) {
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">AI Risk Analysis</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
             AI-powered supplier risk assessment across your vendor base
           </p>
         </div>
@@ -152,7 +152,7 @@ function RiskListView({ onSelect }) {
 
       {!loading && !error && filtered.length === 0 && (
         <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center">
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-slate-600 dark:text-slate-400">
             No suppliers match your search.
           </p>
         </div>
@@ -194,7 +194,7 @@ function RiskListView({ onSelect }) {
                       >
                         {risk.riskScore}
                       </span>
-                      <span className="text-xs text-slate-400">/ 100</span>
+                      <span className="text-xs text-slate-500 dark:text-slate-400">/ 100</span>
                       <RiskLevelBadge level={risk.riskLevel} />
                     </div>
                   </div>
@@ -217,7 +217,7 @@ function RiskListView({ onSelect }) {
                 </div>
 
                 {risk.summary && (
-                  <p className="mt-4 line-clamp-2 text-xs leading-5 text-slate-500">
+                  <p className="mt-4 line-clamp-2 text-xs leading-5 text-slate-600 dark:text-slate-400">
                     {risk.summary}
                   </p>
                 )}
@@ -300,7 +300,7 @@ function RiskDetailView({ vendorId, onBack }) {
       <button
         type="button"
         onClick={onBack}
-        className="cursor-pointer text-sm font-semibold text-slate-500 transition-colors hover:text-[#6C5CE7]"
+        className="cursor-pointer text-sm font-semibold text-slate-600 transition-colors hover:text-[#6C5CE7]"
       >
         ← Back to all suppliers
       </button>
@@ -308,7 +308,7 @@ function RiskDetailView({ vendorId, onBack }) {
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">AI Risk Analysis</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
             {risk.vendorName ? `${risk.vendorName} — ` : ""}
             AI-powered supplier risk assessment
           </p>
@@ -318,14 +318,14 @@ function RiskDetailView({ vendorId, onBack }) {
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-slate-500">Overall Risk Score</p>
+            <p className="text-sm text-slate-600 dark:text-slate-400">Overall Risk Score</p>
 
             <div className="mt-2 flex items-center gap-3">
               <span className="text-4xl font-bold" style={{ color: riskColor }}>
                 {risk.riskScore}
               </span>
 
-              <span className="text-slate-400">/ 100</span>
+              <span className="text-slate-500 dark:text-slate-400">/ 100</span>
             </div>
           </div>
 
@@ -334,7 +334,7 @@ function RiskDetailView({ vendorId, onBack }) {
 
         {risk.factors && (
           <div className="mt-6">
-            <div className="mb-2 flex items-center justify-between text-xs text-slate-500">
+            <div className="mb-2 flex items-center justify-between text-xs text-slate-600 dark:text-slate-400">
               <span className="font-semibold uppercase tracking-wider">
                 Risk Breakdown
               </span>
@@ -413,7 +413,7 @@ function RiskDetailView({ vendorId, onBack }) {
 
                 return (
                   <div key={key}>
-                    <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    <p className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
                       {label}
                     </p>
                     <ul className="mt-2 space-y-1.5">

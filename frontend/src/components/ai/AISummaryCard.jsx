@@ -82,7 +82,7 @@ export default function AISummaryCard({ page }) {
                       <div className="min-w-0">
                         <p className="text-[11.5px] font-bold leading-snug text-[var(--text-primary)]">{item.title}</p>
                         {item.description && (
-                          <p className="line-clamp-1 text-[11px] leading-[1.5] text-[var(--text-muted)]">
+                          <p className="line-clamp-1 text-[12px] leading-[1.5] text-[var(--text-muted)]">
                             {item.description}
                           </p>
                         )}

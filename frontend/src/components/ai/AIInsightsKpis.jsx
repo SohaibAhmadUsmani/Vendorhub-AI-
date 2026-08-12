@@ -171,7 +171,7 @@ export default function AIInsightsKpis({ page }) {
               {hasActivity ? (
                 <TrendSpark data={kpis.spark.activity} accent="#6C63FF" />
               ) : (
-                <p className="text-[11px] font-medium text-[var(--text-muted)]">No signals in this range yet</p>
+                <p className="text-[12px] font-medium text-[var(--text-muted)]">No signals in this range yet</p>
               )}
             </TrendStrip>
           </>
@@ -188,7 +188,7 @@ export default function AIInsightsKpis({ page }) {
               <AnimatedNumber value={kpis.highImpact} />
             </p>
             <TrendStrip>
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-[var(--text-muted)]">
+              <span className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[var(--text-muted)]">
                 <span className="h-1.5 w-1.5 rounded-full bg-[#F59E0B]" />
                 Need your attention
               </span>
@@ -210,7 +210,7 @@ export default function AIInsightsKpis({ page }) {
               {hasActivity ? (
                 <TrendSpark data={kpis.spark.activity} accent="#0EA5E9" />
               ) : (
-                <p className="text-[11px] font-medium text-[var(--text-muted)]">Tracked from live signals</p>
+                <p className="text-[12px] font-medium text-[var(--text-muted)]">Tracked from live signals</p>
               )}
             </TrendStrip>
           </>
@@ -233,7 +233,7 @@ export default function AIInsightsKpis({ page }) {
               {hasRevenue ? (
                 <TrendSpark data={kpis.spark.revenue} accent="#22C55E" />
               ) : (
-                <p className="text-[11px] font-medium text-[var(--text-muted)]">No revenue in this range yet</p>
+                <p className="text-[12px] font-medium text-[var(--text-muted)]">No revenue in this range yet</p>
               )}
             </TrendStrip>
           </>
@@ -251,7 +251,7 @@ export default function AIInsightsKpis({ page }) {
               <RelativeTime value={kpis.updatedAt} />
             </p>
             <TrendStrip>
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-[var(--text-muted)]">
+              <span className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[var(--text-muted)]">
                 <span className="relative flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
