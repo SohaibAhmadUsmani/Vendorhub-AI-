@@ -109,7 +109,11 @@ const updateVendor = async (req, res) => {
       }
     }
 
-    const updatedVendor = await Vendor.findByIdAndUpdate(vendor._id, req.body, { new: true, runValidators: true });
+    const updateData = { ...req.body };
+    delete updateData._id;
+    delete updateData.id;
+
+    const updatedVendor = await Vendor.findByIdAndUpdate(vendor._id, updateData, { new: true, runValidators: true });
 
     res.status(200).json({ success: true, data: updatedVendor });
   } catch (error) {
@@ -237,14 +241,17 @@ const getVendorMe = async (req, res) => {
     }
     let vendor = await Vendor.findOne({ userId: req.user._id || req.user.id }).populate('reviews');
     if (!vendor) {
-      // Fallback to searching by user email or first vendor
+      // Fallback to searching by user email
       vendor = await Vendor.findOne({ 'contact.email': req.user.email }).populate('reviews');
     }
     if (!vendor) {
-      vendor = await Vendor.findOne({}).populate('reviews');
-    }
-    if (!vendor) {
-      return res.status(404).json({ success: false, message: 'Vendor profile not found' });
+      // Create a vendor profile for this user if it doesn't exist
+      vendor = await Vendor.create({
+        userId: req.user._id || req.user.id,
+        name: req.user.name,
+        contact: { email: req.user.email },
+        verificationStatus: 'pending'
+      });
     }
     res.status(200).json({ success: true, data: vendor });
   } catch (error) {

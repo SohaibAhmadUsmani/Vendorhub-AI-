@@ -12,6 +12,7 @@ import { Link } from "react-router-dom";
 
 import DashboardGreeting from "../components/layout/DashboardGreeting";
 import DashboardSection from "../components/dashboard/DashboardSection";
+import DashboardWelcomeRobot from "../components/dashboard/DashboardWelcomeRobot";
 
 import BuyerOverviewCards from "../components/buyerDashboard/BuyerOverviewCards";
 import ActiveRFQs from "../components/buyerDashboard/ActiveRFQs";
@@ -71,6 +72,7 @@ export default function BuyerDashboard() {
             GREETING
         ========================================================= */}
         <DashboardGreeting type="buyer"/>
+        <DashboardWelcomeRobot />
 
         {/* =========================================================
             KEY METRICS

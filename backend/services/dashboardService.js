@@ -92,7 +92,15 @@ async function resolveVendorForRequest(req) {
           if (!owned && user.email) {
             owned = await Vendor.findOne({ 'contact.email': user.email });
           }
-          if (owned) return owned;
+          if (!owned) {
+            owned = await Vendor.create({
+              userId: user._id,
+              name: user.name,
+              contact: { email: user.email },
+              verificationStatus: 'pending'
+            });
+          }
+          return owned;
         }
       }
     } catch {

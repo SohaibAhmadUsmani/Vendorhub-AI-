@@ -461,6 +461,10 @@ function App() {
               path="risk-analysis"
               element={<RiskAnalysisPage />}
             />
+            <Route
+              path="risk-analysis/:vendorId"
+              element={<RiskAnalysisPage />}
+            />
 
             {/* Platform Analytics */}
             <Route

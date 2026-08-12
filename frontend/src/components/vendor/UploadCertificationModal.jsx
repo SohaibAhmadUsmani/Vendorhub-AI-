@@ -29,7 +29,10 @@ export default function UploadCertificationModal({ isOpen, onClose, vendor, onUp
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!vendor) return;
+    if (!vendor) {
+      alert("Vendor profile not loaded. Please try again.");
+      return;
+    }
     
     setIsSubmitting(true);
     
@@ -46,7 +49,7 @@ export default function UploadCertificationModal({ isOpen, onClose, vendor, onUp
     };
     
     try {
-      const updatedVendor = await updateVendorProfile(vendor.id || vendor._id, updatedVendorData);
+      const updatedVendor = await updateVendorProfile(vendor._id || vendor.id, updatedVendorData);
       if (onUploadSuccess) {
         onUploadSuccess(updatedVendor);
       }
@@ -56,6 +59,7 @@ export default function UploadCertificationModal({ isOpen, onClose, vendor, onUp
       setFileUrl(null);
     } catch (err) {
       console.error('Failed to upload certification:', err);
+      alert('Failed to upload certification. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

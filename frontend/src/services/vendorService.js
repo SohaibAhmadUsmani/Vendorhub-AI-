@@ -342,8 +342,8 @@ function normalizeVendor(v) {
     location: v.location || "Sialkot, Pakistan",
     rating: v.rating || 4.9,
     reviewCount: v.reviewCount || 142,
-    founded: v.establishedYear ? String(v.establishedYear) : "1994",
-    staff: v.employeeCount || "500-1,000 Employees",
+    founded: v.founded || (v.establishedYear ? String(v.establishedYear) : "1994"),
+    staff: v.staff || v.employeeCount || "500-1,000 Employees",
     businessType: v.businessType || "Manufacturer & OEM Exporter",
     region: "Global Export",
     languages: Array.isArray(v.languages) ? v.languages.join(', ') : (v.languages || "English, Urdu"),
@@ -401,12 +401,12 @@ function normalizeVendor(v) {
     },
     videoUrl: v.factoryDetails?.videoTourUrl || v.videoUrl || "https://www.youtube.com/embed/5XAxHI8sItI",
     videoTitle: v.videoTitle || `${v.name} Plant Walkthrough`,
-    contactDetails: v.contactDetails || {
-      address: v.contact?.address || v.location,
-      phone: v.contact?.phone || "+92 52 3551234",
-      email: v.contact?.email || "export@vendor.com",
-      operatingHours: "Mon - Sat: 08:00 - 18:00 (GMT+5)",
-      whatsApp: v.contact?.phone || "+92 300 1234567"
+    contactDetails: {
+      address: v.contact?.address || v.contactDetails?.address || v.location,
+      phone: v.contact?.phone || v.contactDetails?.phone || "+92 52 3551234",
+      email: v.contact?.email || v.contactDetails?.email || "export@vendor.com",
+      operatingHours: v.contactDetails?.operatingHours || "Mon - Sat: 08:00 - 18:00 (GMT+5)",
+      whatsApp: v.whatsApp || v.contact?.whatsApp || v.contactDetails?.whatsApp || v.contact?.phone || "+92 300 1234567"
     }
   };
 }

@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ShieldCheck, Search, CheckCircle, XCircle, FileText, Star } from "lucide-react";
 import api from "../services/httpClient";
+import { useNavigate } from "react-router-dom";
 
 export default function AdminVendorsPage() {
+  const navigate = useNavigate();
   const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -123,15 +125,15 @@ export default function AdminVendorsPage() {
                     </td>
                     <td className="py-4 px-6 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <button className="text-sm font-medium text-purple-600 hover:text-purple-700 bg-purple-50 dark:bg-purple-900/20 px-3 py-1.5 rounded-md transition-colors">
+                        <button onClick={() => navigate(`/admin/all-vendors?id=${vendor._id}`)} className="text-sm font-medium text-purple-600 hover:text-purple-700 bg-purple-50 dark:bg-purple-900/20 px-3 py-1.5 rounded-md transition-colors">
                           Review Docs
                         </button>
                         {status === 'pending' && (
                           <>
-                            <button className="p-1.5 text-gray-400 hover:text-green-600 transition-colors" title="Approve">
+                            <button onClick={() => alert("Vendor approved successfully.")} className="p-1.5 text-gray-400 hover:text-green-600 transition-colors" title="Approve">
                               <CheckCircle className="h-5 w-5" />
                             </button>
-                            <button className="p-1.5 text-gray-400 hover:text-red-600 transition-colors" title="Reject">
+                            <button onClick={() => alert("Vendor rejected.")} className="p-1.5 text-gray-400 hover:text-red-600 transition-colors" title="Reject">
                               <XCircle className="h-5 w-5" />
                             </button>
                           </>

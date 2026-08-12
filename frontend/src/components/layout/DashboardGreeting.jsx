@@ -52,15 +52,30 @@ export default function DashboardGreeting({ type = "vendor" }) {
   const dispatch = useDispatch();
   const { status, data } = useSelector(selectOverview);
   const isBuyer = type === "buyer";
+  let isAdmin = type === "admin";
+  let userRole = null;
+  let userName = null;
+  try {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      const u = JSON.parse(userStr);
+      if (u && u.role) userRole = u.role.toLowerCase();
+      if (u && u.name) userName = u.name;
+    }
+  } catch (err) {}
+  
+  if (userRole === 'admin') isAdmin = true;
 
   useEffect(() => {
     if (status === "idle") dispatch(fetchOverview());
   }, [status, dispatch]);
 
   const loading = status === "loading" || status === "idle";
-  const name = isBuyer
+  const name = isAdmin
+    ? "Admin"
+    : userName || (isBuyer
     ? data?.buyerName ?? data?.userName ?? null
-    : data?.vendorName;
+    : data?.vendorName);
   const greeting = data?.greeting ?? greetingFallback();
   const dateLabel = formatDate(data?.currentDate);
   const subtitle = isBuyer
@@ -75,7 +90,7 @@ export default function DashboardGreeting({ type = "vendor" }) {
         ) : (
           <>
             <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[var(--primary-purple)]">
-              {isBuyer ? "Buyer Dashboard" : "Vendor Dashboard"}
+              {isAdmin ? "Admin Dashboard" : isBuyer ? "Buyer Dashboard" : "Vendor Dashboard"}
             </p>
             <h1 className="mt-2 font-heading text-[34px] font-bold leading-[1.15] tracking-tight text-[var(--text-primary)] sm:text-[36px] xl:text-[38px]">
               {greeting}{name ? `, ${name}` : ""}

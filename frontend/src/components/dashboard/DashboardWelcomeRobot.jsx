@@ -4,48 +4,40 @@ import { useSelector } from "react-redux";
 import { Sparkles } from "lucide-react";
 import { selectOverview, selectOverviewUser } from "../../redux/dashboardSlice";
 import hangingRobotPng from "../../assets/images/hanging robot.png";
+import adminRobotPng from "../../assets/images/robot.png";
 
 /* --------------------------------------------------------------------------
    DashboardWelcomeRobot — floating AI mascot near the top-right of the
    dashboard (the single floating mascot; the footer AI banner keeps its own
    static robot and is intentionally untouched).
-
-   Trigger: it subscribes to the redux overview `status`, so the cycle runs
-   once per completed dashboard/feed load or refresh (idle/loading -> success)
-   and never on ordinary re-renders or scroll.
-
-   Sequence:
-     1. Robot drops in from above the viewport into its top-right spot
-        (soft ease-out + a small settle bounce).
-     2. After it lands, a dark-purple speech bubble fades in beside it with
-        the live vendor name.
-     3. While the bubble is visible the robot does a soft side-to-side sway
-        (a friendly "hi 👋") — the whole transparent PNG moves as one piece.
-     4. The bubble fades away after a few seconds; the robot stays floating
-        as a subtle idle mascot.
-
-   Pure CSS keyframes (in index.css), lazy-rendered via Suspense, all timers
-   cleared on unmount. Fixed viewport overlay — never inside the dashboard
-   grid, never affects layout or scroll width.
    -------------------------------------------------------------------------- */
 
 const DROP_MS = 700; // slide-down-from-top duration
 const SETTLE_MS = 90; // small pause after landing
 const BUBBLE_GAP = 150; // bubble fades in just after the robot lands
-const BUBBLE_MS = 4000; // how long the greeting stays up
+const BUBBLE_MS = 6000; // how long the greeting stays up (6 seconds)
 const BUBBLE_FADE = 350; // bubble slide/fade-out duration
 
 export default function DashboardWelcomeRobot() {
   const overview = useSelector(selectOverview);
   const user = useSelector(selectOverviewUser);
 
+  let isAdmin = false;
+  let userName = "there";
+  try {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      const u = JSON.parse(userStr);
+      if (u && u.role === 'admin') isAdmin = true;
+      if (u && u.name) userName = u.name;
+    }
+  } catch (err) {}
+
   const [mounted, setMounted] = useState(false);
-  const [phase, setPhase] = useState("idle"); // idle | drop | sway
+  const [phase, setPhase] = useState("idle");
   const [bubble, setBubble] = useState(false);
 
   const timersRef = useRef([]);
-  const statusRef = useRef(overview.status);
-  const presentedForRef = useRef(false);
 
   const schedule = (fn, ms) => {
     const id = setTimeout(fn, ms);
@@ -68,40 +60,29 @@ export default function DashboardWelcomeRobot() {
     const landAt = DROP_MS + SETTLE_MS;
     schedule(() => setPhase("sway"), landAt);
     schedule(() => setBubble(true), landAt + BUBBLE_GAP);
-    schedule(() => setPhase("idle"), landAt + BUBBLE_GAP + BUBBLE_MS + BUBBLE_FADE);
+    // When the bubble finishes its time, hide the bubble and then unmount the robot entirely
     schedule(() => setBubble(false), landAt + BUBBLE_GAP + BUBBLE_MS);
+    schedule(() => {
+      setPhase("idle");
+      setMounted(false);
+    }, landAt + BUBBLE_GAP + BUBBLE_MS + BUBBLE_FADE);
   };
 
-  /* One run per completed feed load. `presentedForRef` ensures a fresh mount
-     with already-loaded data still greets once (e.g. revisiting the page),
-     while `loading -> success` triggers again on a manual feed refresh. */
   useEffect(() => {
-    const prev = statusRef.current;
-    statusRef.current = overview.status;
-
-    if (overview.status === "success") {
-      const newFetch = prev === "loading" || prev === "idle";
-      const freshMount = !presentedForRef.current;
-      if (newFetch || freshMount) {
-        presentedForRef.current = true;
-        schedule(fire, 350);
-      }
-    } else {
-      presentedForRef.current = false;
-    }
-
+    schedule(fire, 500);
     return clearAll;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [overview.status]);
+  }, []);
 
   if (!mounted) return null;
 
-  const name = user?.name ?? "there";
+  const name = isAdmin ? "Admin" : userName;
   const robotAnim = phase === "drop" ? "robot-drop" : phase === "sway" ? "robot-sway" : "robot-float";
+  const robotSrc = isAdmin ? adminRobotPng : hangingRobotPng;
 
   const mascot = (
     <div
-      className="fixed top-[62px] right-5 z-[80] flex items-center gap-3 sm:top-[66px] sm:right-7 lg:top-[72px] lg:right-9"
+      className="pointer-events-none fixed top-[62px] right-5 z-20 flex items-center gap-3 sm:top-[66px] sm:right-7 lg:top-[72px] lg:right-9"
       aria-live="polite"
     >
       {/* Speech bubble — dark purple panel showing the live vendor name. */}
@@ -139,7 +120,7 @@ export default function DashboardWelcomeRobot() {
         className="relative cursor-pointer focus:outline-none"
       >
         <img
-          src={hangingRobotPng}
+          src={robotSrc}
           alt="AI assistant"
           draggable={false}
           className={`h-[170px] w-auto select-none object-contain drop-shadow-[0_20px_30px_rgba(108,99,255,0.55)] sm:h-[215px] lg:h-[250px] ${robotAnim}`}

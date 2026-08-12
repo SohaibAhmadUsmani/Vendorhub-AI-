@@ -47,11 +47,12 @@ export default function VendorProfileForm({ profile, onClose, onSaveProfile }) {
       ...formData,
       logoImage: formData.logoImage || profile?.logoImage || profile?.logoUrl,
       coverImage: formData.coverImage || profile?.coverImage || profile?.coverUrl,
-      contactDetails: {
-        ...profile?.contactDetails,
+      phone: formData.phone,
+      whatsApp: formData.whatsApp,
+      contact: {
+        ...profile?.contact,
         email: formData.email,
         phone: formData.phone,
-        whatsApp: formData.whatsApp,
         address: formData.address
       },
       manufacturingCapabilities: {
@@ -63,15 +64,20 @@ export default function VendorProfileForm({ profile, onClose, onSaveProfile }) {
         factoryArea: formData.factoryArea
       }
     };
-    if (onSaveProfile) {
-      await onSaveProfile(payload);
+    try {
+      if (onSaveProfile) {
+        await onSaveProfile(payload);
+      }
+      setSuccessMsg(true);
+      setTimeout(() => {
+        setSuccessMsg(false);
+        onClose();
+      }, 1000);
+    } catch (error) {
+      alert("Failed to save profile. Please check your connection or try again.");
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
-    setSuccessMsg(true);
-    setTimeout(() => {
-      setSuccessMsg(false);
-      onClose();
-    }, 1000);
   };
 
   return ReactDOM.createPortal(

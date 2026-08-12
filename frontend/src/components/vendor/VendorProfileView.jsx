@@ -126,17 +126,23 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
   };
 
   const handleSaveProfile = async (updatedFields) => {
-    const updated = await updateVendorProfile(selectedVendorId, {
-      ...vendorData,
-      ...updatedFields,
-      logoImage: updatedFields.logoImage || vendorData?.logoImage || vendorData?.logoUrl || 'https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=300&auto=format&fit=crop&q=80',
-      coverImage: updatedFields.coverImage || vendorData?.coverImage || vendorData?.coverUrl || 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1200&auto=format&fit=crop&q=80',
-      manufacturingCapabilities: {
-        ...vendorData?.manufacturingCapabilities,
-        ...updatedFields.manufacturingCapabilities
-      }
-    });
-    setVendorData(updated);
+    try {
+      const targetId = vendorData?._id || selectedVendorId || vendorData?.id;
+      const updated = await updateVendorProfile(targetId, {
+        ...vendorData,
+        ...updatedFields,
+        logoImage: updatedFields.logoImage || vendorData?.logoImage || vendorData?.logoUrl || 'https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=300&auto=format&fit=crop&q=80',
+        coverImage: updatedFields.coverImage || vendorData?.coverImage || vendorData?.coverUrl || 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1200&auto=format&fit=crop&q=80',
+        manufacturingCapabilities: {
+          ...vendorData?.manufacturingCapabilities,
+          ...updatedFields.manufacturingCapabilities
+        }
+      });
+      setVendorData(updated);
+    } catch (error) {
+      console.error("Failed to save profile:", error);
+      throw error; // Rethrow to let the modal handle it
+    }
   };
 
 
@@ -578,15 +584,12 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
               style={{ position: 'relative', paddingBottom: '45%', height: 0, overflow: 'hidden', borderRadius: 'var(--radius-md)', backgroundColor: '#0B1021', cursor: 'pointer' }}
             >
               <iframe 
-                src={vendorData.videoUrl} 
+                src="https://www.youtube.com/embed/5XAxHI8sItI" 
                 title="Factory Tour"
-                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 0, pointerEvents: 'none' }}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 0, pointerEvents: 'auto' }}
               />
-              <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.2)', display: 'flex', itemsCenter: 'center', justifyContent: 'center' }}>
-                <div style={{ padding: '1rem 1.5rem', borderRadius: '9999px', backgroundColor: 'rgba(108,92,231,0.9)', color: 'white', fontWeight: 700, fontSize: '0.9rem', boxShadow: '0 10px 25px rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  ▶ Play Factory Tour Video
-                </div>
-              </div>
             </div>
           </div>
 
