@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { authMiddleware, roleMiddleware } = require('../middleware/authMiddleware');
 const {
   getOverview,
   getOverviewMetrics,
@@ -22,6 +23,9 @@ const {
 } = require('../controllers/dashboardController');
 
 // Module 3 — Vendor Dashboard routes
+router.use(authMiddleware);
+router.use(roleMiddleware('vendor'));
+
 router.get('/overview', getOverview);
 router.get('/analytics', getAnalytics);
 router.get('/rfqs', getRfqs);
@@ -42,6 +46,8 @@ router.get('/metric-export/:key', getMetricExport);
 
 // Phase 1 — Dashboard Overview module (mounted separately at /api/dashboard)
 const overviewRouter = express.Router();
+overviewRouter.use(authMiddleware);
+overviewRouter.use(roleMiddleware('vendor'));
 overviewRouter.get('/overview', getOverviewMetrics);
 
 module.exports = router;

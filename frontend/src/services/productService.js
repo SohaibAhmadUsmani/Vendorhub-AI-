@@ -2,9 +2,9 @@
  * productService.js — Enterprise REST API & 60+ Product Catalog Dataset Service
  */
 
-const API_BASE_URL = 'http://localhost:5000/api/products';
+import httpClient from './httpClient';
 
-export const INITIAL_PRODUCTS_DATA = [
+const API_BASE_URL = '/api/products';
   // --- 1. Sialkot Sports Limited (10 Products) ---
   {
     id: "p-ss-101",
@@ -1366,45 +1366,15 @@ function saveLocalProductsStore(list) {
 }
 
 export async function fetchProducts(filters = {}) {
-  try {
-    const queryParams = new URLSearchParams();
-    if (filters.category && filters.category !== 'All') queryParams.append('category', filters.category);
-    if (filters.searchQuery) queryParams.append('search', filters.searchQuery);
-    if (filters.stockStatus && filters.stockStatus !== 'All') queryParams.append('stockStatus', filters.stockStatus);
-    if (filters.vendorId) queryParams.append('vendorId', filters.vendorId);
+  const queryParams = new URLSearchParams();
+  if (filters.category && filters.category !== 'All') queryParams.append('category', filters.category);
+  if (filters.searchQuery) queryParams.append('search', filters.searchQuery);
+  if (filters.stockStatus && filters.stockStatus !== 'All') queryParams.append('stockStatus', filters.stockStatus);
+  if (filters.vendorId) queryParams.append('vendorId', filters.vendorId);
 
-    const url = `${API_BASE_URL}?${queryParams.toString()}`;
-    const res = await fetch(url);
-    if (res.ok) {
-      const json = await res.json();
-      let products = (json.data || []).map(normalizeProduct);
-      if (products.length === 0) {
-        products = filterLocalProducts(getLocalProductsStore(), filters);
-      } else {
-        if (filters.vendorId) {
-          const targetId = String(filters.vendorId).toLowerCase();
-          products = products.filter(p => {
-            const pVId = String(p.vendorId || '').toLowerCase();
-            const pVName = String(p.vendorName || '').toLowerCase();
-            if (pVId === targetId) return true;
-            if (targetId.includes('sialkot') && pVName.includes('sialkot')) return true;
-            if (targetId.includes('atlas') && pVName.includes('atlas')) return true;
-            if (targetId.includes('precision') && pVName.includes('precision')) return true;
-            if (targetId.includes('apex') && pVName.includes('apex')) return true;
-            if (targetId.includes('empire') && pVName.includes('empire')) return true;
-            if (targetId.includes('eurotech') && pVName.includes('eurotech')) return true;
-            return false;
-          });
-        }
-      }
-      return products;
-    }
-
-    return filterLocalProducts(getLocalProductsStore(), filters);
-  } catch (error) {
-    console.warn('Backend API unavailable for products, serving full local catalog:', error);
-    return filterLocalProducts(getLocalProductsStore(), filters);
-  }
+  const url = `${API_BASE_URL}?${queryParams.toString()}`;
+  const res = await httpClient.get(url);
+  return (res.data || []).map(normalizeProduct);
 }
 
 function filterLocalProducts(list, filters) {

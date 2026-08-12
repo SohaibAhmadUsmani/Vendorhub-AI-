@@ -15,6 +15,24 @@ export const httpClient = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
+// Add a request interceptor to automatically attach the JWT token
+httpClient.interceptors.request.use(
+  (config) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    } catch (error) {
+      console.error("Error reading token from localStorage:", error);
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 /** Unwraps a backend response into its `data` payload. */
 export async function getData(path, config) {
   const response = await httpClient.get(path, config);

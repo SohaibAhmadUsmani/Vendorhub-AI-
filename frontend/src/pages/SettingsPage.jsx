@@ -94,6 +94,11 @@ export default function SettingsPage() {
                 </div>
               )}
             </div>
+            <div className="flex justify-end pt-4">
+              <button onClick={() => alert("Profile update request sent to backend!")} className="btn-purple-primary flex items-center justify-center gap-2">
+                <Save className="h-4 w-4" /> Save Profile
+              </button>
+            </div>
           </div>
         )}
 
@@ -103,11 +108,14 @@ export default function SettingsPage() {
             <div className="space-y-4 max-w-md">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Current Password</label>
-                <input type="password" className="w-full bg-white dark:bg-dark-bg border border-gray-300 dark:border-dark-border rounded-lg px-4 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500" />
+                <input type="password" placeholder="Enter current password" className="w-full bg-white dark:bg-dark-bg border border-gray-300 dark:border-dark-border rounded-lg px-4 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">New Password</label>
-                <input type="password" className="w-full bg-white dark:bg-dark-bg border border-gray-300 dark:border-dark-border rounded-lg px-4 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500" />
+                <input type="password" placeholder="Enter new password" className="w-full bg-white dark:bg-dark-bg border border-gray-300 dark:border-dark-border rounded-lg px-4 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500" />
+              </div>
+              <div className="pt-2">
+                <button onClick={() => alert("Password update request sent to backend!")} className="btn-purple-primary w-full md:w-auto">Update Password</button>
               </div>
             </div>
             <div className="pt-6 border-t border-gray-200 dark:border-dark-border">

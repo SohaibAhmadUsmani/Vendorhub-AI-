@@ -6,6 +6,8 @@ dns.setServers(['8.8.8.8', '8.8.4.4']); // Use Google Public DNS to guarantee SR
 const mongoose = require('mongoose');
 const Vendor = require('../models/Vendor');
 const Product = require('../models/Product');
+const User = require('../models/User');
+const bcrypt = require('bcryptjs');
 
 const seedData = async () => {
   try {
@@ -17,10 +19,15 @@ const seedData = async () => {
     // Clear existing Vendor and Product collections
     await Vendor.deleteMany({});
     await Product.deleteMany({});
-    console.log('Cleared existing Vendor and Product collections.');
+    await User.deleteMany({});
+    console.log('Cleared existing Vendor, Product and User collections.');
+
+    const defaultPasswordHash = await bcrypt.hash('Vendor@1234', 10);
 
     // 1. Sialkot Sports Limited
+    const sialkotUser = await User.create({ name: 'Sialkot Sports Limited', email: 'sialkotsportslimited@gmail.com', password: defaultPasswordHash, role: 'vendor', isVerified: true });
     const sialkotSports = await Vendor.create({
+      userId: sialkotUser._id,
       name: 'Sialkot Sports Limited',
       tagline: 'Premier FIFA-grade match ball & activewear manufacturer',
       logo: 'https://images.unsplash.com/photo-1517466787929-bc90951d0974?auto=format&fit=crop&w=300&q=80',
@@ -78,7 +85,9 @@ const seedData = async () => {
     ]);
 
     // 2. Atlas Industrial Corp
+    const atlasUser = await User.create({ name: 'Atlas Industrial Corp', email: 'atlasindustrial@gmail.com', password: defaultPasswordHash, role: 'vendor', isVerified: true });
     const atlasIndustrial = await Vendor.create({
+      userId: atlasUser._id,
       name: 'Atlas Industrial Corp',
       tagline: 'Heavy-duty industrial pumps, valves & precision casting',
       logo: 'https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?auto=format&fit=crop&w=300&q=80',
@@ -131,7 +140,9 @@ const seedData = async () => {
     ]);
 
     // 3. Precision Gear Co
+    const precisionUser = await User.create({ name: 'Precision Gear Co', email: 'precisiongearco@gmail.com', password: defaultPasswordHash, role: 'vendor', isVerified: true });
     const precisionGear = await Vendor.create({
+      userId: precisionUser._id,
       name: 'Precision Gear Co',
       tagline: 'High-precision CNC machined gears & transmission components',
       logo: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=300&q=80',
@@ -172,7 +183,9 @@ const seedData = async () => {
     ]);
 
     // 4. Apex Textiles
+    const apexUser = await User.create({ name: 'Apex Textiles', email: 'apextextiles@gmail.com', password: defaultPasswordHash, role: 'vendor', isVerified: true });
     const apexTextiles = await Vendor.create({
+      userId: apexUser._id,
       name: 'Apex Textiles',
       tagline: 'OEKO-TEX certified 100% organic cotton fabrics & home textiles',
       logo: 'https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?auto=format&fit=crop&w=300&q=80',
@@ -217,7 +230,9 @@ const seedData = async () => {
     ]);
 
     // 5. Empire Mills
+    const empireUser = await User.create({ name: 'Empire Mills', email: 'empiremills@gmail.com', password: defaultPasswordHash, role: 'vendor', isVerified: true });
     const empireMills = await Vendor.create({
+      userId: empireUser._id,
       name: 'Empire Mills',
       tagline: 'Structural steel fabrication & heavy industrial mill products',
       logo: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=300&q=80',
@@ -258,7 +273,9 @@ const seedData = async () => {
     ]);
 
     // 6. EuroTech
+    const euroTechUser = await User.create({ name: 'EuroTech', email: 'eurotech@gmail.com', password: defaultPasswordHash, role: 'vendor', isVerified: true });
     const euroTech = await Vendor.create({
+      userId: euroTechUser._id,
       name: 'EuroTech',
       tagline: 'Smart IoT controllers & industrial automation electronics',
       logo: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=300&q=80',

@@ -59,7 +59,7 @@ export default function DashboardLayout() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[var(--bg-primary)]">
+    <div className="flex min-h-screen bg-[var(--bg-primary)] bg-grid-pattern">
       <DashboardSidebar
         collapsed={collapsed}
         mobileOpen={mobileOpen}
