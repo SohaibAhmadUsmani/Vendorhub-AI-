@@ -1,15 +1,28 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Award, Plus, CheckCircle2, Clock, XCircle, FileText } from "lucide-react";
 import DashboardEmptyState from "../components/dashboard/DashboardEmptyState";
+import { fetchMyVendorProfile } from "../services/vendorService";
 
 export default function CertificationsPage() {
-  // Mock data for certifications
-  const certifications = [
-    { id: 1, name: "ISO 9001:2015", issuer: "International Organization for Standardization", issueDate: "2023-01-15", expiryDate: "2026-01-14", status: "verified" },
-    { id: 2, name: "GOTS (Global Organic Textile Standard)", issuer: "Global Standard gGmbH", issueDate: "2023-06-20", expiryDate: "2024-06-19", status: "expired" },
-    { id: 3, name: "CE Marking", issuer: "European Union", issueDate: "2024-02-10", expiryDate: "2027-02-09", status: "pending" }
-  ];
+  const [certifications, setCertifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const vendor = await fetchMyVendorProfile();
+        if (vendor && vendor.certifications) {
+          setCertifications(vendor.certifications);
+        }
+      } catch (err) {
+        console.error("Failed to load certifications:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, []);
 
   const getStatusBadge = (status) => {
     switch (status) {
@@ -40,7 +53,10 @@ export default function CertificationsPage() {
         </button>
       </div>
 
-      <div className="card-surface overflow-hidden">
+      {loading ? (
+        <div className="p-8 text-center text-gray-500 dark:text-gray-400">Loading certifications...</div>
+      ) : (
+        <div className="card-surface overflow-hidden">
         {certifications.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
@@ -56,19 +72,19 @@ export default function CertificationsPage() {
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-dark-border">
                 {certifications.map((cert) => (
-                  <tr key={cert.id} className="hover:bg-gray-50 dark:hover:bg-dark-hover transition-colors">
+                  <tr key={cert.id || cert.title || cert.name} className="hover:bg-gray-50 dark:hover:bg-dark-hover transition-colors">
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-3">
                         <div className="p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
                           <Award className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                         </div>
-                        <span className="font-medium text-gray-900 dark:text-white">{cert.name}</span>
+                        <span className="font-medium text-gray-900 dark:text-white">{cert.title || cert.name}</span>
                       </div>
                     </td>
                     <td className="py-4 px-6 text-sm text-gray-600 dark:text-gray-400">{cert.issuer}</td>
-                    <td className="py-4 px-6 text-sm text-gray-600 dark:text-gray-400">{cert.issueDate}</td>
-                    <td className="py-4 px-6 text-sm text-gray-600 dark:text-gray-400">{cert.expiryDate}</td>
-                    <td className="py-4 px-6">{getStatusBadge(cert.status)}</td>
+                    <td className="py-4 px-6 text-sm text-gray-600 dark:text-gray-400">{cert.issueDate || "N/A"}</td>
+                    <td className="py-4 px-6 text-sm text-gray-600 dark:text-gray-400">{cert.validUntil || cert.expiryDate || "N/A"}</td>
+                    <td className="py-4 px-6">{getStatusBadge(cert.status || "verified")}</td>
                     <td className="py-4 px-6 text-right">
                       <button className="text-purple-600 hover:text-purple-700 font-medium text-sm">View Document</button>
                     </td>

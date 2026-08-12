@@ -3,14 +3,21 @@ import ConversationList from '../components/messaging/ConversationList';
 import ChatWindow from '../components/messaging/ChatWindow';
 import { getConversations } from '../services/messageService';
 
-// TODO: replace with real logged-in user from auth context once wired up
-const currentUser = { id: localStorage.getItem('userId') || '', role: 'buyer' };
-
 export default function MessagesPage() {
   const [conversations, setConversations] = useState([]);
   const [active, setActive] = useState(null);
+  const [currentUser, setCurrentUser] = useState({ id: '', role: 'buyer' });
 
   useEffect(() => {
+    try {
+      const storedUser = JSON.parse(localStorage.getItem('user'));
+      if (storedUser) {
+        setCurrentUser({ id: storedUser._id || storedUser.id, role: storedUser.role || 'buyer' });
+      }
+    } catch (e) {
+      console.error('Failed to parse user from localStorage', e);
+    }
+
     getConversations()
       .then((res) => setConversations(res.conversations || []))
       .catch(() => setConversations([]));

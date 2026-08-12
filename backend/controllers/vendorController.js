@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Vendor = require('../models/Vendor');
+const Review = require('../models/Review');
 
 /**
  * @desc    Get all vendor profiles with optional search & filtering
@@ -27,7 +28,7 @@ const getVendors = async (req, res) => {
       query.verificationStatus = verificationStatus;
     }
 
-    const vendors = await Vendor.find(query).sort({ rating: -1 });
+    const vendors = await Vendor.find(query).sort({ rating: -1 }).populate('reviews');
     res.status(200).json({ success: true, count: vendors.length, data: vendors });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -45,15 +46,15 @@ const getVendorById = async (req, res) => {
     let vendor = null;
 
     if (mongoose.Types.ObjectId.isValid(id)) {
-      vendor = await Vendor.findById(id);
+      vendor = await Vendor.findById(id).populate('reviews');
     } else {
       // Find by name regex or fallback to first vendor in DB
       const cleanSearch = id.replace(/^v-/, '').replace(/-\d+$/, '').replace(/-/g, ' ');
-      vendor = await Vendor.findOne({ name: { $regex: cleanSearch, $options: 'i' } });
+      vendor = await Vendor.findOne({ name: { $regex: cleanSearch, $options: 'i' } }).populate('reviews');
     }
 
     if (!vendor) {
-      vendor = await Vendor.findOne({}); // Fallback to first seeded vendor
+      vendor = await Vendor.findOne({}).populate('reviews'); // Fallback to first seeded vendor
     }
 
     if (!vendor) {
@@ -140,14 +141,15 @@ const addVendorReview = async (req, res) => {
     const { reviewerName, reviewerCompany, rating, comment, categories } = req.body;
 
     let vendor = mongoose.Types.ObjectId.isValid(id)
-      ? await Vendor.findById(id)
-      : await Vendor.findOne({ name: { $regex: id, $options: 'i' } });
+      ? await Vendor.findById(id).populate('reviews')
+      : await Vendor.findOne({ name: { $regex: id, $options: 'i' } }).populate('reviews');
 
     if (!vendor) {
       return res.status(404).json({ success: false, message: 'Vendor not found' });
     }
 
-    const newReview = {
+    const newReview = await Review.create({
+      vendorId: vendor._id,
       reviewerName: reviewerName || 'Verified Buyer',
       reviewerCompany: reviewerCompany || 'Enterprise Client',
       rating: Number(rating) || 5,
@@ -159,14 +161,22 @@ const addVendorReview = async (req, res) => {
       },
       comment: comment || 'Great service and quality products.',
       date: new Date()
-    };
+    });
 
-    vendor.reviews.push(newReview);
+    vendor.reviews.push(newReview._id);
     vendor.reviewCount = vendor.reviews.length;
-    const totalRating = vendor.reviews.reduce((acc, item) => item.rating + acc, 0);
-    vendor.rating = Number((totalRating / vendor.reviews.length).toFixed(1));
+    
+    // Temporarily append the new review to populated reviews for calculation
+    const allReviews = [...vendor.reviews];
+    allReviews[allReviews.length - 1] = newReview;
+    const totalRating = allReviews.reduce((acc, item) => item.rating + acc, 0);
+    vendor.rating = Number((totalRating / allReviews.length).toFixed(1));
 
     await vendor.save();
+    
+    // Replace array of ids with populated documents again for response
+    vendor.reviews = allReviews;
+
     res.status(201).json({ success: true, data: vendor });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
@@ -215,13 +225,13 @@ const getVendorMe = async (req, res) => {
     if (!req.user || !req.user.id) {
       return res.status(401).json({ success: false, message: 'Not authenticated' });
     }
-    let vendor = await Vendor.findOne({ userId: req.user.id });
+    let vendor = await Vendor.findOne({ userId: req.user._id || req.user.id }).populate('reviews');
     if (!vendor) {
       // Fallback to searching by user email or first vendor
-      vendor = await Vendor.findOne({ 'contact.email': req.user.email });
+      vendor = await Vendor.findOne({ 'contact.email': req.user.email }).populate('reviews');
     }
     if (!vendor) {
-      vendor = await Vendor.findOne({});
+      vendor = await Vendor.findOne({}).populate('reviews');
     }
     if (!vendor) {
       return res.status(404).json({ success: false, message: 'Vendor profile not found' });

@@ -425,6 +425,12 @@ export async function fetchVendorProfile(vendorId) {
   throw new Error('Vendor not found');
 }
 
+export async function fetchMyVendorProfile() {
+  const res = await httpClient.get(`${API_BASE_URL}/me`);
+  if (res.data) return normalizeVendor(res.data);
+  throw new Error('Profile not found');
+}
+
 export async function updateVendorProfile(vendorId, updateData) {
   const res = await httpClient.put(`${API_BASE_URL}/${vendorId}`, updateData);
   return normalizeVendor(res.data);
