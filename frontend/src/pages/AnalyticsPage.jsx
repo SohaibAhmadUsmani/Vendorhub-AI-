@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   AreaChart,
   Area,
@@ -27,8 +27,9 @@ import {
   Sparkles,
   ArrowUpRight,
 } from "lucide-react";
+import api from "../services/api";
 
-const monthlySpending = [
+const defaultMonthlySpending = [
   { month: "Jan", amount: 82000 },
   { month: "Feb", amount: 91000 },
   { month: "Mar", amount: 103000 },
@@ -37,36 +38,20 @@ const monthlySpending = [
   { month: "Jun", amount: 127000 },
 ];
 
-const topSuppliers = [
+const defaultTopSuppliers = [
   { name: "Global Electronics Inc.", spend: 38800, orders: 18 },
   { name: "Precision Gear Co.", spend: 26300, orders: 12 },
   { name: "Atlas Industrial", spend: 19200, orders: 9 },
 ];
 
-const savingsData = [{ name: "Savings", value: 14.6, fill: "#8b5cf6" }];
-
-const purchaseTrendBars = [
+const defaultPurchaseTrendBars = [
   { label: "Week 1", value: 55 },
   { label: "Week 2", value: 72 },
   { label: "Week 3", value: 64 },
   { label: "Week 4", value: 83 },
 ];
 
-const buyerHighlights = [
-  { title: "Monthly spending", value: "$127.0K", subtitle: "Highest quarter spend", icon: Wallet },
-  { title: "Top suppliers", value: "3 vendors", subtitle: "Leading supplier spend", icon: Users },
-  { title: "Cost savings", value: "14.6%", subtitle: "Saved vs prior period", icon: PiggyBank },
-  { title: "Purchase trends", value: "+21%", subtitle: "Steady buyer growth", icon: TrendingUp },
-];
-
-const vendorHighlights = [
-  { title: "Revenue", value: "$275.4K", subtitle: "Total seller revenue", icon: DollarSign },
-  { title: "RFQ conversion rate", value: "67%", subtitle: "Win rate on RFQs", icon: Percent },
-  { title: "Response time", value: "1h 42m", subtitle: "Average reply time", icon: Clock },
-  { title: "Best-selling products", value: "3 SKUs", subtitle: "Top performing products", icon: Package },
-];
-
-const revenueTrend = [
+const defaultRevenueTrend = [
   { month: "Jan", revenue: 168000 },
   { month: "Feb", revenue: 191000 },
   { month: "Mar", revenue: 205000 },
@@ -75,15 +60,13 @@ const revenueTrend = [
   { month: "Jun", revenue: 275400 },
 ];
 
-const rfqFunnel = [
+const defaultRfqFunnel = [
   { stage: "Sent", value: 42 },
   { stage: "Quoted", value: 31 },
   { stage: "Won", value: 28 },
 ];
 
-const conversionData = [{ name: "Conversion", value: 67, fill: "#06b6d4" }];
-
-const bestSellingProducts = [
+const defaultBestSellingProducts = [
   { name: "Steel Brackets", sales: 6200 },
   { name: "Servo Motors", sales: 5100 },
   { name: "Ball Bearings", sales: 3800 },
@@ -120,6 +103,56 @@ function HighlightCard({ item, badgeBg, badgeText, borderColor }) {
 }
 
 export default function AnalyticsPage() {
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const role = user.role || "buyer";
+
+  const [data, setData] = useState(null);
+  const [aiInsights, setAiInsights] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await api.get(`/analytics/${role}`);
+        setData(res.data.data);
+        setAiInsights(res.data.aiInsights);
+      } catch (err) {
+        console.error("Failed to fetch analytics", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [role]);
+
+  const isBuyer = role === "buyer";
+
+  const monthlySpending = data?.monthlySpending || defaultMonthlySpending;
+  const topSuppliers = data?.topSuppliers || defaultTopSuppliers;
+  const savingsData = [{ name: "Savings", value: data?.savings?.value || 14.6, fill: "#8b5cf6" }];
+  const purchaseTrendBars = data?.purchaseTrend || defaultPurchaseTrendBars;
+
+  const buyerHighlights = [
+    { title: "Monthly spending", value: data?.highlights?.monthlySpending || "$127.0K", subtitle: "Highest quarter spend", icon: Wallet },
+    { title: "Top suppliers", value: data?.highlights?.topSuppliers || "3 vendors", subtitle: "Leading supplier spend", icon: Users },
+    { title: "Cost savings", value: data?.highlights?.costSavings || "14.6%", subtitle: "Saved vs prior period", icon: PiggyBank },
+    { title: "Purchase trends", value: data?.highlights?.purchaseTrends || "+21%", subtitle: "Steady buyer growth", icon: TrendingUp },
+  ];
+
+  const revenueTrend = data?.revenueTrend || defaultRevenueTrend;
+  const conversionData = [{ name: "Conversion", value: data?.rfqConversion?.value || 67, fill: "#06b6d4" }];
+  const rfqFunnel = data?.rfqFunnel || defaultRfqFunnel;
+  const bestSellingProducts = data?.bestSellingProducts || defaultBestSellingProducts;
+
+  const vendorHighlights = [
+    { title: "Revenue", value: data?.highlights?.revenue || "$275.4K", subtitle: "Total seller revenue", icon: DollarSign },
+    { title: "RFQ conversion rate", value: data?.highlights?.rfqConversionRate || "67%", subtitle: "Win rate on RFQs", icon: Percent },
+    { title: "Response time", value: data?.highlights?.responseTime || "1h 42m", subtitle: "Average reply time", icon: Clock },
+    { title: "Best-selling products", value: data?.highlights?.bestSellingProducts || "3 SKUs", subtitle: "Top performing products", icon: Package },
+  ];
+
+  const highlights = isBuyer ? buyerHighlights : vendorHighlights;
+
   const scrollTo = (id) => {
     const element = document.getElementById(id);
     if (element) {

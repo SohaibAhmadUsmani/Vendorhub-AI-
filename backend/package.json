@@ -30,7 +30,8 @@
     "socket.io": "^4.7.2",
     "speakeasy": "^2.0.0",
     "streamifier": "^0.1.1",
-    "stripe": "^14.11.0"
+    "stripe": "^14.11.0",
+    "tesseract.js": "^7.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"

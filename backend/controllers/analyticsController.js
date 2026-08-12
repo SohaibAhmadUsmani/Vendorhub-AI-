@@ -34,16 +34,23 @@ const getBuyerAnalytics = async (req, res) => {
 
     // Compute fresh analytics
     const vendors = await Vendor.find({}).sort({ rating: -1 });
-    const products = await Product.find({});
-    const rfqs = await RFQ.find({});
+    
+    const productStats = await Product.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalProductValue: { $sum: { $multiply: ["$price", { $ifNull: ["$stockQuantity", 0] }] } }
+        }
+      }
+    ]);
+    const totalProductValue = productStats.length > 0 ? productStats[0].totalProductValue : 0;
 
     // --- Monthly Spending (derived from real DB data, fallback to realistic demo values) ---
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
     const baseMonthlyValues = [82000, 91000, 103000, 98000, 112000, 127000];
-    const totalProductValue = products.reduce((sum, p) => sum + (p.price || 0) * (p.stockQuantity || 0), 0);
 
     let monthlySpending;
-    if (products.length > 0) {
+    if (totalProductValue > 0) {
       const baseMonthly = Math.round(totalProductValue / (months.length * 3));
       monthlySpending = months.map((month, i) => ({
         month,
@@ -56,24 +63,24 @@ const getBuyerAnalytics = async (req, res) => {
       }));
     }
 
-   
-    const vendorProductMap = {};
-    products.forEach(p => {
-      if (!vendorProductMap[p.vendorId]) {
-        vendorProductMap[p.vendorId] = { name: p.vendorName || 'Unknown', totalValue: 0, count: 0 };
-      }
-      vendorProductMap[p.vendorId].totalValue += (p.price || 0) * (p.stockQuantity || 0);
-      vendorProductMap[p.vendorId].count += 1;
-    });
+    const vendorProductMap = await Product.aggregate([
+      {
+        $group: {
+          _id: "$vendorId",
+          vendorName: { $first: "$vendorName" },
+          totalValue: { $sum: { $multiply: ["$price", { $ifNull: ["$stockQuantity", 0] }] } },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { totalValue: -1 } },
+      { $limit: 3 }
+    ]);
 
-    let topSuppliers = Object.entries(vendorProductMap)
-      .sort(([, a], [, b]) => b.totalValue - a.totalValue)
-      .slice(0, 3)
-      .map(([, data]) => ({
-        name: data.name,
-        spend: Math.max(Math.round(data.totalValue / 100), 15000),
-        orders: data.count,
-      }));
+    let topSuppliers = vendorProductMap.map(data => ({
+      name: data.vendorName || 'Unknown',
+      spend: Math.max(Math.round(data.totalValue / 100), 15000),
+      orders: data.count,
+    }));
 
     // If no products with vendor data, use vendor names from DB or demo fallback
     if (topSuppliers.length === 0) {
@@ -241,18 +248,36 @@ const getVendorAnalytics = async (req, res) => {
 
     // Compute fresh analytics
     const vendors = await Vendor.find({});
-    const products = await Product.find({});
-    const rfqs = await RFQ.find({});
+    
+    const productStats = await Product.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalProductRevenue: { $sum: { $multiply: ["$price", { $ifNull: ["$stockQuantity", 0] }] } }
+        }
+      }
+    ]);
+    const totalProductRevenue = productStats.length > 0 ? productStats[0].totalProductRevenue : 0;
+
+    const rfqStats = await RFQ.aggregate([
+      {
+        $group: {
+          _id: null,
+          rfqBudgetTotal: { $sum: { $ifNull: ["$budget", 0] } }
+        }
+      }
+    ]);
+    const rfqBudgetTotal = rfqStats.length > 0 ? rfqStats[0].rfqBudgetTotal : 0;
+
+    const hasProductsOrRfqs = await Product.exists({}) || await RFQ.exists({});
 
     // --- Revenue Trend (derived from real DB data, fallback to realistic demo values) ---
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
     const baseRevenueValues = [168000, 191000, 205000, 224000, 251000, 275400];
-    const totalProductRevenue = products.reduce((sum, p) => sum + (p.price || 0) * (p.stockQuantity || 0), 0);
-    const rfqBudgetTotal = rfqs.reduce((sum, r) => sum + (r.budget || 0), 0);
     const baseRevenue = Math.round((totalProductRevenue + rfqBudgetTotal) / (months.length * 5));
 
     let revenueTrend;
-    if (products.length > 0 || rfqs.length > 0) {
+    if (hasProductsOrRfqs) {
       revenueTrend = months.map((month, i) => ({
         month,
         revenue: Math.max(baseRevenue * (1.2 + (i * 0.1) + Math.random() * 0.05), 75000),
@@ -265,9 +290,20 @@ const getVendorAnalytics = async (req, res) => {
     }
 
     // --- RFQ Funnel ---
-    const rfqSent = rfqs.filter(r => r.status === 'sent' || r.status === 'draft').length || 12;
-    const rfqQuoted = rfqs.filter(r => r.status === 'quoted').length || 8;
-    const rfqWon = rfqs.filter(r => r.status === 'closed').length || 5;
+    const rfqStatusCounts = await RFQ.aggregate([
+      { $group: { _id: "$status", count: { $sum: 1 } } }
+    ]);
+    
+    let rfqSent = 0, rfqQuoted = 0, rfqWon = 0;
+    rfqStatusCounts.forEach(stat => {
+      if (stat._id === 'sent' || stat._id === 'draft') rfqSent += stat.count;
+      else if (stat._id === 'quoted') rfqQuoted += stat.count;
+      else if (stat._id === 'closed') rfqWon += stat.count;
+    });
+
+    if (rfqSent === 0 && rfqQuoted === 0 && rfqWon === 0) {
+      rfqSent = 12; rfqQuoted = 8; rfqWon = 5;
+    }
 
     const rfqFunnel = [
       { stage: 'Sent', value: Math.max(rfqSent, 15) },
@@ -282,9 +318,8 @@ const getVendorAnalytics = async (req, res) => {
     const conversionData = { name: 'Conversion', value: Math.min(conversionRate, 100) };
 
     // --- Best-Selling Products (by stock quantity as proxy for sales) ---
-    const bestSellingProducts = products
-      .sort((a, b) => (b.stockQuantity || 0) - (a.stockQuantity || 0))
-      .slice(0, 3)
+    const productsDesc = await Product.find({}).sort({ stockQuantity: -1 }).limit(3);
+    const bestSellingProducts = productsDesc
       .map(p => ({
         name: p.name.length > 20 ? p.name.substring(0, 20) + '…' : p.name,
         sales: Math.round((p.stockQuantity || 1000) / 5),

@@ -62,6 +62,11 @@ const documentSchema = new mongoose.Schema(
       default: "",
     },
 
+    extractedText: {
+      type: String,
+      default: "",
+    },
+
     summaryKeyPoints: {
       type: [String],
       default: [],
