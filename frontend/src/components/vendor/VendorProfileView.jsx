@@ -21,8 +21,15 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
   const routeParams = useParams();
   const queryVendorId = routeParams.id || searchParams.get('id');
   
-  const userStr = localStorage.getItem('user');
-  const currentUser = userStr ? JSON.parse(userStr) : null;
+  let currentUser = null;
+  try {
+    const userStr = localStorage.getItem('user');
+    if (userStr && userStr !== 'undefined') {
+      currentUser = JSON.parse(userStr);
+    }
+  } catch (e) {
+    console.error('Error parsing user from localStorage:', e);
+  }
   const isVendorUser = currentUser?.role === 'vendor';
 
   const [selectedVendorId, setSelectedVendorId] = useState(queryVendorId || initialVendorId);
@@ -63,6 +70,9 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
       let data;
       if (isVendorUser) {
         data = await fetchMyVendorProfile();
+        if (data && (data._id || data.id) && (data._id || data.id) !== selectedVendorId) {
+          setSelectedVendorId(data._id || data.id);
+        }
       } else {
         data = await fetchVendorProfile(selectedVendorId);
       }
@@ -282,13 +292,15 @@ export default function VendorProfileView({ initialVendorId = "v-sialkot-101" })
 
           {/* Right Action Buttons */}
           <div className="profile-hero-actions" style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-            <button 
-              className="btn-purple-primary" 
-              style={{ minHeight: '48px', padding: '0.6rem 1.5rem', borderRadius: '12px' }}
-              onClick={() => setShowEditModal(true)}
-            >
-              Edit Profile
-            </button>
+            {currentUser?.role !== 'buyer' && (
+              <button 
+                className="btn-purple-primary" 
+                style={{ minHeight: '48px', padding: '0.6rem 1.5rem', borderRadius: '12px' }}
+                onClick={() => setShowEditModal(true)}
+              >
+                Edit Profile
+              </button>
+            )}
             <button 
               className="btn-outline-secondary" 
               style={{ minHeight: '48px', padding: '0.6rem 1.5rem', borderRadius: '12px' }}

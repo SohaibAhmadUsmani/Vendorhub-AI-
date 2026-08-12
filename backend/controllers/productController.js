@@ -155,6 +155,15 @@ const createProduct = async (req, res) => {
     if (body.imageUrl && !body.image) body.image = body.imageUrl;
     if (body.availableStock && !body.stockQuantity) body.stockQuantity = Number(body.availableStock);
     
+    // Ownership check for vendors
+    if (req.user.role === 'vendor') {
+      const vendor = await mongoose.model('Vendor').findOne({ userId: req.user._id });
+      if (!vendor) {
+        return res.status(403).json({ success: false, message: 'No vendor profile found for this user.' });
+      }
+      body.vendorId = vendor._id;
+    }
+
     const product = await Product.create(body);
     res.status(201).json({ success: true, data: product });
   } catch (error) {
@@ -180,16 +189,26 @@ const updateProduct = async (req, res) => {
     let product;
 
     if (mongoose.Types.ObjectId.isValid(id)) {
-      product = await Product.findByIdAndUpdate(id, body, { new: true, runValidators: true });
+      product = await Product.findById(id);
     } else {
-      product = await Product.findOneAndUpdate({ name: { $regex: id, $options: 'i' } }, body, { new: true });
+      product = await Product.findOne({ name: { $regex: id, $options: 'i' } });
     }
 
     if (!product) {
       return res.status(404).json({ success: false, message: 'Product not found' });
     }
 
-    res.status(200).json({ success: true, data: product });
+    // Ownership check for vendors
+    if (req.user.role === 'vendor') {
+      const vendor = await mongoose.model('Vendor').findOne({ userId: req.user._id });
+      if (!vendor || product.vendorId.toString() !== vendor._id.toString()) {
+        return res.status(403).json({ success: false, message: 'Access denied: You can only update your own products' });
+      }
+    }
+
+    const updatedProduct = await Product.findByIdAndUpdate(product._id, body, { new: true, runValidators: true });
+
+    res.status(200).json({ success: true, data: updatedProduct });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
@@ -206,14 +225,24 @@ const deleteProduct = async (req, res) => {
     let product;
 
     if (mongoose.Types.ObjectId.isValid(id)) {
-      product = await Product.findByIdAndDelete(id);
+      product = await Product.findById(id);
     } else {
-      product = await Product.findOneAndDelete({ name: { $regex: id, $options: 'i' } });
+      product = await Product.findOne({ name: { $regex: id, $options: 'i' } });
     }
 
     if (!product) {
       return res.status(404).json({ success: false, message: 'Product not found' });
     }
+
+    // Ownership check for vendors
+    if (req.user.role === 'vendor') {
+      const vendor = await mongoose.model('Vendor').findOne({ userId: req.user._id });
+      if (!vendor || product.vendorId.toString() !== vendor._id.toString()) {
+        return res.status(403).json({ success: false, message: 'Access denied: You can only delete your own products' });
+      }
+    }
+
+    await Product.findByIdAndDelete(product._id);
 
     res.status(200).json({ success: true, message: 'Product deleted successfully', data: {} });
   } catch (error) {

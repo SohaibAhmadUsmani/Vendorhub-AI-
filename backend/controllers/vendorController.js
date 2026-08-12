@@ -92,16 +92,22 @@ const updateVendor = async (req, res) => {
     let vendor;
 
     if (mongoose.Types.ObjectId.isValid(id)) {
-      vendor = await Vendor.findByIdAndUpdate(id, req.body, { new: true, runValidators: true });
+      vendor = await Vendor.findById(id);
     } else {
-      vendor = await Vendor.findOneAndUpdate({ name: { $regex: id, $options: 'i' } }, req.body, { new: true });
+      vendor = await Vendor.findOne({ name: { $regex: id, $options: 'i' } });
     }
 
     if (!vendor) {
       return res.status(404).json({ success: false, message: 'Vendor not found' });
     }
 
-    res.status(200).json({ success: true, data: vendor });
+    if (req.user.role === 'vendor' && vendor.userId.toString() !== req.user._id) {
+      return res.status(403).json({ success: false, message: 'Access denied: You can only update your own vendor profile' });
+    }
+
+    const updatedVendor = await Vendor.findByIdAndUpdate(vendor._id, req.body, { new: true, runValidators: true });
+
+    res.status(200).json({ success: true, data: updatedVendor });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }

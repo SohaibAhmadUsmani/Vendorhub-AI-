@@ -102,6 +102,7 @@ export default function CertificationsPage() {
           />
         )}
       </div>
+      )}
     </div>
   );
 }

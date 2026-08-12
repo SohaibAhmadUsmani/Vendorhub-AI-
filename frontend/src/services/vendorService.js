@@ -413,37 +413,43 @@ function normalizeVendor(v) {
 
 export async function fetchAllVendorProfiles() {
   const res = await httpClient.get(API_BASE_URL);
-  if (Array.isArray(res.data) && res.data.length > 0) {
-    return res.data.map(normalizeVendor);
+  const data = res.data?.data || res.data;
+  if (Array.isArray(data) && data.length > 0) {
+    return data.map(normalizeVendor);
   }
   return [];
 }
 
 export async function fetchVendorProfile(vendorId) {
   const res = await httpClient.get(`${API_BASE_URL}/${vendorId}`);
-  if (res.data) return normalizeVendor(res.data);
+  const data = res.data?.data || res.data;
+  if (data) return normalizeVendor(data);
   throw new Error('Vendor not found');
 }
 
 export async function fetchMyVendorProfile() {
   const res = await httpClient.get(`${API_BASE_URL}/me`);
-  if (res.data) return normalizeVendor(res.data);
+  const data = res.data?.data || res.data;
+  if (data) return normalizeVendor(data);
   throw new Error('Profile not found');
 }
 
 export async function updateVendorProfile(vendorId, updateData) {
   const res = await httpClient.put(`${API_BASE_URL}/${vendorId}`, updateData);
-  return normalizeVendor(res.data);
+  const data = res.data?.data || res.data;
+  return normalizeVendor(data);
 }
 
 export async function submitVendorReview(vendorId, reviewData) {
   const res = await httpClient.post(`${API_BASE_URL}/${vendorId}/reviews`, reviewData);
-  return normalizeVendor(res.data);
+  const data = res.data?.data || res.data;
+  return normalizeVendor(data);
 }
 
 export async function updateVendorRiskScore(vendorId, riskData) {
   const res = await httpClient.put(`${API_BASE_URL}/${vendorId}/risk`, riskData);
-  return normalizeVendor(res.data);
+  const data = res.data?.data || res.data;
+  return normalizeVendor(data);
 }
 
 export async function toggleSaveVendor(vendorId, isSaved) {

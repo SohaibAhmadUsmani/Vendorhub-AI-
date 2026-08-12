@@ -1,33 +1,78 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Users, Search, Shield, Ban, Edit, CheckCircle } from "lucide-react";
+import api from "../services/httpClient";
 
 export default function AdminUsersPage() {
-  const [users, setUsers] = useState([
-    { id: 1, name: "John Doe", email: "john@example.com", role: "buyer", status: "active", joined: "2023-10-15" },
-    { id: 2, name: "Jane Smith", email: "jane@acmecorp.com", role: "vendor", status: "active", joined: "2023-11-02" },
-    { id: 3, name: "Admin User", email: "admin@vendorhub.ai", role: "admin", status: "active", joined: "2023-01-10" },
-    { id: 4, name: "Suspended Buyer", email: "baduser@example.com", role: "buyer", status: "suspended", joined: "2024-01-20" }
-  ]);
-
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [editFormData, setEditFormData] = useState({ name: "", role: "" });
 
-  const toggleUserStatus = (userId) => {
-    setUsers(users.map(user => 
-      user.id === userId 
-        ? { ...user, status: user.status === 'active' ? 'suspended' : 'active' }
-        : user
-    ));
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get('/api/users');
+      if (res.data.success) {
+        setUsers(res.data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleUserStatus = async (userId, currentStatus) => {
+    try {
+      const newStatus = currentStatus === 'active' ? 'suspended' : 'active';
+      const res = await api.put(`/api/users/${userId}/status`, { status: newStatus });
+      if (res.data.success) {
+        setUsers(users.map(user => 
+          user._id === userId 
+            ? { ...user, status: newStatus }
+            : user
+        ));
+      }
+    } catch (error) {
+      console.error("Error updating user status:", error);
+      alert("Failed to update user status.");
+    }
   };
 
   const handleEdit = (userId) => {
-    alert(`Edit User modal would open for User ID: ${userId}`);
+    const userToEdit = users.find(u => u._id === userId);
+    if (userToEdit) {
+      setSelectedUser(userToEdit);
+      setEditFormData({ name: userToEdit.name, role: userToEdit.role });
+      setShowEditModal(true);
+    }
+  };
+
+  const submitEdit = async () => {
+    try {
+      const res = await api.put(`/api/users/${selectedUser._id}`, editFormData);
+      if (res.data.success) {
+        setUsers(users.map(u => u._id === selectedUser._id ? res.data.data : u));
+        setShowEditModal(false);
+        setSelectedUser(null);
+      }
+    } catch (error) {
+      console.error("Error updating user:", error);
+      alert("Failed to update user.");
+    }
   };
 
   const filteredUsers = users.filter(user => {
-    const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          user.email.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = user.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          user.email?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesRole = roleFilter === "all" || user.role === roleFilter;
     return matchesSearch && matchesRole;
   });
@@ -83,12 +128,24 @@ export default function AdminUsersPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-dark-border">
-              {filteredUsers.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-dark-hover transition-colors">
+              {loading ? (
+                <tr>
+                  <td colSpan="5" className="py-8 text-center text-gray-500">
+                    Loading users...
+                  </td>
+                </tr>
+              ) : filteredUsers.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="py-8 text-center text-gray-500">
+                    No users found matching your criteria.
+                  </td>
+                </tr>
+              ) : filteredUsers.map((user) => (
+                <tr key={user._id} className="hover:bg-gray-50 dark:hover:bg-dark-hover transition-colors">
                   <td className="py-4 px-6">
                     <div className="flex items-center gap-3">
                       <div className="h-10 w-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-700 dark:text-purple-400 font-bold">
-                        {user.name.charAt(0)}
+                        {user.name?.charAt(0)}
                       </div>
                       <div>
                         <p className="font-medium text-gray-900 dark:text-white">{user.name}</p>
@@ -105,7 +162,9 @@ export default function AdminUsersPage() {
                       {user.role}
                     </span>
                   </td>
-                  <td className="py-4 px-6 text-sm text-gray-600 dark:text-gray-400">{user.joined}</td>
+                  <td className="py-4 px-6 text-sm text-gray-600 dark:text-gray-400">
+                    {new Date(user.createdAt).toLocaleDateString()}
+                  </td>
                   <td className="py-4 px-6">
                     {user.status === 'active' ? (
                       <span className="inline-flex items-center gap-1 text-sm text-green-600 dark:text-green-400"><CheckCircle className="h-4 w-4" /> Active</span>
@@ -115,15 +174,15 @@ export default function AdminUsersPage() {
                   </td>
                   <td className="py-4 px-6 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <button onClick={() => handleEdit(user.id)} className="p-2 text-gray-400 hover:text-purple-600 transition-colors" title="Edit User">
+                      <button onClick={() => handleEdit(user._id)} className="p-2 text-gray-400 hover:text-purple-600 transition-colors" title="Edit User">
                         <Edit className="h-4 w-4" />
                       </button>
                       {user.status === 'active' ? (
-                        <button onClick={() => toggleUserStatus(user.id)} className="p-2 text-gray-400 hover:text-red-600 transition-colors" title="Suspend User">
+                        <button onClick={() => toggleUserStatus(user._id, user.status)} className="p-2 text-gray-400 hover:text-red-600 transition-colors" title="Suspend User">
                           <Ban className="h-4 w-4" />
                         </button>
                       ) : (
-                        <button onClick={() => toggleUserStatus(user.id)} className="p-2 text-gray-400 hover:text-green-600 transition-colors" title="Reactivate User">
+                        <button onClick={() => toggleUserStatus(user._id, user.status)} className="p-2 text-gray-400 hover:text-green-600 transition-colors" title="Reactivate User">
                           <CheckCircle className="h-4 w-4" />
                         </button>
                       )}
@@ -131,17 +190,55 @@ export default function AdminUsersPage() {
                   </td>
                 </tr>
               ))}
-              {filteredUsers.length === 0 && (
-                <tr>
-                  <td colSpan="5" className="py-8 text-center text-gray-500">
-                    No users found matching your criteria.
-                  </td>
-                </tr>
-              )}
             </tbody>
           </table>
         </div>
       </div>
+      
+      {showEditModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white dark:bg-dark-card rounded-lg p-6 w-full max-w-md">
+            <h3 className="text-xl font-bold mb-4 dark:text-white">Edit User</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
+                <input 
+                  type="text" 
+                  className="w-full bg-white dark:bg-dark-bg border border-gray-300 dark:border-dark-border rounded-lg px-4 py-2 dark:text-white"
+                  value={editFormData.name}
+                  onChange={e => setEditFormData({...editFormData, name: e.target.value})}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Role</label>
+                <select 
+                  className="w-full bg-white dark:bg-dark-bg border border-gray-300 dark:border-dark-border rounded-lg px-4 py-2 dark:text-white"
+                  value={editFormData.role}
+                  onChange={e => setEditFormData({...editFormData, role: e.target.value})}
+                >
+                  <option value="buyer">Buyer</option>
+                  <option value="vendor">Vendor</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 mt-6">
+              <button 
+                onClick={() => setShowEditModal(false)}
+                className="px-4 py-2 text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-dark-hover rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={submitEdit}
+                className="px-4 py-2 text-white bg-purple-600 rounded-lg hover:bg-purple-700"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

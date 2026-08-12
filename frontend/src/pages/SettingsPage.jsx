@@ -1,20 +1,44 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { User, Shield, Bell, Key, CreditCard, Save } from "lucide-react";
+import { User, Shield, Bell, Key, CreditCard, Save, ExternalLink } from "lucide-react";
+import { fetchMyVendorProfile, updateVendorProfile } from "../services/vendorService";
 
 export default function SettingsPage() {
+  const navigate = useNavigate();
   const [role, setRole] = useState("buyer");
   const [activeTab, setActiveTab] = useState("profile");
+  const [userProfile, setUserProfile] = useState({ name: "", email: "" });
+  const [vendorData, setVendorData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState("");
 
   useEffect(() => {
-    try {
-      const storedUser = JSON.parse(localStorage.getItem("user"));
-      if (storedUser && storedUser.role) {
-        setRole(String(storedUser.role).toLowerCase());
+    async function initSettings() {
+      try {
+        const storedUser = JSON.parse(localStorage.getItem("user"));
+        if (storedUser) {
+          setUserProfile({ name: storedUser.name, email: storedUser.email });
+          if (storedUser.role) {
+            const userRole = String(storedUser.role).toLowerCase();
+            setRole(userRole);
+            
+            if (userRole === "vendor") {
+              const vendor = await fetchMyVendorProfile();
+              if (vendor) {
+                setVendorData(vendor);
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Error loading settings:", err);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (err) {
-      console.error(err);
     }
+    initSettings();
   }, []);
 
   const getTabs = () => {
@@ -34,6 +58,31 @@ export default function SettingsPage() {
   };
 
   const tabs = getTabs();
+
+  const handleSaveProfile = async () => {
+    setIsSaving(true);
+    setSaveMessage("");
+    try {
+      if (role === 'vendor' && vendorData) {
+        await updateVendorProfile(vendorData.id, vendorData);
+      }
+      setSaveMessage("Profile updated successfully!");
+      setTimeout(() => setSaveMessage(""), 3000);
+    } catch (err) {
+      console.error(err);
+      setSaveMessage("Failed to update profile.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in pb-12">
@@ -81,22 +130,51 @@ export default function SettingsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Full Name</label>
-                <input type="text" className="w-full bg-white dark:bg-dark-bg border border-gray-300 dark:border-dark-border rounded-lg px-4 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500" defaultValue="John Doe" />
+                <input type="text" className="w-full bg-white dark:bg-dark-bg border border-gray-300 dark:border-dark-border rounded-lg px-4 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500" defaultValue={userProfile.name} />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email Address</label>
-                <input type="email" className="w-full bg-white dark:bg-dark-bg border border-gray-300 dark:border-dark-border rounded-lg px-4 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500" defaultValue="john@example.com" />
+                <input type="email" className="w-full bg-white dark:bg-dark-bg border border-gray-300 dark:border-dark-border rounded-lg px-4 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500" defaultValue={userProfile.email} />
               </div>
-              {role === "vendor" && (
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Company Name</label>
-                  <input type="text" className="w-full bg-white dark:bg-dark-bg border border-gray-300 dark:border-dark-border rounded-lg px-4 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500" defaultValue="Acme Corp" />
+              
+              {role === "vendor" && vendorData && (
+                <div className="md:col-span-2 space-y-6">
+                  <div className="pt-4 border-t border-gray-200 dark:border-dark-border">
+                    <h3 className="text-md font-bold text-gray-900 dark:text-white mb-4">Company Details</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Company Name</label>
+                        <input type="text" className="w-full bg-white dark:bg-dark-bg border border-gray-300 dark:border-dark-border rounded-lg px-4 py-2 text-gray-900 dark:text-white" value={vendorData.name} onChange={(e) => setVendorData({...vendorData, name: e.target.value})} />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
+                        <input type="text" className="w-full bg-white dark:bg-dark-bg border border-gray-300 dark:border-dark-border rounded-lg px-4 py-2 text-gray-900 dark:text-white" value={vendorData.location} onChange={(e) => setVendorData({...vendorData, location: e.target.value})} />
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Business Overview</label>
+                        <textarea className="w-full bg-white dark:bg-dark-bg border border-gray-300 dark:border-dark-border rounded-lg px-4 py-2 text-gray-900 dark:text-white" rows="3" value={vendorData.overview} onChange={(e) => setVendorData({...vendorData, overview: e.target.value})} />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center p-4 bg-purple-50 dark:bg-purple-900/10 border border-purple-100 dark:border-purple-900/30 rounded-lg justify-between">
+                    <div>
+                      <h4 className="text-sm font-bold text-purple-900 dark:text-purple-300">Manage Vendor Profile</h4>
+                      <p className="text-xs text-purple-700 dark:text-purple-400 mt-1">Update your catalog, certifications, facility details, and branding.</p>
+                    </div>
+                    <button 
+                      onClick={() => navigate('/vendor/profile', { state: { editMode: true } })}
+                      className="btn-purple-primary flex items-center gap-2 text-sm px-4 py-2"
+                    >
+                      <ExternalLink className="h-4 w-4" /> Edit Public Profile
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
-            <div className="flex justify-end pt-4">
-              <button onClick={() => alert("Profile update request sent to backend!")} className="btn-purple-primary flex items-center justify-center gap-2">
-                <Save className="h-4 w-4" /> Save Profile
+            <div className="flex items-center justify-end gap-4 pt-4 border-t border-gray-200 dark:border-dark-border">
+              {saveMessage && <span className="text-sm font-medium text-green-600">{saveMessage}</span>}
+              <button onClick={handleSaveProfile} disabled={isSaving} className="btn-purple-primary flex items-center justify-center gap-2">
+                <Save className="h-4 w-4" /> {isSaving ? "Saving..." : "Save Profile"}
               </button>
             </div>
           </div>

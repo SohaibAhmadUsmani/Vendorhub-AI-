@@ -7,7 +7,7 @@ import axios from "axios";
    `{ success, data }`, so services unwrap `response.data.data ?? response.data`.
    -------------------------------------------------------------------------- */
 
-const API_BASE_URL = "http://localhost:5000";
+export const API_BASE_URL = "http://localhost:5000";
 
 export const httpClient = axios.create({
   baseURL: API_BASE_URL,

@@ -5,6 +5,7 @@
 import httpClient from './httpClient';
 
 const API_BASE_URL = '/api/products';
+const INITIAL_PRODUCTS_DATA = [
   // --- 1. Sialkot Sports Limited (10 Products) ---
   {
     id: "p-ss-101",
@@ -1365,16 +1366,46 @@ function saveLocalProductsStore(list) {
   }
 }
 
+function normalizeProduct(p) {
+  if (!p) return null;
+  return {
+    id: p._id || p.id,
+    _id: p._id || p.id,
+    sku: p.sku || `SKU-${Math.floor(1000 + Math.random() * 9000)}`,
+    vendorId: p.vendor || p.vendorId,
+    vendorName: p.vendorName || "Unknown Vendor",
+    title: p.name || p.title || "Untitled Product",
+    category: p.category || "Uncategorized",
+    rating: p.rating || 0,
+    priceMin: p.price || p.priceMin || 0,
+    priceMax: p.price || p.priceMax || 0,
+    priceDisplay: `$${p.price || p.priceMin || 0}`,
+    unit: p.unit || "piece",
+    moq: p.moq || 1,
+    leadTimeDays: p.leadTimeDays || 14,
+    leadTimeDisplay: typeof p.leadTime === 'string' ? p.leadTime : `${p.leadTimeDays || 14} days`,
+    availableStock: p.stockQuantity || p.availableStock || 0,
+    stockStatus: p.inStock ? "In Stock" : (p.stockStatus || "Out of Stock"),
+    isVerified: p.isVerified !== undefined ? p.isVerified : true,
+    tags: p.tags || [],
+    specifications: p.description || p.specifications || "",
+    imageUrl: p.image || p.imageUrl || "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800&auto=format&fit=crop&q=80",
+    multiImages: p.images || p.multiImages || (p.image ? [p.image] : [])
+  };
+}
+
 export async function fetchProducts(filters = {}) {
   const queryParams = new URLSearchParams();
   if (filters.category && filters.category !== 'All') queryParams.append('category', filters.category);
   if (filters.searchQuery) queryParams.append('search', filters.searchQuery);
   if (filters.stockStatus && filters.stockStatus !== 'All') queryParams.append('stockStatus', filters.stockStatus);
   if (filters.vendorId) queryParams.append('vendorId', filters.vendorId);
+  queryParams.append('limit', 1000); // Fetch all for client-side pagination
 
   const url = `${API_BASE_URL}?${queryParams.toString()}`;
   const res = await httpClient.get(url);
-  return (res.data || []).map(normalizeProduct);
+  const data = res.data?.data || res.data;
+  return (data || []).map(normalizeProduct);
 }
 
 function filterLocalProducts(list, filters) {
